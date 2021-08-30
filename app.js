@@ -42,8 +42,7 @@ app.get('/', (req, res) => {
 // LRS endpoint to accept post data
 app.post('/lrs', (req, res) => {
     try {
-        // TODO: Don't save user personal information like name, email. 
-        // TODO: User ID must be encrypted
+        // Encryption of personal data is moved to LTI Tool
         m_collection.insertOne(req.body, function (err, mong_res) {
             console.log(new Date(), " record inserted");
             res.send(JSON.stringify({ 'result': 'done' }));
