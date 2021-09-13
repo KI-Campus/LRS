@@ -21,7 +21,8 @@ Add the following to env file
 PORT={{your-lrs-port}}
 MONGO_URL=mongodb://{{mongo-host}}:{{mongo-port}}
 MONGO_DB={{mongo-db-name}}
-MONGO_COLLECTION={{mongo-collection-name}}
+MONGO_XAPI_COLLECTION={{mongo-collection-name-for-xAPI-records}}
+SECRET={{secret-for-jwt-tokens}}
 ```
 
 If your Mongo installation has a username and authentication, _please embed it in MONGO_URL_

@@ -1,19 +1,30 @@
 {
-  "name": "mylrs",
-  "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
-  "scripts": {
-    "start": "node app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "express-session": "^1.17.2",
-    "mongodb": "^4.1.0"
-  }
+    "name": "LRS",
+    "version": "2.0.0",
+    "description": "Learning Record Store / LAP",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/KI-Campus/LRS.git"
+    },
+    "scripts": {
+        "start": "node ./app.js",
+        "start:dev": "nodemon ./app.js"
+    },
+    "dependencies": {
+        "bcryptjs": "^2.4.3",
+        "body-parser": "^1.19.0",
+        "cors": "^2.8.5",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.1",
+        "express-jwt": "^6.0.0",
+        "express-jwt-authz": "^2.4.1",
+        "jsonwebtoken": "^8.5.1",
+        "mongodb": "^3.5.9",
+        "mongoose": "^5.9.21",
+        "rootpath": "^0.1.2"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.4"
+    }
 }
