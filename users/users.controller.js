@@ -10,7 +10,6 @@ let jwtScopeOptions = {
 
 // Public routes
 router.post("/authenticate", authenticate);
-router.post("/register", register);
 
 // User scope private routes
 router.get("/current", getCurrent);
@@ -21,12 +20,7 @@ router.get("/getall", jwtAuthz(["admin"], jwtScopeOptions), getAll);
 router.get("/:id", jwtAuthz(["admin"], jwtScopeOptions), getById);
 router.put("/:id", jwtAuthz(["admin"], jwtScopeOptions), update);
 router.delete("/:id", jwtAuthz(["admin"], jwtScopeOptions), _delete);
-router.post(
-  "/registeradmin",
-  jwtAuthz(["admin"], jwtScopeOptions),
-  registerAdmin
-);
-
+router.post("/register", jwtAuthz(["admin"], jwtScopeOptions), register);
 module.exports = router;
 
 function authenticate(req, res, next) {
@@ -36,9 +30,9 @@ function authenticate(req, res, next) {
       user
         ? res.json(user)
         : res.status(400).json({
-            success: false,
-            message: "email or password is incorrect",
-          })
+          success: false,
+          message: "email or password is incorrect",
+        })
     )
     .catch((err) => next(err));
 }

@@ -53,7 +53,7 @@ async function create(userParam, admin = false) {
   }
 
   // If create an admin argument is there, then add a field role as an admin
-  user.role = "admin";
+  if (admin) { user.role = "admin"; }
 
   // Save the user to the database
   await user.save();
