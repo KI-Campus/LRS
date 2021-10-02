@@ -12,8 +12,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-  <script src="./assets/js/charts-lines.js" defer></script>
-  <script src="./assets/js/charts-pie.js" defer></script>
+  <!-- <script src="./assets/js/charts-lines.js" defer></script> -->
+  <!-- <script src="./assets/js/charts-pie.js" defer></script> -->
+
 </head>
 
 <body>
@@ -218,24 +219,6 @@
           <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
             <!-- Card -->
             <div class="flex items-center p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
-              <div class="p-3 mr-4 text-orange-500 bg-orange-100 rounded-full dark:text-orange-100 dark:bg-orange-500">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z">
-                  </path>
-                </svg>
-              </div>
-              <div>
-                <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Total clients
-                </p>
-                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                  6389
-                </p>
-              </div>
-            </div>
-            <!-- Card -->
-            <div class="flex items-center p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
               <div class="p-3 mr-4 text-green-500 bg-green-100 rounded-full dark:text-green-100 dark:bg-green-500">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd"
@@ -245,10 +228,29 @@
               </div>
               <div>
                 <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Account balance
+                  Total Records
                 </p>
-                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                  $ 46,760.89
+                <p id="totalRecords" class="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                  ...
+                </p>
+              </div>
+            </div>
+            <!-- Card -->
+
+            <div class="flex items-center p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+              <div class="p-3 mr-4 text-orange-500 bg-orange-100 rounded-full dark:text-orange-100 dark:bg-orange-500">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z">
+                  </path>
+                </svg>
+              </div>
+              <div>
+                <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Total Submissions
+                </p>
+                <p id="totalSubmissions" class="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                  ...
                 </p>
               </div>
             </div>
@@ -263,10 +265,10 @@
               </div>
               <div>
                 <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                  New sales
+                  Exercise Types
                 </p>
-                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                  376
+                <p id="exerciseTypes" class="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                  ...
                 </p>
               </div>
             </div>
@@ -281,10 +283,10 @@
               </div>
               <div>
                 <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Pending contacts
+                  Total completes
                 </p>
-                <p class="text-lg font-semibold text-gray-700 dark:text-gray-200">
-                  35
+                <p id="totalCompletes" class="text-lg font-semibold text-gray-700 dark:text-gray-200">
+                  ...
                 </p>
               </div>
             </div>
@@ -297,48 +299,149 @@
           <div class="grid gap-6 mb-8 md:grid-cols-2">
             <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
               <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
-                Revenue
+                Events by Exercises
               </h4>
-              <canvas id="pie"></canvas>
+              <canvas id="exercisesChartId"></canvas>
               <div class="flex justify-center mt-4 space-x-3 text-sm text-gray-600 dark:text-gray-400">
                 <!-- Chart legend -->
-                <div class="flex items-center">
-                  <span class="inline-block w-3 h-3 mr-1 bg-blue-500 rounded-full"></span>
-                  <span>Shirts</span>
-                </div>
-                <div class="flex items-center">
-                  <span class="inline-block w-3 h-3 mr-1 bg-teal-600 rounded-full"></span>
-                  <span>Shoes</span>
-                </div>
-                <div class="flex items-center">
-                  <span class="inline-block w-3 h-3 mr-1 bg-blue-600 rounded-full"></span>
-                  <span>Bags</span>
-                </div>
               </div>
             </div>
             <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
               <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
-                Traffic
+                Submissions over Time
               </h4>
-              <canvas id="line"></canvas>
+              <canvas id="submissionsByTimeChartId"></canvas>
               <div class="flex justify-center mt-4 space-x-3 text-sm text-gray-600 dark:text-gray-400">
-                <!-- Chart legend -->
-                <div class="flex items-center">
-                  <span class="inline-block w-3 h-3 mr-1 bg-teal-600 rounded-full"></span>
-                  <span>Organic</span>
-                </div>
-                <div class="flex items-center">
-                  <span class="inline-block w-3 h-3 mr-1 bg-blue-600 rounded-full"></span>
-                  <span>Paid</span>
-                </div>
+
               </div>
             </div>
+          </div>
+
+          <div class="grid gap-6 mb-8 md:grid-cols-1">
+            <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+              <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
+                Multiple Choice Questions
+              </h4>
+              <canvas id="mcqChartId"></canvas>
+              <div class="flex justify-center mt-4 space-x-3 text-sm text-gray-600 dark:text-gray-400">
+
+                <label class="block mt-4 text-sm">
+                  <span class="text-gray-700 dark:text-gray-400">MCQ ID</span>
+                  <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
+                    <select onchange="chartMCQsChangeId()" id="exerciseIdMCQChart"
+                      class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
+                      <option value="...">...</option>
+                    </select>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="grid gap-6 mb-8 md:grid-cols-1 hidden">
+
+            <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+              <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
+                Quiz MCQs
+              </h4>
+              <canvas id="quizCcqChartId"></canvas>
+              <div class="flex justify-center mt-4 space-x-3 text-sm text-gray-600 dark:text-gray-400">
+
+                <label class="block mt-4 text-sm">
+                  <span class="text-gray-700 dark:text-gray-400">Quiz ID</span>
+                  <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
+                    <select onchange="chartQuizMCQsChangeQuizId()" id="exerciseIdQuizChart"
+                      class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
+                      <option value="...">...</option>
+
+                    </select>
+                  </div>
+                </label>
+
+                <label class="block mt-4 text-sm">
+                  <span class="text-gray-700 dark:text-gray-400">Sub MCQ ID</span>
+                  <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
+                    <select id="exerciseIdQuizMCQidChart"
+                      class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
+                      <option value="...">...</option>
+                    </select>
+                  </div>
+                </label>
+
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Download Data -->
+          <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+            Download Data
+          </h2>
+          <div class="grid gap-6 mb-8 md:grid-cols-1">
+            <div class="min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+              <h4 class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
+                Select options to download the data
+              </h4>
+              <div class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
+                <form>
+                  <label class="block mt-4 text-sm">
+                    <span class="text-gray-700 dark:text-gray-400">Exercise ID</span>
+                    <!-- focus-within sets the color for the icon when input is focused -->
+                    <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
+                      <select id="downloadExerciseId"
+                        class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
+                        <option value="all">All</option>
+                        <option value="1234">Excercise 123</option>
+                      </select>
+                    </div>
+                  </label>
+
+                  <label class="block mt-4 text-sm hidden">
+                    <span class="text-gray-700 dark:text-gray-400">Context ID</span>
+                    <!-- focus-within sets the color for the icon when input is focused -->
+                    <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
+                      <select id="downloadContextId"
+                        class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
+                        <option value="all">All</option>
+                        <option value="1234">Context ID 12334</option>
+                      </select>
+                    </div>
+                  </label>
+
+                  <label class="block mt-4 text-sm">
+                    <span class="text-gray-700 dark:text-gray-400">Verb Type</span>
+                    <!-- focus-within sets the color for the icon when input is focused -->
+                    <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
+                      <select id="downloadVerbType"
+                        class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
+                        <option value="all">All</option>
+                        <option value="answered">Answered</option>
+                        <option value="interacted">Interacted</option>
+                        <option value="attempted">Attempted</option>
+                      </select>
+                    </div>
+                  </label>
+                </form>
+                <label class="block mt-4 text-sm">
+                  <button onclick="downloadData()"
+                    class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">
+                    Download
+                  </button>
+                </label>
+
+              </div>
+
+
+            </div>
+
           </div>
         </div>
       </main>
     </div>
   </div>
   <script defer src="assets/js/common.js"></script>
+  <script defer src="assets/js/index.js"></script>
 </body>
 
 </html>
