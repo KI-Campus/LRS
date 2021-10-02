@@ -11,6 +11,7 @@ function jwt() {
       "/users/authenticate",
       // "/users/register",                       // Do not allow registration
       "/",
+      "/favicon.ico",
       "/lrs",
     ],
   });
