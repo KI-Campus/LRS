@@ -66,17 +66,19 @@ app.post("/lrs", (req, res) => {
 });
 
 // Get records with find and sorting queries. Also have pagination support (limit and skip)
-app.get("/records/get", (req, res) => {
+app.post("/records/get", (req, res) => {
   let query;
   let sort;
+  let unwind;
   let limit;
   let skip;
   try {
     req.body.query ? query = req.body.query : query = {};
     req.body.sort ? sort = req.body.sort : sort = {};
+    req.body.unwind ? unwind = req.body.unwind : unwind = {};
     req.body.limit ? limit = req.body.limit : 0;
     req.body.skip ? limit = req.body.skip : 0;
-    m_client.db(process.env.MONGO_DB || "lrs").collection(process.env.MONGO_XAPI_COLLECTION || "records").find(query, { limit: limit, skip: skip, sort: sort }).toArray(function (err, results) {
+    m_client.db(process.env.MONGO_DB || "lrs").collection(process.env.MONGO_XAPI_COLLECTION || "records").find(query, { limit: limit, skip: skip, sort: sort, unwind: unwind }).toArray(function (err, results) {
       if (err) throw err;
       console.log("Records request received", req.body);
       res.status(200).send({ total: results.length, results: results }).end();
@@ -93,6 +95,25 @@ app.get("/records/get", (req, res) => {
   }
 });
 
+// Get records with aggregation
+app.post("/records/aggregate", (req, res) => {
+  let pipeline;
+  console.log(req.body)
+  try {
+    req.body.pipeline ? pipeline = req.body.pipeline : pipeline = [];
+    m_client.db(process.env.MONGO_DB || "lrs").collection(process.env.MONGO_XAPI_COLLECTION || "records").aggregate(pipeline).toArray(function (err, results) {
+      if (err) throw err;
+      console.log("Aggregate Records request received", req.body);
+      res.status(200).send({ results }).end();
+    });
+
+  }
+  catch (err) {
+    console.log("Error while aggregating records", err);
+    console.log("Pipeline was: ", pipeline);
+    res.status(500).end();
+  }
+});
 
 // Start the Server
 const port =
