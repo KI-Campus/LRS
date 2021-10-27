@@ -79,9 +79,18 @@ app.post("/records/get", (req, res) => {
     req.body.limit ? limit = req.body.limit : 0;
     req.body.skip ? limit = req.body.skip : 0;
     m_client.db(process.env.MONGO_DB || "lrs").collection(process.env.MONGO_XAPI_COLLECTION || "records").find(query, { limit: limit, skip: skip, sort: sort, unwind: unwind }).toArray(function (err, results) {
-      if (err) throw err;
-      console.log("Records request received", req.body);
-      res.status(200).send({ total: results.length, results: results }).end();
+      if (err) {
+        console.log("Error while getting records", err);
+        console.log("Input Query was: ", query);
+        console.log("Sort Query was: ", sort);
+        console.log("Limit: ", limit);
+        console.log("Skip: ", skip);
+        res.status(500).end();
+      }
+      else {
+        console.log("Records request received", req.body);
+        res.status(200).send({ total: results.length, results: results }).end();
+      }
     });
 
   }
@@ -102,9 +111,15 @@ app.post("/records/aggregate", (req, res) => {
   try {
     req.body.pipeline ? pipeline = req.body.pipeline : pipeline = [];
     m_client.db(process.env.MONGO_DB || "lrs").collection(process.env.MONGO_XAPI_COLLECTION || "records").aggregate(pipeline).toArray(function (err, results) {
-      if (err) throw err;
-      console.log("Aggregate Records request received", req.body);
-      res.status(200).send({ results }).end();
+      if (err) {
+        console.log("Error while Aggregating: ", err);
+        console.log("Pipeline: ", pipeline);
+        res.status(500).end();
+      }
+      else {
+        console.log("Aggregate Records request received", req.body);
+        res.status(200).send({ results }).end();
+      }
     });
 
   }
