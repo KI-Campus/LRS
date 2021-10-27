@@ -14,6 +14,9 @@ docReady(function () {
     // Populate dashboard cards
     populateCards();
 
+    // Populate exercise stats exercise selector dropdown
+    populateExerciseStatSelector();
+
     // Draw Submissions by Time chart
     chartSubmissionsByTime();
 
@@ -672,7 +675,6 @@ function chartMCQsChangeId() {
 
                                     if (response.data) {
                                         correctResponsesPattern = response.data.results[0]._id[0];
-                                        console.log(correctResponsesPattern)
                                         let splitResponses = correctResponsesPattern.split("[,]")
 
                                         for (let index = 0; index < splitResponses.length; index++) {
@@ -704,5 +706,177 @@ function chartMCQsChangeId() {
         .catch(function (error) {
             console.log(error);
         });
+
+}
+
+function populateExerciseStatSelector() {
+    // First populate the exercise selector to get all available exercises
+    // Get all distinct exercise ids
+    data = {
+        pipeline: [
+            {
+                "$group": {
+                    "_id": "$xAPI.object.id"
+                }
+            }
+        ]
+    }
+    axios.post("../records/aggregate", data, config)
+        .then(function (response) {
+            if (response.data) {
+                let returnedExercises = {};
+                document.getElementById("excericseStatsExerciseId").innerHTML = "";
+                for (let index = 0; index < response.data.results.length; index++) {
+                    let element = response.data.results[index];
+                    // Ignore subtypes of exercises
+                    element._id = element._id.split("?")[0];
+                    //returnedExercises.push(element._id.split("?")[0]);
+                    returnedExercises[element._id.split("?")[0]] = element._id.split("?")[0];
+                }
+                for (let index = 0; index < Object.keys(returnedExercises).length; index++) {
+                    const element = Object.keys(returnedExercises)[index];
+                    document.getElementById("excericseStatsExerciseId").innerHTML += `<option value="${element}">${JSON.stringify(element).slice(1, -1)}</option>`;
+                }
+
+                document.getElementById("excericseStatsExerciseId").onchange();
+            }
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+
+}
+
+// Exercise Stats dropdown changes. Get stats for that particular exercise
+function exerciseStatsChangeExercise() {
+    let exerciseId = document.getElementById("excericseStatsExerciseId").value;
+    // Fetch number of completed or answered records for that particular exercise
+    data = {
+        pipeline: [
+            {
+                "$match": {
+                    "xAPI.object.id": exerciseId,
+                    "$or": [
+                        {
+                            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed"
+                        },
+                        {
+                            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered"
+                        }
+                    ]
+                }
+            },
+
+            {
+                "$group": { "_id": "$xAPI.verb.id", "count": { "$sum": 1 } }
+            },
+
+            {
+                "$sort": {
+                    "_id": 1
+                }
+            }
+        ]
+    }
+
+    axios.post("../records/aggregate", data, config)
+        .then(function (response) {
+            if (response.data.results[0].count) {
+
+                let count = response.data.results[0].count;
+                if (response.data.results[1]) {
+                    count += response.data.results[1].count
+                }
+                document.getElementById("excericseStatsTotalCompletesOrAnswered").innerHTML = count;
+            }
+        })
+        .catch(function (error) {
+            document.getElementById("excericseStatsTotalCompletesOrAnswered").innerHTML = "...";
+            console.log(error);
+        });
+
+
+    // Fetch number of students who passed
+    data = {
+        pipeline: [
+            {
+                "$match": {
+                    "xAPI.object.id": exerciseId, "xAPI.result.success": true,
+                    "$or": [
+                        {
+                            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed"
+                        },
+                        {
+                            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered"
+                        }
+                    ]
+                }
+            },
+
+            {
+                "$group": { "_id": "$xAPI.verb.results", "count": { "$sum": 1 } }
+            },
+
+            {
+                "$sort": {
+                    "_id": 1
+                }
+            }
+        ]
+    }
+
+    axios.post("../records/aggregate", data, config)
+        .then(function (response) {
+            if (response.data.results[0].count) {
+
+                document.getElementById("excericseStatsPassing").innerHTML = response.data.results[0].count;
+            }
+        })
+        .catch(function (error) {
+            document.getElementById("excericseStatsPassing").innerHTML = "...";
+            console.log(error);
+        });
+
+
+    // Fetch average marks
+    data = {
+        "pipeline": [
+            {
+                "$match": {
+                    "xAPI.object.id": exerciseId,
+                    "$or": [
+                        {
+                            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed"
+                        },
+                        {
+                            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered"
+                        }
+                    ]
+                }
+            },
+
+            {
+                "$group": { "_id": "$xAPI.verb.id", "avg": { "$avg": "$xAPI.result.score.scaled" } }
+            },
+            {
+                "$sort": {
+                    "_id": 1
+                }
+            }
+        ]
+    }
+
+    axios.post("../records/aggregate", data, config)
+        .then(function (response) {
+            if (response.data.results[0].avg) {
+
+                document.getElementById("excericseStatsAveragePoints").innerHTML = response.data.results[0].avg;
+            }
+        })
+        .catch(function (error) {
+            document.getElementById("excericseStatsAveragePoints").innerHTML = "...";
+            console.log(error);
+        });
+
 
 }
