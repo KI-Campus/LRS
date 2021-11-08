@@ -10,6 +10,7 @@ let jwtScopeOptions = {
 
 // Public routes
 router.post("/authenticate", authenticate);
+router.post("/register", jwtAuthz(["admin"], jwtScopeOptions), register);       // For initial deployment, make /register reachable
 
 // User scope private routes
 router.get("/current", getCurrent);
@@ -20,7 +21,7 @@ router.get("/getall", jwtAuthz(["admin"], jwtScopeOptions), getAll);
 router.get("/:id", jwtAuthz(["admin"], jwtScopeOptions), getById);
 router.put("/:id", jwtAuthz(["admin"], jwtScopeOptions), update);
 router.delete("/:id", jwtAuthz(["admin"], jwtScopeOptions), _delete);
-router.post("/register", jwtAuthz(["admin"], jwtScopeOptions), register);
+//router.post("/register", jwtAuthz(["admin"], jwtScopeOptions), register);
 module.exports = router;
 
 function authenticate(req, res, next) {
