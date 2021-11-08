@@ -1,0 +1,105 @@
+{
+  "semantics": [
+    {
+      "label": "Task Description",
+      "default": "Drag to arrange the images in the correct sequence",
+      "description": "A guide telling the user how to solve this task."
+    },
+    {
+      "label": "Alternate Task Description",
+      "default": "Make the following list be ordered correctly. Use the cursor keys to navigate through the list items, use space to activate or deactivate an item and the cursor keys to move it",
+      "description": "A guide intended for visually impaired users on how to solve this task."
+    },
+    {
+      "widgets": [
+        {
+          "label": "Default"
+        }
+      ],
+      "label": "Images",
+      "entity": "image",
+      "field": {
+        "label": "Image Element",
+        "fields": [
+          {
+            "label": "Image"
+          },
+          {
+            "label": "Image Description",
+            "description": "An image description for users who cannot recognize the image"
+          },
+          {
+            "description": "An optional audio for the card to play",
+            "label": "Audio files"
+          }
+        ]
+      }
+    },
+    {
+      "label": "Behavioural settings",
+      "description": "These options will let you control how the game behaves.",
+      "fields": [
+        {
+          "label": "Add a show solution button for the game"
+        },
+        {
+          "label": "Add button for retrying when the game is over"
+        },
+        {
+          "label": "Add button for resuming from the current state "
+        }
+      ]
+    },
+    {
+      "label": "Localization",
+      "fields": [
+        {
+          "label": "Total Moves text",
+          "default": "Total Moves"
+        },
+        {
+          "label": "Time spent text",
+          "default": "Time spent"
+        },
+        {
+          "label": "Feedback text",
+          "default": "You got @score of @total points",
+          "description": "Feedback text, variables available: @score and @total. Example: 'You got @score of @total possible points'"
+        },
+        {
+          "label": "Text for \"Check\" button",
+          "default": "Check"
+        },
+        {
+          "label": "Text for \"Retry\" button",
+          "default": "Retry"
+        },
+        {
+          "label": "Text for \"Show Solution\" button",
+          "default": "ShowSolution"
+        },
+        {
+          "label": "Text for \"Resume\" button",
+          "default": "Resume"
+        },
+        {
+          "label": "Audio not supported message",
+          "default": "Audio Error"
+        },
+        {
+          "label": "Play button (text for readspeakers)",
+          "default": "Play the corresponding audio"
+        },
+        {
+          "label": "Card moving description (text for readspeakers)",
+          "description": "@posSrc : card initial position, @posDes : card final position",
+          "default": "Moved @cardDesc from @posSrc to @posDes"
+        },
+        {
+          "label": "Default Card Description (text for readspeakers)",
+          "default": "sequencing item"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+.h5p-speak-the-words {
+  text-align: center;
+}
+
+.h5p-speak-the-words .h5p-question-introduction {
+  margin: 0;
+  padding: 1.25em 1.75em;
+}
+
+.h5p-speak-the-words-introduction {
+  font-size: 1.25em;
+}
+
+.h5p-speak-the-words .h5p-question-content {
+  margin: 0;
+  padding: 1em;
+}
+
+.h5p-speak-the-words .h5p-question-feedback.h5p-question-visible {
+  margin: 0;
+  padding-top: 1em;
+}
+
+.h5p-speak-the-words-unsupported-browser-error {
+  padding: 1em 0;
+  color: darkred;
+}
+
+.h5p-speak-the-words-unsupported-browser-header,
+.h5p-speak-the-words-unsupported-browser-body {
+  margin: 1em 0;
+}
+
+.h5p-speak-the-words .h5p-question-content.empty {
+  padding: 0;
+}

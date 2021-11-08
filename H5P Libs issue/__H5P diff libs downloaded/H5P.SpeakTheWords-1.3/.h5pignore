@@ -1,0 +1,14 @@
+node_modules
+dev
+app
+tests
+.idea
+.h5pignore
+.babelrc
+webpack.config.js
+webpack.dev.config.js
+package.json
+README.md
+LICENSE.md
+CONTRIBUTION.md
+crowdin.yml

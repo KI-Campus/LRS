@@ -1,0 +1,27 @@
+@font-face {
+  font-family: '360-image';
+  src:  url('../assets/360-image.eot?nghxo3');
+  src:  url('../assets/360-image.eot?nghxo3#iefix') format('embedded-opentype'),
+  url('../assets/360-image.ttf?nghxo3') format('truetype'),
+  url('../assets/360-image.woff?nghxo3') format('woff'),
+  url('../assets/360-image.svg?nghxo3#360-image') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.h5p-three-image.h5p-fullscreen {
+  display: block;
+  background-color: black;
+
+  .h5p-three-sixty-wrapper {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+
+    width: 100%;
+  }
+}
+
+.h5p-three-image [tabIndex="-1"] {
+  outline: none;
+}
