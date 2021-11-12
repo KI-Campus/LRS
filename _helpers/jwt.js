@@ -9,7 +9,7 @@ function jwt() {
     path: [
       // Public routes that don't require JWT authentication
       "/users/authenticate",
-      // "/users/register",                       // Do not allow registration
+      "/users/register",                       // Do not allow registration
       "/",
       "/favicon.ico",
       "/lrs",

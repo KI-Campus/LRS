@@ -10,7 +10,7 @@ let jwtScopeOptions = {
 
 // Public routes
 router.post("/authenticate", authenticate);
-router.post("/register", jwtAuthz(["admin"], jwtScopeOptions), register);       // For initial deployment, make /register reachable
+router.post("/register", register);       // For initial deployment, make /register reachable
 
 // User scope private routes
 router.get("/current", getCurrent);
