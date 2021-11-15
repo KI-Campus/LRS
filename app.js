@@ -32,7 +32,7 @@ app.use(errorHandler);
 
 // Mongo import and init variables
 const { MongoClient } = require("mongodb");
-var mongo_url = process.env.MONGO_URL || "mongodb://localhost:27017";
+var mongo_url = process.env.MONGO_URL;
 const m_client = new MongoClient(mongo_url, { useUnifiedTopology: true });
 let m_database;
 
@@ -52,7 +52,7 @@ connectMongo();
 app.post("/lrs", (req, res) => {
   try {
     // Encryption of personal data is moved to LTI Tool
-    m_client.db(process.env.MONGO_DB || "lrs").collection(process.env.MONGO_XAPI_COLLECTION || "records").insertOne(req.body, { check_keys: false }, function (err, mong_res) {
+    m_client.db().collection(process.env.MONGO_XAPI_COLLECTION).insertOne(req.body, { check_keys: false }, function (err, mong_res) {
       if (err) { throw err }
       console.log("xAPI Record inserted");
       console.log("Mongo Response", mong_res)
@@ -78,7 +78,7 @@ app.post("/records/get", (req, res) => {
     req.body.unwind ? unwind = req.body.unwind : unwind = {};
     req.body.limit ? limit = req.body.limit : 0;
     req.body.skip ? limit = req.body.skip : 0;
-    m_client.db(process.env.MONGO_DB || "lrs").collection(process.env.MONGO_XAPI_COLLECTION || "records").find(query, { limit: limit, skip: skip, sort: sort, unwind: unwind }).toArray(function (err, results) {
+    m_client.db().collection(process.env.MONGO_XAPI_COLLECTION).find(query, { limit: limit, skip: skip, sort: sort, unwind: unwind }).toArray(function (err, results) {
       if (err) {
         console.log("Error while getting records", err);
         console.log("Input Query was: ", query);
@@ -110,7 +110,7 @@ app.post("/records/aggregate", (req, res) => {
   console.log(req.body)
   try {
     req.body.pipeline ? pipeline = req.body.pipeline : pipeline = [];
-    m_client.db(process.env.MONGO_DB || "lrs").collection(process.env.MONGO_XAPI_COLLECTION || "records").aggregate(pipeline).toArray(function (err, results) {
+    m_client.db().collection(process.env.MONGO_XAPI_COLLECTION).aggregate(pipeline).toArray(function (err, results) {
       if (err) {
         console.log("Error while Aggregating: ", err);
         console.log("Pipeline: ", pipeline);

@@ -7,9 +7,7 @@ const connectionOptions = {
 };
 mongoose
   .connect(
-    process.env.MONGO_URL + process.env.MONGO_DB ||
-      "mongodb://localhost:27017/lrs",
-    connectionOptions
+    process.env.MONGO_URL, connectionOptions
   )
   .then(() => {
     console.log("Mongoose connected");
