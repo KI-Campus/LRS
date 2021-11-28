@@ -33,7 +33,7 @@ app.use(errorHandler);
 // Mongo import and init variables
 const { MongoClient } = require("mongodb");
 var mongo_url = process.env.MONGO_URL;
-const m_client = new MongoClient(mongo_url, { useUnifiedTopology: true });
+var m_client = new MongoClient(mongo_url, { useUnifiedTopology: true });
 let m_database;
 
 
@@ -47,6 +47,11 @@ async function connectMongo() {
   }
 }
 connectMongo();
+
+require("./consumers/consumers.js").init(m_client);
+
+// Consumer API routes
+app.use("/consumers", require("./consumers/consumers.js").router);
 
 // LRS endpoint to accept post data
 app.post("/lrs", (req, res) => {
@@ -107,9 +112,19 @@ app.post("/records/get", (req, res) => {
 // Get records with aggregation
 app.post("/records/aggregate", (req, res) => {
   let pipeline;
-  console.log(req.body)
+  let consumer;
+  req.body.consumer ? consumer = req.body.consumer : consumer = "all";
+
   try {
     req.body.pipeline ? pipeline = req.body.pipeline : pipeline = [];
+    if (consumer != "all") {
+      pipeline.unshift({
+        "$match": {
+          "metadata.session.custom_consumer": consumer
+        }
+      })
+    }
+
     m_client.db().collection(process.env.MONGO_XAPI_COLLECTION).aggregate(pipeline).toArray(function (err, results) {
       if (err) {
         console.log("Error while Aggregating: ", err);

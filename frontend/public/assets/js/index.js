@@ -6,7 +6,8 @@ docReady(function () {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     };
 
-    // Fetch records
+    // Populate All of the Consumers
+    populateConsumers();
 
     // Populate download form fields
     populateDownloadForm();
@@ -31,10 +32,76 @@ docReady(function () {
 
 });
 
+function populateConsumers() {
+    // Get all consumers
+    const GETUSERS_URL = "../consumers/getall";
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+    axios.get(GETUSERS_URL, config)
+        .then(function (response) {
+
+
+            if (response.data?.result) {
+                response.data.result.forEach(element => {
+                    addConsumerToHomepage(element);
+                });
+                addConsumerToHomepage("", true);
+            }
+
+
+        })
+        .catch(function (error) {
+            console.log("Error while populating consumers", error);
+        });
+
+    console.log("Consumer", consumer);
+
+    if (consumer == "all") {
+
+        selectConsumer("", "", "", true, false);
+    }
+    else {
+
+        selectConsumer(consumer.id, consumer.name, consumer.picture, false, false);
+    }
+}
+
+function addConsumerToHomepage(consumer, empty = false) {
+    const container = document.getElementById("consumersContainer");
+    const div = document.createElement("div");
+    div.className = "flex justify-center text-2xl border-2 border-gray-300 rounded-xl p-6 bg-gray-100";
+    if (!empty) {
+        div.innerHTML = ` <button onClick="selectConsumer('${consumer.id}', '${consumer.name}', '${consumer.picture}' )"> <img src="${consumer.picture}" style="max-width:300px; max-height:40px" /> </button>`;
+    }
+    else {
+        div.innerHTML = ` <button onClick="selectConsumer('', '', '', true )"> All </button>`;
+    }
+    container.appendChild(div);
+}
+
+
+function selectConsumer(consumerId, consumerName, consumerPicture, all = false, reload = true) {
+    if (!all) {
+        // Save consumer id to session storage
+        sessionStorage.setItem("consumer", JSON.stringify({ id: consumerId, name: consumerName, picture: consumerPicture }));
+        document.getElementById("selectedConsumer").innerHTML = "Selected Consumer: " + consumerName;
+    }
+    else {
+        sessionStorage.setItem("consumer", "all");
+        document.getElementById("selectedConsumer").innerHTML = "All Consumers selected ";
+    }
+    // Reload page after some timeout
+    reload && setTimeout(function () {
+        location.reload();
+    }, 500);
+}
+
 function populateDownloadForm() {
 
     // Get all distinct exercise ids
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$group": {
@@ -60,6 +127,7 @@ function populateDownloadForm() {
     // Get all distinct context ids
 
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$group": {
@@ -85,6 +153,7 @@ function populateDownloadForm() {
 
     // Get all distinct activities
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$group": {
@@ -119,9 +188,10 @@ function downloadData() {
     //let activityType = document.getElementById("downloadActivityType").value
 
     let data = {}
-    data.pipeline = []
-    data.pipeline[0] = {}
-    data.pipeline[0]["$match"] = {}
+    data.consumer = consumer?.id ? consumer.id : "all";
+    data.pipeline = [];
+    data.pipeline[0] = {};
+    data.pipeline[0]["$match"] = {};
     // if (contextId != "all" || !contextId) { data.pipeline[0]["$match"]["xAPI.context.contextActivities.category.id"] = contextId; }
     if (exerciseId != "all" || !exerciseId) { data.pipeline[0]["$match"]["xAPI.object.id"] = exerciseId; }
     //if (activityType != "all" || !activityType) { data.pipeline[0]["$match"]["xAPI.verb.id"] = activityType; }
@@ -193,6 +263,7 @@ function chartSubmissionsByTime() {
     // Fetch the required aggregated request
 
     let data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$match": {
@@ -249,6 +320,7 @@ function populateCards() {
     let data = {};
     // Fetch total records 
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             { "$unset": ["xAPI", "metadata"] }
         ]
@@ -265,6 +337,7 @@ function populateCards() {
 
     // Fetch total submissions
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$match": { "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/interacted" }
@@ -284,6 +357,7 @@ function populateCards() {
 
     // Fetch Exercise types
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$group": {
@@ -304,6 +378,7 @@ function populateCards() {
 
     // Fetch total completes
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$match": { "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed" }
@@ -355,6 +430,7 @@ function chartExercisesTypes() {
     // Fetch the required aggregated request
 
     let data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$group": {
@@ -388,6 +464,7 @@ function chartQuizMCQs() {
 
     // Get all distinct exercise ids
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$match": {
@@ -432,6 +509,7 @@ function chartQuizMCQsChangeQuizId() {
     let subMCQs = [];
     // Get Quiz's sub MCQs
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$group": {
@@ -469,6 +547,7 @@ function chartQuizMCQsChangeQuizId() {
 function chartMCQs() {
     // Get all MCQ ids
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$match": {
@@ -506,6 +585,7 @@ function chartMCQsChangeId() {
 
     // Fetch all the available choices from this particular MCQ
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$match": {
@@ -552,6 +632,7 @@ function chartMCQsChangeId() {
 
                 // Get the number of counts per choice
                 data = {
+                    consumer: consumer?.id ? consumer.id : "all",
                     pipeline: [
                         {
                             "$match": {
@@ -646,6 +727,7 @@ function chartMCQsChangeId() {
                             // Get the correct answers query 
                             let correctResponsesPattern;
                             data = {
+                                consumer: consumer?.id ? consumer.id : "all",
                                 "pipeline": [
                                     {
                                         "$match": {
@@ -713,6 +795,7 @@ function populateExerciseStatSelector() {
     // First populate the exercise selector to get all available exercises
     // Get all distinct exercise ids
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$group": {
@@ -752,6 +835,7 @@ function exerciseStatsChangeExercise() {
     let exerciseId = document.getElementById("excericseStatsExerciseId").value;
     // Fetch number of completed or answered records for that particular exercise
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$match": {
@@ -798,6 +882,7 @@ function exerciseStatsChangeExercise() {
 
     // Fetch number of students who passed
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
                 "$match": {
@@ -840,6 +925,7 @@ function exerciseStatsChangeExercise() {
 
     // Fetch average marks
     data = {
+        consumer: consumer?.id ? consumer.id : "all",
         "pipeline": [
             {
                 "$match": {

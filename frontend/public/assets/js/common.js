@@ -5,6 +5,9 @@ let lastName = ""
 let role = ""
 let id = ""
 
+var consumer;
+
+
 // Document ready helper function 
 function docReady(fn) {
     // see if DOM is already available
@@ -33,6 +36,33 @@ docReady(function () {
         for (let index = 0; index < document.getElementsByClassName("usersMenu").length; index++) {
             const element = document.getElementsByClassName("usersMenu")[index];
             element.classList.remove("hidden");
+        }
+
+        for (let index = 0; index < document.getElementsByClassName("consumersMenu").length; index++) {
+            const element = document.getElementsByClassName("consumersMenu")[index];
+            element.classList.remove("hidden");
+        }
+    }
+
+    // Check for consumer in localstorage, if not then set it to all
+    if (sessionStorage.getItem("consumer") == null) {
+
+        sessionStorage.setItem("consumer", "all");
+        consumer = "all";
+
+    }
+    try {
+        // Load the consumer from session storage
+        consumer = JSON.parse(sessionStorage.getItem("consumer"));
+        consumerID = consumer.id;
+
+    }
+    catch (e) {
+        if (typeof (sessionStorage.getItem("consumer")) == 'string') {
+            // Load the consumer from session storage
+            consumer = sessionStorage.getItem("consumer");
+
+
         }
     }
 

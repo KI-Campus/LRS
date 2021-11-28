@@ -38,9 +38,8 @@
         <ul>
 
           <li class="relative px-6 py-3 usersMenu hidden">
-            <span class="absolute inset-y-0 left-0 w-1 bg-blue-600 rounded-tr-lg rounded-br-lg"
-              aria-hidden="true"></span>
-            <a class="inline-flex items-center w-full text-sm font-semibold text-gray-800 transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 dark:text-gray-100"
+
+            <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
               href="users.html">
               <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round"
                 stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
@@ -51,8 +50,9 @@
           </li>
 
           <li class="relative px-6 py-3 consumersMenu hidden">
-
-            <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
+            <span class="absolute inset-y-0 left-0 w-1 bg-blue-600 rounded-tr-lg rounded-br-lg"
+              aria-hidden="true"></span>
+            <a class="inline-flex items-center w-full text-sm font-semibold text-gray-800 transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 dark:text-gray-100"
               href="consumers.html">
               <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round"
                 stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
@@ -112,9 +112,8 @@
         <ul>
 
           <li class="relative px-6 py-3 usersMenu hidden">
-            <span class="absolute inset-y-0 left-0 w-1 bg-blue-600 rounded-tr-lg rounded-br-lg"
-              aria-hidden="true"></span>
-            <a class="inline-flex items-center w-full text-sm font-semibold text-gray-800 transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 dark:text-gray-100"
+
+            <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
               href="users.html">
               <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round"
                 stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
@@ -125,8 +124,9 @@
           </li>
 
           <li class="relative px-6 py-3 consumersMenu hidden">
-
-            <a class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
+            <span class="absolute inset-y-0 left-0 w-1 bg-blue-600 rounded-tr-lg rounded-br-lg"
+              aria-hidden="true"></span>
+            <a class="inline-flex items-center w-full text-sm font-semibold text-gray-800 transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 dark:text-gray-100"
               href="consumers.html">
               <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round"
                 stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
@@ -135,6 +135,7 @@
               <span class="ml-4">Consumers</span>
             </a>
           </li>
+
 
         </ul>
         <div class="px-6 my-6">
@@ -232,93 +233,63 @@
       <main class="h-full pb-16 overflow-y-auto">
         <div class="container grid px-6 mx-auto">
           <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
-            Users
+            LTI Consumers
           </h2>
 
           <!-- Create new user -->
           <h4 class="mb-4 text-lg font-semibold text-gray-600 dark:text-gray-300">
-            Create new user
+            Add a new consumer
           </h4>
           <div class="px-4 py-3 mb-8 bg-white rounded-lg shadow-md dark:bg-gray-800">
             <form>
               <label class="block text-sm">
-                <span class="text-gray-700 dark:text-gray-400">Email Address</span>
+                <span class="text-gray-700 dark:text-gray-400">Consumer ID</span>
                 <!-- focus-within sets the color for the icon when input is focused -->
                 <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
-                  <input id="newUserEmail" autocomplete="email"
-                    class="block w-full pl-10 mt-1 text-sm text-black dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray form-input"
-                    placeholder="john@company.com" />
-                  <div class="absolute inset-y-0 flex items-center ml-3 pointer-events-none">
-                    <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-                      </path>
-                    </svg>
-                  </div>
-                </div>
-              </label>
-
-              <label class="block mt-4 text-sm">
-                <span class="text-gray-700 dark:text-gray-400">Password</span>
-                <!-- focus-within sets the color for the icon when input is focused -->
-                <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
-                  <input id="newUserPassword" type="password" autocomplete="new-password"
+                  <input id="newConsumerId"
                     class="block w-full pr-10 mt-1 text-sm text-black dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray form-input"
-                    placeholder="**********" />
+                    placeholder="hpi" />
                 </div>
               </label>
 
+
               <label class="block mt-4 text-sm">
-                <span class="text-gray-700 dark:text-gray-400">First Name</span>
+                <span class="text-gray-700 dark:text-gray-400">Name</span>
                 <!-- focus-within sets the color for the icon when input is focused -->
                 <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
-                  <input id="newUserFirstName" autocomplete="name"
+                  <input id="newConsumerName"
                     class="block w-full pr-10 mt-1 text-sm text-black dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray form-input"
-                    placeholder="John" />
+                    placeholder="openHPI Consumer" />
                 </div>
               </label>
 
 
               <label class="block mt-4 text-sm">
-                <span class="text-gray-700 dark:text-gray-400">Last Name</span>
+                <span class="text-gray-700 dark:text-gray-400">Picture URL</span>
                 <!-- focus-within sets the color for the icon when input is focused -->
                 <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
-                  <input id="newUserLastName" autocomplete="family-name"
+                  <input id="newConsumerPicture"
                     class="block w-full pr-10 mt-1 text-sm text-black dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray form-input"
-                    placeholder="Doe" />
+                    placeholder="" />
                 </div>
               </label>
 
 
 
               <label class="block mt-4 text-sm">
-                <span class="text-gray-700 dark:text-gray-400">
-                  Role
-                </span>
-                <select id="newUserRole" autocomplete="role"
-                  class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </label>
-
-
-
-              <label class="block mt-4 text-sm">
-                <span id="newUserLabel" class="text-xs text-green-600 dark:text-green-400 hidden">
-                  User successfully created
+                <span id="newConsumerLabel" class="text-xs text-green-600 dark:text-green-400 hidden">
+                  Consumer successfully created
                 </span>
               </label>
 
               <label class="block mt-4 text-sm">
-                <span id="newUserErrorLabel" class="text-xs text-red-600 dark:text-red-400 hidden">
-                  Error creating user
+                <span id="newConsumerErrorLabel" class="text-xs text-red-600 dark:text-red-400 hidden">
+                  Error creating consumer
                 </span>
               </label>
             </form>
             <label class="block mt-4 text-sm">
-              <button onclick="createUser()"
+              <button onclick="createConsumer()"
                 class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">
                 Create
               </button>
@@ -336,14 +307,14 @@
                 <thead>
                   <tr
                     class="text-xs font-semibold tracking-wide text-left text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
-                    <th class="px-4 py-3">User</th>
-                    <th class="px-4 py-3">Last Login</th>
-                    <th class="px-4 py-3">Role</th>
+                    <th class="px-4 py-3">Consumer Name</th>
+                    <th class="px-4 py-3">Picture</th>
+                    <th class="px-4 py-3">ID</th>
                     <th class="px-4 py-3">Created Date</th>
                     <th class="px-4 py-3">Actions</th>
                   </tr>
                 </thead>
-                <tbody id="usersTable" class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
+                <tbody id="consumersTable" class="bg-white divide-y dark:divide-gray-700 dark:bg-gray-800">
 
                 </tbody>
               </table>
@@ -424,83 +395,65 @@
           </h2>
 
           <!-- Update user -->
-          <h4 class="updateUserUI mb-4 text-lg font-semibold text-gray-600 dark:text-gray-300 hidden">
-            Update user
+          <h4 class="updateConsumerUI mb-4 text-lg font-semibold text-gray-600 dark:text-gray-300 hidden">
+            Update consumer
           </h4>
-          <div class="updateUserUI px-4 py-3 mb-8 bg-white rounded-lg shadow-md dark:bg-gray-800 hidden">
+          <div class="updateConsumerUI px-4 py-3 mb-8 bg-white rounded-lg shadow-md dark:bg-gray-800 hidden">
             <form>
-              <input id="updateUserId" type="hidden" />
+              <input id="updateConsumerId" type="hidden" />
               <label class="block text-sm">
-                <span class="text-gray-700 dark:text-gray-400">Email Address</span>
+                <span class="text-gray-700 dark:text-gray-400">Consumer ID</span>
                 <!-- focus-within sets the color for the icon when input is focused -->
                 <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
-                  <input id="updateUserEmail" autocomplete="email"
-                    class="block w-full pl-10 mt-1 text-sm text-black dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray form-input"
-                    placeholder="john@company.com" />
-                  <div class="absolute inset-y-0 flex items-center ml-3 pointer-events-none">
-                    <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke-linecap="round" stroke-linejoin="round"
-                      stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-                      </path>
-                    </svg>
-                  </div>
+                  <input id="updateConsumerId2" disabled readonly
+                    class="cursor-not-allowed disabled readonly block w-full pr-10 mt-1 text-sm text-black dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray form-input"
+                    placeholder="hpi" />
+
                 </div>
               </label>
 
               <label class="block mt-4 text-sm">
-                <span class="text-gray-700 dark:text-gray-400">First Name</span>
+                <span class="text-gray-700 dark:text-gray-400">Name</span>
                 <!-- focus-within sets the color for the icon when input is focused -->
                 <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
-                  <input id="updateUserFirstName" autocomplete="name"
+                  <input id="updateConsumerName"
                     class="block w-full pr-10 mt-1 text-sm text-black dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray form-input"
-                    placeholder="John" />
+                    placeholder="openHPI Consumer" />
                 </div>
               </label>
 
 
               <label class="block mt-4 text-sm">
-                <span class="text-gray-700 dark:text-gray-400">Last Name</span>
+                <span class="text-gray-700 dark:text-gray-400">Picture URL</span>
                 <!-- focus-within sets the color for the icon when input is focused -->
                 <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
-                  <input id="updateUserLastName" autocomplete="family-name"
-                    class="block w-full pr-10 mt-1 text-sm text-black dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray form-input"
-                    placeholder="Doe" />
+                  <input id="updateConsumerPicture"
+                    class="block w-full pr-10 mt-1 text-sm text-black dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray form-input" />
                 </div>
               </label>
 
 
 
-              <label class="block mt-4 text-sm">
-                <span class="text-gray-700 dark:text-gray-400">
-                  Role
-                </span>
-                <select id="updateUserRole" autocomplete="role"
-                  class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </label>
 
 
               <label class="block mt-4 text-sm">
-                <span id="updateUserLabel" class="text-xs text-green-600 dark:text-green-400 hidden">
-                  User successfully updated
+                <span id="updateConsumerLabel" class="text-xs text-green-600 dark:text-green-400 hidden">
+                  Consumer successfully updated
                 </span>
               </label>
 
               <label class="block mt-4 text-sm">
-                <span id="updateUserErrorLabel" class="text-xs text-red-600 dark:text-red-400 hidden">
-                  Error updating user
+                <span id="updateConsumerErrorLabel" class="text-xs text-red-600 dark:text-red-400 hidden">
+                  Error updating consumer
                 </span>
               </label>
             </form>
             <label class="block mt-4 text-sm">
-              <button onclick="updateUserCancel()"
+              <button onclick="updateConsumerCancel()"
                 class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-500 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">
                 Cancel
               </button>
-              <button onclick="updateUserServer()" id="updateButton" onclick="updateUserToServer()"
+              <button onclick="updateConsumerServer()" id="updateButton" onclick="updateConsumerToServer()"
                 class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">
                 Update
               </button>
@@ -512,7 +465,7 @@
     </div>
   </div>
   <script defer src="assets/js/common.js"></script>
-  <script defer src="assets/js/users.js"></script>
+  <script defer src="assets/js/consumers.js"></script>
 </body>
 
 </html>
