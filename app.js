@@ -32,9 +32,7 @@ app.use(errorHandler);
 
 // Mongo import and init variables
 const { MongoClient } = require("mongodb");
-var mongo_url = process.env.MONGO_URL;
-var m_client = new MongoClient(mongo_url, { useUnifiedTopology: true });
-let m_database;
+var m_client = new MongoClient(process.env.MONGO_URL + process.env.MONGO_DB, { useUnifiedTopology: true });
 
 
 // Async function to connect to MongoDB and initiaize variables for db and collection
