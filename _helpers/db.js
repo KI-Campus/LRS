@@ -7,7 +7,7 @@ const connectionOptions = {
 };
 mongoose
   .connect(
-    process.env.MONGO_URL, connectionOptions
+    process.env.MONGO_URL + process.env.MONGO_DB, connectionOptions
   )
   .then(() => {
     console.log("Mongoose connected");
