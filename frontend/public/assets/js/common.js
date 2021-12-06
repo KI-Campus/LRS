@@ -8,6 +8,8 @@ let id = ""
 var consumer;
 var courseId;
 
+var VERSION = null;
+
 
 // Document ready helper function 
 function docReady(fn) {
@@ -86,6 +88,26 @@ docReady(function () {
 
     // Set default Axios calls
     axios.defaults.headers.common['Authorization'] = "Bearer " + token;
+
+    // Fetch the LRS version
+    axios.get("/status")
+        .then(function (response) {
+            if (response.data) {
+                if (response.data.version) {
+                    VERSION = response.data.version;
+                    document.getElementById("lrsVersion").innerHTML = response.data.version;
+                }
+            }
+
+        })
+        .catch(function (error) {
+            console.log(error);
+            VERSION = null;
+
+        }
+        );
+
+
 });
 
 // If not logged in, navigate to login

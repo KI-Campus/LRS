@@ -13,6 +13,7 @@ function jwt() {
       "/",
       "/favicon.ico",
       "/lrs",
+      "/status",
     ],
   });
 }

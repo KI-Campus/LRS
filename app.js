@@ -1,4 +1,6 @@
-﻿require("dotenv").config();
+﻿let LRS_VERSION = "1.0.0";
+
+require("dotenv").config();
 require("rootpath")();
 const express = require("express");
 const app = express();
@@ -22,7 +24,7 @@ app.use("/users", require("./users/users.controller"));
 
 // Default route for status
 app.get("/status", (req, res) => {
-  res.send({ status: "LRS is up" });
+  res.send({ status: "LRS is up", version: LRS_VERSION });
 });
 
 // Global error handler
