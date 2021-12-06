@@ -6,6 +6,7 @@ let role = ""
 let id = ""
 
 var consumer;
+var courseId;
 
 
 // Document ready helper function 
@@ -64,6 +65,23 @@ docReady(function () {
 
 
         }
+    }
+
+
+    // Check for courseId in session storage, if not then set it to all
+    if (sessionStorage.getItem("courseId") == null) {
+
+        sessionStorage.setItem("courseId", "all");
+        courseId = "all";
+
+    }
+    try {
+        // Load the courseId from session storage
+        courseId = sessionStorage.getItem("courseId");
+
+    }
+    catch (e) {
+
     }
 
     // Set default Axios calls

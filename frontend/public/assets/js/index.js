@@ -1,13 +1,16 @@
 let config;
 var mcqChart;
-docReady(function () {
+docReady(async function () {
     // Get config ready
     config = {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     };
 
     // Populate All of the Consumers
-    populateConsumers();
+    await populateConsumers();
+
+    // Populate Course Dropdown
+    await populateCourses();
 
     // Populate download form fields
     populateDownloadForm();
@@ -32,13 +35,13 @@ docReady(function () {
 
 });
 
-function populateConsumers() {
+async function populateConsumers() {
     // Get all consumers
     const GETUSERS_URL = "../consumers/getall";
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    axios.get(GETUSERS_URL, config)
+    await axios.get(GETUSERS_URL, config)
         .then(function (response) {
 
 
@@ -59,20 +62,20 @@ function populateConsumers() {
 
     if (consumer == "all") {
 
-        selectConsumer("", "", "", true, false);
+        await selectConsumer("", "", "", true, false);
     }
     else {
 
-        selectConsumer(consumer.id, consumer.name, consumer.picture, false, false);
+        await selectConsumer(consumer.id, consumer.name, consumer.picture, false, false);
     }
 }
 
-function addConsumerToHomepage(consumer, empty = false) {
+async function addConsumerToHomepage(consumer, empty = false) {
     const container = document.getElementById("consumersContainer");
     const div = document.createElement("div");
     div.className = "flex justify-center text-2xl border-2 border-gray-300 rounded-xl p-6 bg-gray-100";
     if (!empty) {
-        div.innerHTML = ` <button onClick="selectConsumer('${consumer.id}', '${consumer.name}', '${consumer.picture}' )"> <img src="${consumer.picture}" style="max-width:300px; max-height:40px" /> </button>`;
+        div.innerHTML = ` <button onClick="selectConsumer('${consumer.id}', '${consumer.name}', '${consumer.picture}' )"> <img src="${consumer.picture}" style="max-width:300px; max-height:40px; height:40px" /> </button>`;
     }
     else {
         div.innerHTML = ` <button onClick="selectConsumer('', '', '', true )"> All </button>`;
@@ -81,7 +84,7 @@ function addConsumerToHomepage(consumer, empty = false) {
 }
 
 
-function selectConsumer(consumerId, consumerName, consumerPicture, all = false, reload = true) {
+async function selectConsumer(consumerId, consumerName, consumerPicture, all = false, reload = true) {
     if (!all) {
         // Save consumer id to session storage
         sessionStorage.setItem("consumer", JSON.stringify({ id: consumerId, name: consumerName, picture: consumerPicture }));
@@ -97,11 +100,83 @@ function selectConsumer(consumerId, consumerName, consumerPicture, all = false, 
     }, 500);
 }
 
+// Fetch all the courses Id available
+async function populateCourses() {
+    data = {
+        consumer: consumer?.id ? consumer.id : "all",
+        pipeline: [
+            {
+                "$group": {
+                    "_id": "$metadata.session.context_id",
+                    "title": { "$first": "$metadata.session.context_title" }
+                }
+            }
+        ]
+    }
+    await axios.post("../records/aggregate", data, config)
+        .then(function (response) {
+            if (response.data) {
+
+                if (response.data?.results) {
+                    response.data.results.forEach(element => {
+                        if (element._id != null) {
+                            addCourseToHomepage(element);
+                        }
+                    });
+
+                }
+            }
+
+        });
+
+    // Select a particular course
+
+    if (courseId != "all") {
+        // Check if the course is in the list
+        let course = document.getElementById("coursesSelect").querySelector(`option[value="${courseId}"]`);
+        if (course) {
+            course.selected = true;
+            //selectCourse(courseId, course.innerHTML);
+        }
+        else {
+            sessionStorage.removeItem("courseId");
+            setTimeout(function () {
+                location.reload();
+            }, 500);
+        }
+    }
+}
+
+function addCourseToHomepage(course) {
+    let myElement = document.createElement("option");
+    myElement.value = course._id;
+    myElement.innerHTML = course.title + "    " + course._id;
+    document.getElementById("coursesSelect").appendChild(myElement);
+}
+
+function changeCourse(value) {
+    if (value != "all") {
+        // Save course id to session storage
+        sessionStorage.setItem("courseId", value);
+        //document.getElementById("selectedCourse").innerHTML = "Selected Consumer: " + consumerName;
+    }
+    else {
+        sessionStorage.setItem("courseId", "all");
+        //document.getElementById("selectedConsumer").innerHTML = "All Consumers selected ";
+    }
+    // Reload page after some timeout
+    setTimeout(function () {
+        location.reload();
+    }, 500);
+
+}
+
 function populateDownloadForm() {
 
     // Get all distinct exercise ids
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$group": {
@@ -128,6 +203,7 @@ function populateDownloadForm() {
 
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$group": {
@@ -154,6 +230,7 @@ function populateDownloadForm() {
     // Get all distinct activities
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$group": {
@@ -189,6 +266,7 @@ function downloadData() {
 
     let data = {}
     data.consumer = consumer?.id ? consumer.id : "all";
+    data.courseId = courseId ? courseId : "all";
     data.pipeline = [];
     data.pipeline[0] = {};
     data.pipeline[0]["$match"] = {};
@@ -199,7 +277,7 @@ function downloadData() {
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
-                let csvBlob = new Blob([response.data.results])
+                let csvBlob = new Blob([JSON.stringify(response.data.results)])
                 downloadBlob(csvBlob, 'myfile.json');
             }
         })
@@ -264,6 +342,7 @@ function chartSubmissionsByTime() {
 
     let data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$match": {
@@ -321,10 +400,12 @@ function populateCards() {
     // Fetch total records 
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             { "$unset": ["xAPI", "metadata"] }
         ]
     }
+
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
@@ -338,6 +419,7 @@ function populateCards() {
     // Fetch total submissions
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$match": { "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/interacted" }
@@ -358,10 +440,14 @@ function populateCards() {
     // Fetch Exercise types
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$group": {
-                    "_id": "$xAPI.object.id"
+                    "_id": "$xAPI.context.contextActivities.category.id",
+                    "count": {
+                        "$sum": 1
+                    }
                 }
             }
         ]
@@ -379,6 +465,7 @@ function populateCards() {
     // Fetch total completes
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$match": { "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed" }
@@ -431,6 +518,7 @@ function chartExercisesTypes() {
 
     let data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$group": {
@@ -465,6 +553,7 @@ function chartQuizMCQs() {
     // Get all distinct exercise ids
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$match": {
@@ -510,6 +599,7 @@ function chartQuizMCQsChangeQuizId() {
     // Get Quiz's sub MCQs
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$group": {
@@ -548,6 +638,7 @@ function chartMCQs() {
     // Get all MCQ ids
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$match": {
@@ -586,6 +677,7 @@ function chartMCQsChangeId() {
     // Fetch all the available choices from this particular MCQ
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$match": {
@@ -633,6 +725,7 @@ function chartMCQsChangeId() {
                 // Get the number of counts per choice
                 data = {
                     consumer: consumer?.id ? consumer.id : "all",
+                    courseId: courseId ? courseId : "all",
                     pipeline: [
                         {
                             "$match": {
@@ -728,6 +821,7 @@ function chartMCQsChangeId() {
                             let correctResponsesPattern;
                             data = {
                                 consumer: consumer?.id ? consumer.id : "all",
+                                courseId: courseId ? courseId : "all",
                                 "pipeline": [
                                     {
                                         "$match": {
@@ -756,6 +850,7 @@ function chartMCQsChangeId() {
                                 .then(function (response) {
 
                                     if (response.data) {
+                                        if (!response.data.results[0]) { return; }
                                         correctResponsesPattern = response.data.results[0]._id[0];
                                         let splitResponses = correctResponsesPattern.split("[,]")
 
@@ -796,10 +891,13 @@ function populateExerciseStatSelector() {
     // Get all distinct exercise ids
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$group": {
-                    "_id": "$xAPI.object.id"
+                    "_id": "$xAPI.object.id",
+                    "title": { "$first": "$xAPI.object.definition.name.en-US" },
+                    "type": { "$first": "$xAPI.context.contextActivities.category.id" }
                 }
             }
         ]
@@ -811,15 +909,22 @@ function populateExerciseStatSelector() {
                 document.getElementById("excericseStatsExerciseId").innerHTML = "";
                 for (let index = 0; index < response.data.results.length; index++) {
                     let element = response.data.results[index];
+                    let minifyType = String(element.type).replace("http://h5p.org/libraries/", "");
+                    document.getElementById("excericseStatsExerciseId").innerHTML += `<option value="${element._id}">${JSON.stringify(element.title + "   " + element._id + "    " + minifyType).slice(1, -1)}</option>`;
                     // Ignore subtypes of exercises
-                    element._id = element._id.split("?")[0];
-                    //returnedExercises.push(element._id.split("?")[0]);
-                    returnedExercises[element._id.split("?")[0]] = element._id.split("?")[0];
+                    // element._id = element._id.split("?")[0];
+                    // //returnedExercises.push(element._id.split("?")[0]);
+                    // returnedExercises[element._id.split("?")[0]] = element._id.split("?")[0];
+                    // returnedExercises[element._id.split("?")[0]]["title"] = element.title;
+                    // returnedExercises[element._id.split("?")[0]]["type"] = element.type;
+                    // console.log(element)
+
                 }
-                for (let index = 0; index < Object.keys(returnedExercises).length; index++) {
-                    const element = Object.keys(returnedExercises)[index];
-                    document.getElementById("excericseStatsExerciseId").innerHTML += `<option value="${element}">${JSON.stringify(element).slice(1, -1)}</option>`;
-                }
+                // for (let index = 0; index < Object.keys(returnedExercises).length; index++) {
+                //     const element = Object.keys(returnedExercises)[index];
+
+                //     document.getElementById("excericseStatsExerciseId").innerHTML += `<option value="${element}">${JSON.stringify(element).slice(1, -1)}</option>`;
+                // }
 
                 document.getElementById("excericseStatsExerciseId").onchange();
             }
@@ -836,6 +941,7 @@ function exerciseStatsChangeExercise() {
     // Fetch number of completed or answered records for that particular exercise
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$match": {
@@ -865,6 +971,10 @@ function exerciseStatsChangeExercise() {
 
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
+            if (!response.data.results[0]) {
+                document.getElementById("excericseStatsTotalCompletesOrAnswered").innerHTML = "...";
+                return;
+            }
             if (response.data.results[0].count) {
 
                 let count = response.data.results[0].count;
@@ -872,6 +982,9 @@ function exerciseStatsChangeExercise() {
                     count += response.data.results[1].count
                 }
                 document.getElementById("excericseStatsTotalCompletesOrAnswered").innerHTML = count;
+            }
+            else {
+                document.getElementById("excericseStatsTotalCompletesOrAnswered").innerHTML = "...";
             }
         })
         .catch(function (error) {
@@ -883,6 +996,7 @@ function exerciseStatsChangeExercise() {
     // Fetch number of students who passed
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         pipeline: [
             {
                 "$match": {
@@ -912,9 +1026,14 @@ function exerciseStatsChangeExercise() {
 
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
-            if (response.data.results[0].count) {
+            if (response.data.results[0]) {
+                if (response.data.results[0].count) {
 
-                document.getElementById("excericseStatsPassing").innerHTML = response.data.results[0].count;
+                    document.getElementById("excericseStatsPassing").innerHTML = response.data.results[0].count;
+                }
+            }
+            else {
+                document.getElementById("excericseStatsPassing").innerHTML = "...";
             }
         })
         .catch(function (error) {
@@ -926,6 +1045,7 @@ function exerciseStatsChangeExercise() {
     // Fetch average marks
     data = {
         consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
         "pipeline": [
             {
                 "$match": {
@@ -954,9 +1074,16 @@ function exerciseStatsChangeExercise() {
 
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
+            if (!response.data.results[0]) {
+                document.getElementById("excericseStatsAveragePoints").innerHTML = "...";
+                return;
+            }
             if (response.data.results[0].avg) {
 
-                document.getElementById("excericseStatsAveragePoints").innerHTML = response.data.results[0].avg;
+                document.getElementById("excericseStatsAveragePoints").innerHTML = parseFloat(response.data.results[0].avg).toFixed(4);
+            }
+            else {
+                document.getElementById("excericseStatsAveragePoints").innerHTML = "...";
             }
         })
         .catch(function (error) {

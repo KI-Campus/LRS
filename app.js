@@ -111,10 +111,18 @@ app.post("/records/get", (req, res) => {
 app.post("/records/aggregate", (req, res) => {
   let pipeline;
   let consumer;
+  let courseId;
   req.body.consumer ? consumer = req.body.consumer : consumer = "all";
-
+  req.body.courseId ? courseId = req.body.courseId : courseId = "all";
   try {
     req.body.pipeline ? pipeline = req.body.pipeline : pipeline = [];
+    if (courseId != "all") {
+      pipeline.unshift({
+        "$match": {
+          "metadata.session.context_id": courseId
+        }
+      })
+    }
     if (consumer != "all") {
       pipeline.unshift({
         "$match": {
@@ -123,6 +131,7 @@ app.post("/records/aggregate", (req, res) => {
       })
     }
 
+
     m_client.db().collection(process.env.MONGO_XAPI_COLLECTION).aggregate(pipeline).toArray(function (err, results) {
       if (err) {
         console.log("Error while Aggregating: ", err);
@@ -130,7 +139,7 @@ app.post("/records/aggregate", (req, res) => {
         res.status(500).end();
       }
       else {
-        console.log("Aggregate Records request received", req.body);
+        console.log("Aggregate Records request received", JSON.stringify(req.body));
         res.status(200).send({ results }).end();
       }
     });

@@ -247,7 +247,29 @@
           </div>
 
           <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
-            Main Dashboard
+            Course
+          </h2>
+
+          <!-- Cards -->
+          <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-2">
+            <!-- Card -->
+            <div class="flex items-center p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
+
+              <div>
+                <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Select a course
+                </p>
+                <select onchange="changeCourse(this.value)" id="coursesSelect"
+                  class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
+                  <option value="all">All</option>
+                </select>
+              </div>
+            </div>
+
+          </div>
+
+          <h2 class="my-6 text-2xl font-semibold text-gray-700 dark:text-gray-200">
+            Overview
           </h2>
 
           <!-- Cards -->
@@ -331,21 +353,25 @@
             Exercise Statistics
           </h2>
 
-          <!-- Cards -->
-          <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
-
+          <div class="grid gap-6 mb-8 ">
             <!-- Card -->
             <div class="flex items-center p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
               <label class="block mt-4 text-sm">
                 <span class="text-gray-700 dark:text-gray-400">Exercise</span>
                 <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
                   <select onchange="exerciseStatsChangeExercise()" id="excericseStatsExerciseId"
-                    class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
+                    class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray max-w-full">
                     <option value="...">...</option>
                   </select>
                 </div>
               </label>
             </div>
+          </div>
+
+          <!-- Cards -->
+          <div class="grid gap-6 mb-8 md:grid-cols-2 xl:grid-cols-4">
+
+
 
             <!-- Card -->
             <div class="flex items-center p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
@@ -542,6 +568,13 @@
                     class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue">
                     Download
                   </button>
+                </label>
+
+                <label class="block mt-4 text-sm">
+                  <h6>To convert JSON to CSV please use any online website like </h6>
+                </label>
+                <label class="block mt-4 text-sm font-thin hover:underline ">
+                  <a href="https://www.convertcsv.com/json-to-csv.htm">https://www.convertcsv.com/json-to-csv.htm</a>
                 </label>
 
               </div>
