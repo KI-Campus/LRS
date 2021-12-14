@@ -1,5 +1,6 @@
 let config;
 var mcqChart;
+var selectedExercise;
 docReady(async function () {
     // Get config ready
     config = {
@@ -258,11 +259,13 @@ function populateDownloadForm() {
 // Download button handler
 function downloadData() {
 
-    let exerciseId = document.getElementById("downloadExerciseId").value
+    //let exerciseId = document.getElementById("downloadExerciseId").value
 
-    let contextId = document.getElementById("downloadContextId").value
+    //let contextId = document.getElementById("downloadContextId").value
 
     //let activityType = document.getElementById("downloadActivityType").value
+
+    let exerciseId = selectedExercise;
 
     let data = {}
     data.consumer = consumer?.id ? consumer.id : "all";
@@ -272,13 +275,28 @@ function downloadData() {
     data.pipeline[0]["$match"] = {};
     // if (contextId != "all" || !contextId) { data.pipeline[0]["$match"]["xAPI.context.contextActivities.category.id"] = contextId; }
     if (exerciseId != "all" || !exerciseId) { data.pipeline[0]["$match"]["xAPI.object.id"] = exerciseId; }
+
     //if (activityType != "all" || !activityType) { data.pipeline[0]["$match"]["xAPI.verb.id"] = activityType; }
 
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
-                let csvBlob = new Blob([JSON.stringify(response.data.results)])
-                downloadBlob(csvBlob, 'myfile.json');
+
+                if (response.data.results.length > 0) {
+
+                    let formattedDownloadedData = response.data.results;
+                    // Loop through formattedDownloadedData object and remove property session.cookie
+                    for (let index = 0; index < formattedDownloadedData.length; index++) {
+                        const element = formattedDownloadedData[index];
+                        delete element.metadata.session.cookie;
+                        console.log(element)
+                    }
+
+
+                    let csvBlob = new Blob([JSON.stringify(formattedDownloadedData)])
+
+                    downloadBlob(csvBlob, 'myfile.json');
+                }
             }
         })
         .catch(function (error) {
@@ -402,14 +420,16 @@ function populateCards() {
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
-            { "$unset": ["xAPI", "metadata"] }
+            {
+                "$count": "totalRecords"
+            }
         ]
     }
 
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
-                document.getElementById("totalRecords").innerHTML = response.data.results.length;
+                document.getElementById("totalRecords").innerHTML = response.data.results[0].totalRecords;
             }
         })
         .catch(function (error) {
@@ -423,8 +443,8 @@ function populateCards() {
         pipeline: [
             {
                 "$match": { "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/interacted" }
-            },
-            { "$unset": ["xAPI", "metadata"] }
+            }
+
         ]
     }
     axios.post("../records/aggregate", data, config)
@@ -469,8 +489,8 @@ function populateCards() {
         pipeline: [
             {
                 "$match": { "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed" }
-            },
-            { "$unset": ["xAPI", "metadata"] }
+            }
+
         ]
     }
     axios.post("../records/aggregate", data, config)
@@ -697,11 +717,7 @@ function chartMCQsChangeId() {
                     }
                 }
             },
-            {
-                "$unset": [
-                    "metadata"
-                ]
-            },
+
             {
                 "$sort": {
                     "myId": 1
@@ -739,9 +755,7 @@ function chartMCQsChangeId() {
                             "$group": { "_id": "$xAPI.result.response", "count": { "$sum": 1 } }
                         },
 
-                        {
-                            "$unset": ["metadata", "xAPI.verb", "xAPI.actor", "xAPI.result"]
-                        },
+
 
                         {
                             "$sort": { "_id": 1 }
@@ -925,7 +939,7 @@ function populateExerciseStatSelector() {
 
                 //     document.getElementById("excericseStatsExerciseId").innerHTML += `<option value="${element}">${JSON.stringify(element).slice(1, -1)}</option>`;
                 // }
-
+                document.getElementById("excericseStatsExerciseId").innerHTML += `<option value="all">All</option>`;
                 document.getElementById("excericseStatsExerciseId").onchange();
             }
         })
@@ -938,14 +952,17 @@ function populateExerciseStatSelector() {
 // Exercise Stats dropdown changes. Get stats for that particular exercise
 function exerciseStatsChangeExercise() {
     let exerciseId = document.getElementById("excericseStatsExerciseId").value;
+    selectedExercise = exerciseId;
+    exerciseIdToRegex = exerciseId == "all" ? "" : exerciseId;
     // Fetch number of completed or answered records for that particular exercise
     data = {
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
+
         pipeline: [
             {
                 "$match": {
-                    "xAPI.object.id": exerciseId,
+                    "xAPI.object.id": { "$regex": exerciseIdToRegex },
                     "$or": [
                         {
                             "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed"
@@ -1000,7 +1017,7 @@ function exerciseStatsChangeExercise() {
         pipeline: [
             {
                 "$match": {
-                    "xAPI.object.id": exerciseId, "xAPI.result.success": true,
+                    "xAPI.object.id": { "$regex": exerciseIdToRegex },
                     "$or": [
                         {
                             "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed"
@@ -1049,7 +1066,7 @@ function exerciseStatsChangeExercise() {
         "pipeline": [
             {
                 "$match": {
-                    "xAPI.object.id": exerciseId,
+                    "xAPI.object.id": { "$regex": exerciseIdToRegex },
                     "$or": [
                         {
                             "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed"
