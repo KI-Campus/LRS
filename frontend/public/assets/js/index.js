@@ -1,6 +1,7 @@
 let config;
 var mcqChart;
 var selectedExercise;
+var selectedExerciseType;
 docReady(async function () {
     // Get config ready
     config = {
@@ -405,6 +406,120 @@ function chartSubmissionsByTime() {
                     lineConfig.data.datasets[0].data.push(element.submissions);
                 }
                 window.submissionsByTimeChartId = new Chart(document.getElementById('submissionsByTimeChartId'), lineConfig)
+            }
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+}
+
+function exerciseSubmissionsByTime(exercise) {
+    let lineConfig = {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                {
+                    label: 'Submissions',
+                    fill: false,
+                    backgroundColor: '#7e3af2',
+                    borderColor: '#7e3af2',
+                    data: [],
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            /**
+             * Default legends are ugly and impossible to style.
+             * See examples in charts.html to add your own legends
+             *  */
+            legend: {
+                display: false,
+            },
+            tooltips: {
+                mode: 'index',
+                intersect: false,
+            },
+            hover: {
+                mode: 'nearest',
+                intersect: true,
+            },
+            scales: {
+                x: {
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Date',
+                    },
+                },
+                y: {
+                    display: true,
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Submissions',
+                    },
+                },
+            },
+        },
+    }
+
+
+    // Fetch the required aggregated request
+
+    console.log(exercise)
+
+    let data = {
+        consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
+        pipeline: [
+            {
+                "$match": {
+                    "xAPI.object.id": { "$regex": exercise },
+                    "$or": [
+                        {
+                            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed"
+                        },
+                        {
+                            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered"
+                        }
+                    ]
+                }
+            },
+
+            {
+                "$project": {
+                    "DayMonthYear": {
+                        "$dateToString": {
+                            "format": "%d-%m-%Y",
+                            "date": "$_id"
+                        }
+                    }
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$DayMonthYear",
+                    "submissions": { "$sum": 1 }
+                }
+            },
+
+            {
+                "$sort": { "_id": 1 }
+            }
+        ]
+    }
+    axios.post("../records/aggregate", data, config)
+        .then(function (response) {
+            if (response.data) {
+                console.log(response.data)
+                for (let index = 0; index < response.data.results.length; index++) {
+                    const element = response.data.results[index];
+
+                    lineConfig.data.labels.push(element._id);
+                    lineConfig.data.datasets[0].data.push(element.submissions);
+                }
+                window.submissionsByTimeChartId = new Chart(document.getElementById('exerciseSubmissionsByTimeChartId'), lineConfig)
             }
         })
         .catch(function (error) {
@@ -924,7 +1039,7 @@ function populateExerciseStatSelector() {
                 for (let index = 0; index < response.data.results.length; index++) {
                     let element = response.data.results[index];
                     let minifyType = String(element.type).replace("http://h5p.org/libraries/", "");
-                    document.getElementById("excericseStatsExerciseId").innerHTML += `<option value="${element._id}">${JSON.stringify(element.title + "   " + element._id + "    " + minifyType).slice(1, -1)}</option>`;
+                    document.getElementById("excericseStatsExerciseId").innerHTML += `<option value="${element._id}">${element.title + " | " + element._id + " | " + minifyType}</option>`;
                     // Ignore subtypes of exercises
                     // element._id = element._id.split("?")[0];
                     // //returnedExercises.push(element._id.split("?")[0]);
@@ -952,7 +1067,27 @@ function populateExerciseStatSelector() {
 // Exercise Stats dropdown changes. Get stats for that particular exercise
 function exerciseStatsChangeExercise() {
     let exerciseId = document.getElementById("excericseStatsExerciseId").value;
+    let hasSubContent = String(document.getElementById("excericseStatsExerciseId").options[document.getElementById("excericseStatsExerciseId").selectedIndex].text).includes("?subContentId=");
     selectedExercise = exerciseId;
+    if (selectedExercise == "all") { selectedExerciseType = null }
+    else if (selectedExercise != "all") {
+        selectedExerciseType = String(document.getElementById("excericseStatsExerciseId").options[document.getElementById("excericseStatsExerciseId").selectedIndex].text.split(" | ")[2]).split("-")[0];
+    }
+
+    // Check if the exercise is MultiChoice and has no subContentId then display chart MCQ
+    if (selectedExerciseType == "H5P.MultiChoice" && !hasSubContent) {
+        document.getElementById("mcqChartDiv").style.display = "unset";
+        document.getElementById("exerciseIdMCQChart").value = selectedExercise;
+        document.getElementById("exerciseIdMCQChart").onchange();
+
+    }
+    // Otherwise hide it
+    else {
+        document.getElementById("mcqChartDiv").style.display = "none";
+    }
+
+
+
     exerciseIdToRegex = exerciseId == "all" ? "" : exerciseId;
     // Fetch number of completed or answered records for that particular exercise
     data = {
@@ -1108,5 +1243,5 @@ function exerciseStatsChangeExercise() {
             console.log(error);
         });
 
-
+    exerciseSubmissionsByTime(exerciseIdToRegex)
 }
