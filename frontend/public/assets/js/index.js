@@ -1,5 +1,6 @@
 let config;
 var mcqChart;
+var exerciseSubmissionsByChart;
 var selectedExercise;
 var selectedExerciseType;
 docReady(async function () {
@@ -467,7 +468,7 @@ function exerciseSubmissionsByTime(exercise) {
 
     // Fetch the required aggregated request
 
-    console.log(exercise)
+
 
     let data = {
         consumer: consumer?.id ? consumer.id : "all",
@@ -510,9 +511,14 @@ function exerciseSubmissionsByTime(exercise) {
         ]
     }
     axios.post("../records/aggregate", data, config)
+
         .then(function (response) {
             if (response.data) {
-                console.log(response.data)
+
+                if (exerciseSubmissionsByChart) {exerciseSubmissionsByChart.destroy();}
+                document.getElementById('exerciseSubmissionsByTimeChartId').innerHTML = "";
+
+
                 for (let index = 0; index < response.data.results.length; index++) {
                     const element = response.data.results[index];
 
@@ -520,6 +526,7 @@ function exerciseSubmissionsByTime(exercise) {
                     lineConfig.data.datasets[0].data.push(element.submissions);
                 }
                 window.submissionsByTimeChartId = new Chart(document.getElementById('exerciseSubmissionsByTimeChartId'), lineConfig)
+                exerciseSubmissionsByChart = window.submissionsByTimeChartId;
             }
         })
         .catch(function (error) {
@@ -943,6 +950,7 @@ function chartMCQsChangeId() {
                             }
                             if (mcqChart) { mcqChart.destroy() }
                             const mcqChartCanvas = document.getElementById('mcqChartId');
+                            document.getElementById('mcqChartId').innerHTML = "";
                             mcqChart = new Chart(mcqChartCanvas, mcqChartConfig);
 
                             // Color the correct answers
