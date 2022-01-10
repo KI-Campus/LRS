@@ -515,7 +515,7 @@ function exerciseSubmissionsByTime(exercise) {
         .then(function (response) {
             if (response.data) {
 
-                if (exerciseSubmissionsByChart) {exerciseSubmissionsByChart.destroy();}
+                if (exerciseSubmissionsByChart) { exerciseSubmissionsByChart.destroy(); }
                 document.getElementById('exerciseSubmissionsByTimeChartId').innerHTML = "";
 
 
@@ -1020,6 +1020,46 @@ function chartMCQsChangeId() {
         .catch(function (error) {
             console.log(error);
         });
+
+    // Get MCQ question    
+
+    document.getElementById('mcqChartQs').innerHTML = "...";
+    data = {
+        consumer: consumer?.id ? consumer.id : "all",
+        courseId: courseId ? courseId : "all",
+        "pipeline": [
+            {
+                "$match": {
+                    "xAPI.context.contextActivities.category.id": "http://h5p.org/libraries/H5P.MultiChoice-1.14",
+                    "xAPI.object.id": mcqId
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$xAPI.object.definition.description.en-US",
+                    "myId": {
+                        "$first": "$xAPI.object.definition.description.en-US"
+                    }
+                }
+            }
+        ]
+    }
+
+    axios.post("../records/aggregate", data, config)
+        .then(function (response) {
+            if (response.data) {
+                document.getElementById('mcqChartQs').innerHTML = response.data.results[0].myId;
+                console.log("response for qs", response.data)
+            }
+
+
+        }
+        )
+        .catch(function (error) {
+            console.log(error);
+        });
+
+
 
 }
 
