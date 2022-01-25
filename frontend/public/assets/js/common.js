@@ -149,3 +149,129 @@ function downloadBlob(blob, name = 'file.txt') {
     // Remove link from body
     document.body.removeChild(link);
 }
+
+function simplifyData(element) {
+    // Format the data based on what Zuhra has suggested
+
+    let response = {};
+
+    // Assign the User ID
+    response["User ID"] = element.xAPI?.actor?.name;
+
+    // Assign the verb type
+    switch (element.xAPI?.verb?.id) {
+        case "http://adlnet.gov/expapi/verbs/answered":
+            response["Verb"] = "answered";
+            response["Question"] = element.xAPI?.object?.definition?.description["en-US"];
+
+            // Flatten the choices array
+            let choices = [];
+            for (let index = 0; index < element.xAPI?.object?.definition?.choices?.length; index++) {
+                let choice = {};
+
+                const thisElement = element.xAPI?.object?.definition?.choices[index];
+                choice.name = thisElement.description["en-US"];
+                choice.id = thisElement.id;
+                choices.push(choice);
+            }
+
+            // Sort the choices by id
+            choices.sort(function (a, b) {
+                return Number(a.id) - Number(b.id);
+            });
+
+
+
+            // Put the choices in the response in correct order and new lines
+            let choicesString = "";
+            for (let index = 0; index < choices.length; index++) {
+                choicesString += "[" + choices[index].id + "] " + choices[index].name;
+            }
+            response["Choices"] = choicesString;
+
+            // Loop through correctResponses array and add the correct responses to the response
+            if (String(element.xAPI?.object?.definition.correctResponsesPattern).includes("[,]")) {
+                // Multiple correct responses
+                let correctResponses = String(element.xAPI?.object?.definition?.correctResponsesPattern).split("[,]");
+                response["Correct response"] = "";
+                for (let index = 0; index < correctResponses.length; index++) {
+                    let id = correctResponses[index];
+                    response["Correct response"] += "[" + id + "] " + choices[id].name + "\n";
+                }
+            }
+            else {
+                // Single correct response
+                let id = element.xAPI?.object?.definition?.correctResponsesPattern;
+                response["Correct response"] = "[" + id + "] " + choices[id].name;
+            }
+
+            // Assign the user answer
+            if (element.xAPI?.result?.response.includes("[,]")) {
+                // Multiple responses
+                let responses = String(element.xAPI?.result?.response).split("[,]");
+                response["User answer"] = "";
+                for (let index = 0; index < responses.length; index++) {
+                    let id = responses[index];
+                    response["User answer"] += "[" + id + "] " + choices[id].name + "\n";
+                }
+            }
+            else {
+                // Single response
+                let id = element.xAPI?.result?.response;
+                response["User answer"] = "[" + id + "] " + choices[id].name;
+            }
+
+
+            // Result completion
+            response["Result completion"] = element.xAPI?.result?.completion;
+
+            // Result success
+            response["Result success"] = element.xAPI?.result?.success;
+
+            // Duration
+            response["Duration"] = element.xAPI?.result?.duration;
+
+
+            break;
+        case "http://adlnet.gov/expapi/verbs/completed":
+            response["Verb"] = "completed";
+
+            response["Result Score Raw"] = element.xAPI?.result?.score?.raw;
+            response["Result Score Scaled"] = element.xAPI?.result?.score?.scaled;
+            response["Result Completion"] = element.xAPI?.result?.completion;
+            response["Result Success"] = element.xAPI?.result?.success;
+            response["Result Duration"] = element.xAPI?.result?.duration;
+
+            break;
+        case "http://adlnet.gov/expapi/verbs/attempted":
+            response["Verb"] = "attempted";
+            break;
+        case "http://adlnet.gov/expapi/verbs/interacted":
+            response["Verb"] = "interacted";
+            break;
+        case "http://adlnet.gov/expapi/verbs/passed":
+            response["Verb"] = "passed";
+            response["Result Completion"] = element.xAPI?.result?.completion;
+            response["Result Success"] = element.xAPI?.result?.success;
+            break;
+        case "http://adlnet.gov/expapi/verbs/mastered":
+            response["Verb"] = "mastered";
+            response["Result Completion"] = element.xAPI?.result?.completion;
+            response["Result Success"] = element.xAPI?.result?.success;
+            break;
+    }
+
+    // Assign content ID
+    response["Content ID"] = element.xAPI?.object?.id;
+
+    // Assign the subcontent ID is it exists
+    if (element.xAPI?.object?.definition?.extensions["http://h5p.org/x-api/h5p-subContentId"]) {
+        response["Sub Content ID"] = element.xAPI.object.definition.extensions["http://h5p.org/x-api/h5p-subContentId"];
+    }
+
+    // Assign the time
+    response["Time"] = element.metadata?.createdAt;
+
+
+    return response;
+}

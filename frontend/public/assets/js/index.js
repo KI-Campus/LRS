@@ -265,7 +265,7 @@ function downloadData() {
 
     //let contextId = document.getElementById("downloadContextId").value
 
-    //let activityType = document.getElementById("downloadActivityType").value
+    let activityType = document.getElementById("downloadVerbType").value
 
     let exerciseId = selectedExercise;
 
@@ -278,22 +278,25 @@ function downloadData() {
     // if (contextId != "all" || !contextId) { data.pipeline[0]["$match"]["xAPI.context.contextActivities.category.id"] = contextId; }
     if (exerciseId != "all" || !exerciseId) { data.pipeline[0]["$match"]["xAPI.object.id"] = exerciseId; }
 
-    //if (activityType != "all" || !activityType) { data.pipeline[0]["$match"]["xAPI.verb.id"] = activityType; }
+    if (activityType != "all" || !activityType) { data.pipeline[0]["$match"]["xAPI.verb.id"] = activityType; }
 
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
+                console.log("response", response);
 
                 if (response.data.results.length > 0) {
 
-                    let formattedDownloadedData = response.data.results;
+                    let formattedDownloadedData = [];
                     // Loop through formattedDownloadedData object and remove property session.cookie
-                    for (let index = 0; index < formattedDownloadedData.length; index++) {
-                        const element = formattedDownloadedData[index];
+                    for (let index = 0; index < response.data.results.length; index++) {
+                        const element = response.data.results[index];
                         delete element.metadata.session.cookie;
-                        console.log(element)
+                        formattedDownloadedData.push(simplifyData(element));
                     }
 
+
+                    console.log("Download data", formattedDownloadedData);
 
                     let csvBlob = new Blob([JSON.stringify(formattedDownloadedData)])
 
@@ -814,251 +817,262 @@ function chartMCQs() {
 }
 
 function chartMCQsChangeId() {
-    let mcqId = document.getElementById("exerciseIdMCQChart").value;
 
-    // Fetch all the available choices from this particular MCQ
-    data = {
-        consumer: consumer?.id ? consumer.id : "all",
-        courseId: courseId ? courseId : "all",
-        pipeline: [
-            {
-                "$match": {
-                    "xAPI.context.contextActivities.category.id": "http://h5p.org/libraries/H5P.MultiChoice-1.14",
-                    "xAPI.object.id": mcqId,
-                    "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered"
-                }
-            },
-            {
-                "$unwind": "$xAPI.object.definition.choices"
-            },
-            {
-                "$group": {
-                    "_id": "$xAPI.object.definition.choices.description",
-                    "myId": {
-                        "$first": "$xAPI.object.definition.choices.id"
+    setTimeout(() => {
+
+
+        let mcqId = document.getElementById("exerciseIdMCQChart").value;
+
+        // Fetch all the available choices from this particular MCQ
+        data = {
+            consumer: consumer?.id ? consumer.id : "all",
+            courseId: courseId ? courseId : "all",
+            pipeline: [
+                {
+                    "$match": {
+                        "xAPI.context.contextActivities.category.id": "http://h5p.org/libraries/H5P.MultiChoice-1.14",
+                        "xAPI.object.id": mcqId,
+                        "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered"
+                    }
+                },
+                {
+                    "$unwind": "$xAPI.object.definition.choices"
+                },
+                {
+                    "$group": {
+                        "_id": "$xAPI.object.definition.choices.description",
+                        "myId": {
+                            "$first": "$xAPI.object.definition.choices.id"
+                        }
+                    }
+                },
+
+                {
+                    "$sort": {
+                        "myId": 1
                     }
                 }
-            },
+            ]
+        }
+        axios.post("../records/aggregate", data, config)
+            .then(function (response) {
+                if (response.data) {
+                    let choices = {};
 
-            {
-                "$sort": {
-                    "myId": 1
-                }
-            }
-        ]
-    }
-    axios.post("../records/aggregate", data, config)
-        .then(function (response) {
-            if (response.data) {
-                let choices = {};
+                    for (let index = 0; index < response.data.results.length; index++) {
+                        let element = response.data.results[index];
+                        element.selected = 0;
+                        element.myId = Number(element.myId)
+                        element._id["en-US"] = element._id["en-US"].replace("\n", "");
+                        choices[element.myId] = element;
+                    }
 
-                for (let index = 0; index < response.data.results.length; index++) {
-                    let element = response.data.results[index];
-                    element.selected = 0;
-                    element.myId = Number(element.myId)
-                    element._id["en-US"] = element._id["en-US"].replace("\n", "");
-                    choices[element.myId] = element;
-                }
+                    // Get the number of counts per choice
+                    data = {
+                        consumer: consumer?.id ? consumer.id : "all",
+                        courseId: courseId ? courseId : "all",
+                        pipeline: [
+                            {
+                                "$match": {
+                                    "xAPI.context.contextActivities.category.id": "http://h5p.org/libraries/H5P.MultiChoice-1.14",
+                                    "xAPI.object.id": mcqId,
+                                    "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered"
+                                }
+                            },
 
-                // Get the number of counts per choice
-                data = {
-                    consumer: consumer?.id ? consumer.id : "all",
-                    courseId: courseId ? courseId : "all",
-                    pipeline: [
-                        {
-                            "$match": {
-                                "xAPI.context.contextActivities.category.id": "http://h5p.org/libraries/H5P.MultiChoice-1.14",
-                                "xAPI.object.id": mcqId,
-                                "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered"
+                            {
+                                "$group": { "_id": "$xAPI.result.response", "count": { "$sum": 1 } }
+                            },
+
+
+
+                            {
+                                "$sort": { "_id": 1 }
                             }
-                        },
+                        ]
+                    }
 
-                        {
-                            "$group": { "_id": "$xAPI.result.response", "count": { "$sum": 1 } }
-                        },
+                    axios.post("../records/aggregate", data, config)
+                        .then(function (response) {
 
+                            if (response.data) {
+                                let eachSelectedChoice;
+                                for (let index = 0; index < response.data.results.length; index++) {
+                                    const element = response.data.results[index];
+                                    if (element._id == "") { continue; }
 
+                                    eachSelectedChoice = element._id.split("[,]");
+                                    eachSelectedChoice.forEach(splitElement => {
+                                        choices[splitElement].selected += element.count
+                                    });
 
-                        {
-                            "$sort": { "_id": 1 }
-                        }
-                    ]
-                }
-
-                axios.post("../records/aggregate", data, config)
-                    .then(function (response) {
-
-                        if (response.data) {
-                            let eachSelectedChoice;
-                            for (let index = 0; index < response.data.results.length; index++) {
-                                const element = response.data.results[index];
-                                if (element._id == "") { continue; }
-
-                                eachSelectedChoice = element._id.split("[,]");
-                                eachSelectedChoice.forEach(splitElement => {
-                                    choices[splitElement].selected += element.count
-                                });
-
-                            }
+                                }
 
 
-                            let labels = []
-                            let myData = []
+                                let labels = []
+                                let myData = []
 
 
-                            for (let index = 0; index < Object.keys(choices).length; index++) {
-                                const element = Object.keys(choices)[index];
-                                labels.push(choices[element]._id["en-US"]);
-                                myData.push(choices[element].selected)
+                                for (let index = 0; index < Object.keys(choices).length; index++) {
+                                    const element = Object.keys(choices)[index];
+                                    labels.push(choices[element]._id["en-US"]);
+                                    myData.push(choices[element].selected)
 
-                            }
+                                }
 
 
 
-                            // Draw the chart
-                            const mcqChartConfig = {
-                                type: 'bar',
-                                data: {
-                                    labels: labels,
-                                    datasets: [
+                                // Draw the chart
+                                const mcqChartConfig = {
+                                    type: 'bar',
+                                    data: {
+                                        labels: labels,
+                                        datasets: [
 
-                                        {
-                                            label: 'Number of times selected',
-                                            backgroundColor: myData.map((element) => { return '#DC2626' }), //['#7e3af2', '#0694a2'],
-                                            // borderColor: window.chartColors.blue,
-                                            borderWidth: 1,
-                                            data: myData,
-                                        },
-                                    ],
-                                },
-                                options: {
-                                    scales: {
-                                        yAxes: [{
-                                            ticks: {
+                                            {
+                                                label: 'Number of times selected',
+                                                backgroundColor: myData.map((element) => { return '#DC2626' }), //['#7e3af2', '#0694a2'],
+                                                // borderColor: window.chartColors.blue,
+                                                borderWidth: 1,
+                                                data: myData,
+                                            },
+                                        ],
+                                    },
+                                    options: {
+                                        scales: {
+                                            yAxes: [{
+                                                ticks: {
+                                                    beginAtZero: true
+                                                }
+                                            }],
+                                            x: {
                                                 beginAtZero: true
                                             }
-                                        }],
-                                        x: {
-                                            beginAtZero: true
+                                        },
+                                        responsive: true,
+                                        legend: {
+                                            display: false,
+                                        },
+                                    },
+                                }
+                                if (mcqChart) { mcqChart.destroy() }
+                                const mcqChartCanvas = document.getElementById('mcqChartId');
+                                document.getElementById('mcqChartId').innerHTML = "";
+                                mcqChart = new Chart(mcqChartCanvas, mcqChartConfig);
+
+                                // Color the correct answers
+                                // Get the correct answers query 
+                                let correctResponsesPattern;
+                                data = {
+                                    consumer: consumer?.id ? consumer.id : "all",
+                                    courseId: courseId ? courseId : "all",
+                                    "pipeline": [
+                                        {
+                                            "$match": {
+                                                "xAPI.context.contextActivities.category.id": "http://h5p.org/libraries/H5P.MultiChoice-1.14",
+                                                "xAPI.object.id": mcqId,
+                                                "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered"
+                                            }
+                                        },
+                                        {
+                                            "$sort": {
+                                                "_id": -1
+                                            }
+                                        },
+                                        {
+                                            "$limit": 1
+                                        },
+                                        {
+                                            "$group": {
+                                                "_id": "$xAPI.object.definition.correctResponsesPattern"
+                                            }
                                         }
-                                    },
-                                    responsive: true,
-                                    legend: {
-                                        display: false,
-                                    },
-                                },
+                                    ]
+                                }
+
+                                axios.post("../records/aggregate", data, config)
+                                    .then(function (response) {
+
+                                        if (response.data) {
+                                            if (!response.data.results[0]) { return; }
+                                            correctResponsesPattern = response.data.results[0]._id[0];
+                                            let splitResponses = correctResponsesPattern.split("[,]")
+
+                                            for (let index = 0; index < splitResponses.length; index++) {
+                                                const element = splitResponses[index];
+                                                // Highlight the correct responses
+                                                mcqChart.data.datasets[0].backgroundColor[element] = '#10B981';
+
+                                            }
+                                            mcqChart.update();
+
+
+                                        }
+                                    })
+                                    .catch(function (error) {
+                                        console.log(error);
+                                    });
                             }
-                            if (mcqChart) { mcqChart.destroy() }
-                            const mcqChartCanvas = document.getElementById('mcqChartId');
-                            document.getElementById('mcqChartId').innerHTML = "";
-                            mcqChart = new Chart(mcqChartCanvas, mcqChartConfig);
 
-                            // Color the correct answers
-                            // Get the correct answers query 
-                            let correctResponsesPattern;
-                            data = {
-                                consumer: consumer?.id ? consumer.id : "all",
-                                courseId: courseId ? courseId : "all",
-                                "pipeline": [
-                                    {
-                                        "$match": {
-                                            "xAPI.context.contextActivities.category.id": "http://h5p.org/libraries/H5P.MultiChoice-1.14",
-                                            "xAPI.object.id": mcqId,
-                                            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered"
-                                        }
-                                    },
-                                    {
-                                        "$sort": {
-                                            "_id": -1
-                                        }
-                                    },
-                                    {
-                                        "$limit": 1
-                                    },
-                                    {
-                                        "$group": {
-                                            "_id": "$xAPI.object.definition.correctResponsesPattern"
-                                        }
-                                    }
-                                ]
-                            }
-
-                            axios.post("../records/aggregate", data, config)
-                                .then(function (response) {
-
-                                    if (response.data) {
-                                        if (!response.data.results[0]) { return; }
-                                        correctResponsesPattern = response.data.results[0]._id[0];
-                                        let splitResponses = correctResponsesPattern.split("[,]")
-
-                                        for (let index = 0; index < splitResponses.length; index++) {
-                                            const element = splitResponses[index];
-                                            // Highlight the correct responses
-                                            mcqChart.data.datasets[0].backgroundColor[element] = '#10B981';
-
-                                        }
-                                        mcqChart.update();
-
-
-                                    }
-                                })
-                                .catch(function (error) {
-                                    console.log(error);
-                                });
-                        }
-
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    });
+                        })
+                        .catch(function (error) {
+                            console.log(error);
+                        });
 
 
 
 
-            }
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-
-    // Get MCQ question    
-
-    document.getElementById('mcqChartQs').innerHTML = "...";
-    data = {
-        consumer: consumer?.id ? consumer.id : "all",
-        courseId: courseId ? courseId : "all",
-        "pipeline": [
-            {
-                "$match": {
-                    "xAPI.context.contextActivities.category.id": "http://h5p.org/libraries/H5P.MultiChoice-1.14",
-                    "xAPI.object.id": mcqId
                 }
-            },
-            {
-                "$group": {
-                    "_id": "$xAPI.object.definition.description.en-US",
-                    "myId": {
-                        "$first": "$xAPI.object.definition.description.en-US"
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+
+        // Get MCQ question    
+
+        document.getElementById('mcqChartQs').innerHTML = "...";
+        data = {
+            consumer: consumer?.id ? consumer.id : "all",
+            courseId: courseId ? courseId : "all",
+            "pipeline": [
+                {
+                    "$sort": { "metadata.createdAt": -1 }
+                },
+
+
+                {
+                    "$match": {
+                        "xAPI.context.contextActivities.category.id": "http://h5p.org/libraries/H5P.MultiChoice-1.14",
+                        "xAPI.object.id": mcqId
+                    }
+                },
+                {
+                    "$group": {
+                        "_id": "$xAPI.object.definition.description.en-US",
+                        "myId": {
+                            "$first": "$xAPI.object.definition.description.en-US"
+                        }
                     }
                 }
-            }
-        ]
-    }
-
-    axios.post("../records/aggregate", data, config)
-        .then(function (response) {
-            if (response.data) {
-                document.getElementById('mcqChartQs').innerHTML = response.data.results[0].myId;
-                console.log("response for qs", response.data)
-            }
-
-
+            ]
         }
-        )
-        .catch(function (error) {
-            console.log(error);
-        });
 
+        axios.post("../records/aggregate", data, config)
+            .then(function (response) {
+                if (response.data) {
+                    document.getElementById('mcqChartQs').innerHTML = response.data.results[0].myId;
+                    console.log("response for qs", response.data)
+                }
+
+
+            }
+            )
+            .catch(function (error) {
+                console.log(error);
+            });
+
+
+    }, 1000);
 
 
 }
