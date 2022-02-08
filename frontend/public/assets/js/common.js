@@ -150,13 +150,18 @@ function downloadBlob(blob, name = 'file.txt') {
     document.body.removeChild(link);
 }
 
-function simplifyData(element) {
+function simplifyData(element, includexAPIRaw = false) {
     // Format the data based on what Zuhra has suggested
 
     let response = {};
 
     // Assign the User ID
     response["User ID"] = element.xAPI?.actor?.name;
+
+    // Include raw xAPI data
+    if (includexAPIRaw === true) {
+        response["Raw xAPI Data"] = element.xAPI;
+    }
 
     // Assign the verb type
     switch (element.xAPI?.verb?.id) {

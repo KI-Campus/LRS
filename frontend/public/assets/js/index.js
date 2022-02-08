@@ -292,7 +292,16 @@ function downloadData() {
                     for (let index = 0; index < response.data.results.length; index++) {
                         const element = response.data.results[index];
                         delete element.metadata.session.cookie;
-                        formattedDownloadedData.push(simplifyData(element));
+
+                        let checkboxIncludeRawxAPI = document.getElementById("downloadDataxAPI").checked;
+                        if (checkboxIncludeRawxAPI) {
+                            formattedDownloadedData.push(simplifyData(element, true));
+                        }
+                        else {
+                            formattedDownloadedData.push(simplifyData(element));
+                        }
+
+
                     }
 
 
