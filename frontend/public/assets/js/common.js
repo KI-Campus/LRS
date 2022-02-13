@@ -10,6 +10,8 @@ var courseId;
 
 var VERSION = null;
 
+var consumersList = [];
+
 
 // Document ready helper function 
 function docReady(fn) {
@@ -47,27 +49,7 @@ docReady(function () {
         }
     }
 
-    // Check for consumer in localstorage, if not then set it to all
-    if (sessionStorage.getItem("consumer") == null) {
 
-        sessionStorage.setItem("consumer", "all");
-        consumer = "all";
-
-    }
-    try {
-        // Load the consumer from session storage
-        consumer = JSON.parse(sessionStorage.getItem("consumer"));
-        consumerID = consumer.id;
-
-    }
-    catch (e) {
-        if (typeof (sessionStorage.getItem("consumer")) == 'string') {
-            // Load the consumer from session storage
-            consumer = sessionStorage.getItem("consumer");
-
-
-        }
-    }
 
 
     // Check for courseId in session storage, if not then set it to all
@@ -95,7 +77,7 @@ docReady(function () {
             if (response.data) {
                 if (response.data.version) {
                     VERSION = response.data.version;
-                    document.getElementById("lrsVersion").innerHTML = response.data.version;
+                    if (document.getElementById("lrsVersion")) document.getElementById("lrsVersion").innerHTML = response.data.version;
                 }
             }
 
@@ -279,4 +261,25 @@ function simplifyData(element, includexAPIRaw = false) {
 
 
     return response;
+}
+
+async function getAllConsumers() {
+    // Get all consumers
+    const GETCONSUMERS_URL = "../consumers/getall";
+    const config = {
+        headers: { Authorization: `Bearer ${token}` }
+    };
+
+    await axios.get(GETCONSUMERS_URL, config)
+        .then(function (response) {
+            if (response.data?.result) {
+                consumersList = response.data.result;
+            }
+
+        })
+        .catch(function (error) {
+            console.log("Error while getting consumers", error);
+            consumersList = [];
+        });
+
 }

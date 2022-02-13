@@ -14,9 +14,9 @@ var m_client;
 // User scope private routes
 
 // Admin scope private routes
-router.post("/register", jwtAuthz(["admin"], jwtScopeOptions), register);       // For initial deployment, make /register reachable
+router.post("/register", jwtAuthz(["admin"], jwtScopeOptions), register);
 
-router.get("/getall", jwtAuthz(["admin"], jwtScopeOptions), getAll);
+router.get("/getall", getAll);
 router.get("/:id", jwtAuthz(["admin"], jwtScopeOptions), getById);
 router.put("/:id", jwtAuthz(["admin"], jwtScopeOptions), update);
 router.delete("/:id", jwtAuthz(["admin"], jwtScopeOptions), _delete);
@@ -68,15 +68,49 @@ function register(req, res, next) {
 
 
 function getAll(req, res, next) {
-    // Read all consumers
-    m_client.db().collection("consumers").find({}).toArray((err, result) => {
-        if (err) {
-            console.log(err);
-            res.status(500).send({ success: false, message: "Error while getting consumers" });
-        } else {
-            res.status(200).send({ success: true, result: result });
-        }
-    });
+
+    if (req.user.role === "admin") {
+        // Read all consumers
+        m_client.db().collection("consumers").find({}).toArray((err, result) => {
+            if (err) {
+                console.log("Error reading all consumers for admin", err);
+                res.status(500).send({ success: false, message: "Error while getting consumers" });
+            } else {
+                // Admin has access to all
+                result.push({ id: "all", name: "All" });
+                res.status(200).send({ success: true, result: result });
+            }
+        });
+    }
+    // Return only the consumers which this user has access to
+    else {
+        // Get the list of consumersAccess field of current user
+        m_client.db().collection("users").findOne({ email: req.user.email }, (err, resultUser) => {
+            if (err) {
+                console.log("Error reading all consumers for user", err);
+                res.status(500).send({ success: false, message: "Error while getting consumers" });
+            } else if (resultUser) {
+
+                // Read all consumers
+                m_client.db().collection("consumers").find({ id: { $in: resultUser.consumersAccess } }).toArray((err, result) => {
+                    if (err) {
+                        console.log(err);
+                        res.status(500).send({ success: false, message: "Error while getting consumers" });
+                    } else {
+                        if (resultUser.consumersAccess.indexOf("all") > -1) {
+                            result.push({ id: "all", name: "All" });
+                        }
+                        res.status(200).send({ success: true, result: result });
+                    }
+                });
+
+            } else {
+                res.status(404).send({ success: false, message: "User not found" });
+            }
+        });
+
+
+    }
 }
 
 

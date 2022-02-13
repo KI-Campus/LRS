@@ -29,7 +29,6 @@ function login() {
                 window.location = "index.html";
                 storeAuth(response.data);
             }
-            console.log(response);
         })
         .catch(function (error) {
             document.getElementById("error").innerHTML = "Error: " + error;

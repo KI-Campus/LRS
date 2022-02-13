@@ -9,6 +9,33 @@ docReady(async function () {
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     };
 
+    // Collect consumers in a list
+    await getAllConsumers();
+
+
+    // Set session storage for consumers
+    // Check for consumer in session storage, if not then set it to all
+    if (sessionStorage.getItem("consumer") == null) {
+        sessionStorage.setItem("consumer", JSON.stringify(consumersList[0]));
+        consumer = String(consumersList[0].id);
+
+    }
+    try {
+        // Load the consumer from session storage
+        consumer = JSON.parse(sessionStorage.getItem("consumer"));
+        consumerID = consumer.id;
+
+    }
+    catch (e) {
+        if (typeof (sessionStorage.getItem("consumer")) == 'string') {
+            // Load the consumer from session storage
+            consumer = sessionStorage.getItem("consumer");
+
+
+        }
+    }
+
+
     // Populate All of the Consumers
     await populateConsumers();
 
@@ -40,11 +67,11 @@ docReady(async function () {
 
 async function populateConsumers() {
     // Get all consumers
-    const GETUSERS_URL = "../consumers/getall";
+    const GETCONSUMERS_URL = "../consumers/getall";
     const config = {
         headers: { Authorization: `Bearer ${token}` }
     };
-    await axios.get(GETUSERS_URL, config)
+    await axios.get(GETCONSUMERS_URL, config)
         .then(function (response) {
 
 
@@ -52,7 +79,6 @@ async function populateConsumers() {
                 response.data.result.forEach(element => {
                     addConsumerToHomepage(element);
                 });
-                addConsumerToHomepage("", true);
             }
 
 
@@ -60,8 +86,6 @@ async function populateConsumers() {
         .catch(function (error) {
             console.log("Error while populating consumers", error);
         });
-
-    console.log("Consumer", consumer);
 
     if (consumer == "all") {
 
@@ -74,6 +98,9 @@ async function populateConsumers() {
 }
 
 async function addConsumerToHomepage(consumer, empty = false) {
+    if (consumer.id == "all") {
+        empty = true
+    }
     const container = document.getElementById("consumersContainer");
     const div = document.createElement("div");
     div.className = "flex justify-center text-2xl border-2 border-gray-300 rounded-xl p-6 bg-gray-100";
@@ -81,6 +108,7 @@ async function addConsumerToHomepage(consumer, empty = false) {
         div.innerHTML = ` <button onClick="selectConsumer('${consumer.id}', '${consumer.name}', '${consumer.picture}' )"> <img src="${consumer.picture}" style="max-width:300px; max-height:40px; height:40px" /> </button>`;
     }
     else {
+
         div.innerHTML = ` <button onClick="selectConsumer('', '', '', true )"> All </button>`;
     }
     container.appendChild(div);
@@ -1070,7 +1098,7 @@ function chartMCQsChangeId() {
             .then(function (response) {
                 if (response.data) {
                     document.getElementById('mcqChartQs').innerHTML = response.data.results[0].myId;
-                    console.log("response for qs", response.data)
+
                 }
 
 

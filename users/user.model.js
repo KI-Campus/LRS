@@ -10,6 +10,7 @@ const schema = new Schema({
   lastLogin: { type: Date },
   email: { type: String, unique: true, required: true },
   role: { type: String, unique: false, default: "user" },
+  consumersAccess: { type: Array, default: ["all"] },
 });
 
 // When returning the user object, don't include the MongoDB _id and password fields

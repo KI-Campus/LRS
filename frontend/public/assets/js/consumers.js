@@ -11,7 +11,9 @@ function getConsumers() {
       document.getElementById("showingLabel").innerHTML = "Showing " + response.data.result.length + " consumers";
       if (response.data?.result) {
         response.data.result.forEach(element => {
-          addConsumerToTable(element);
+          if (element.id != "all") {
+            addConsumerToTable(element);
+          }
         });
       }
       document.getElementById("loadingText").innerHTML = "Listing all consumers";
@@ -119,7 +121,7 @@ function createConsumer() {
   let picture = document.getElementById("newConsumerPicture").value;
 
 
-  if (id && name && picture) {
+  if (id && name && picture || String(id).toLocaleLowerCase() != "all") {
     let CREATE_USER_API = "../consumers/register"
     const config = {
       headers: { Authorization: `Bearer ${token}` }
@@ -142,7 +144,7 @@ function createConsumer() {
       });
   }
   else {
-    document.getElementById("newConsumerErrorLabel").innerHTML = "ID, name and picture cannot be empty";
+    document.getElementById("newConsumerErrorLabel").innerHTML = "ID, name and picture cannot be empty or ID cannot be 'all'";
     document.getElementById("newConsumerErrorLabel").classList.remove("hidden");
     setTimeout(() => { document.getElementById("newConsumerErrorLabel").classList.add("hidden"); }, 3000)
   }
@@ -173,7 +175,7 @@ function updateConsumerServer() {
   let picture = document.getElementById("updateConsumerPicture").value;
 
 
-  if (id && name && picture) {
+  if (id && name && picture || String(id).toLocaleLowerCase != "all") {
     let UPDATE_USER_API = "../consumers/" + id;
     const config = {
       headers: { Authorization: `Bearer ${token}` }
@@ -197,7 +199,7 @@ function updateConsumerServer() {
       });
   }
   else {
-    document.getElementById("updateConsumerErrorLabel").innerHTML = "ID, name and picture cannot be empty";
+    document.getElementById("updateConsumerErrorLabel").innerHTML = "ID, name and picture cannot be empty or ID cannot be 'all'";
     document.getElementById("updateConsumerErrorLabel").classList.remove("hidden");
     setTimeout(() => { document.getElementById("updateConsumerErrorLabel").classList.add("hidden"); }, 3000)
   }

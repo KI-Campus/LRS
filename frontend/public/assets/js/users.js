@@ -7,7 +7,7 @@ function getUsers() {
   };
   axios.get(GETUSERS_URL, config)
     .then(function (response) {
-      document.getElementById("showingLabel").innerHTML = "Showing " + response.data.length + " users";
+      document.getElementById("showingLabel").innerHTML = "Showing " + response.data.length + (response.data.length > 1 ? " users" : " user");
       if (response.data) {
         response.data.forEach(element => {
           addUserToTable(element);
@@ -26,8 +26,15 @@ function getUsers() {
 function addUserToTable(user) {
   var node = document.createElement("tr");
   node.id = "user_" + user.id;
-  user.lastLogin = new Date(user.lastLogin).toLocaleDateString() + " " + new Date(user.lastLogin).toLocaleTimeString()
-  user.createdAt = new Date(user.createdAt).toLocaleDateString() + " " + new Date(user.createdAt).toLocaleTimeString()
+  if (user.lastLogin) {
+    user.lastLogin = new Date(user.lastLogin).toLocaleDateString() + " " + new Date(user.lastLogin).toLocaleTimeString()
+  }
+  else {
+    user.lastLogin = "Never";
+  }
+  if (user.createdAt) {
+    user.createdAt = new Date(user.createdAt).toLocaleDateString() + " " + new Date(user.createdAt).toLocaleTimeString()
+  }
   document.getElementById("usersTable").appendChild(node)
   document.getElementById("user_" + user.id).outerHTML = `
                 <tr id="user_${user.id}" class="text-gray-700 dark:text-gray-400">
@@ -57,12 +64,19 @@ function addUserToTable(user) {
                         ${user.role}
                       </span>
                     </td>
+
+                    <td class="px-4 py-3 text-sm">
+                      ${user.role == "admin" ? "Admin has access to all consumers" :
+      user.consumersAccess.map(function (access) { if (access === "all") { return "All" } else { return access } }).join(", ")}
+                      
+                    </td>
+
                     <td class="px-4 py-3 text-sm">
                       ${user.createdAt ? user.createdAt : ""}
                     </td>
                     <td class="px-4 py-3">
                       <div class="flex items-center space-x-4 text-sm">
-                        <button onclick="updateUser('${(user.id)}','${user.email}','${user.firstName}','${user.lastName}','${user.role}')"
+                        <button onclick="updateUser('${(user.id)}','${user.email}','${user.firstName}','${user.lastName}','${user.role}', '${user.consumersAccess}')"
                           class="flex items-center justify-between px-2 py-2 text-sm font-medium leading-5 text-blue-600 rounded-lg dark:text-gray-400 focus:outline-none focus:shadow-outline-gray"
                           aria-label="Edit">
                           <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
@@ -89,9 +103,26 @@ function removeUserFromTable(userId) {
   document.getElementById("user_" + userId).remove();
 }
 
-docReady(function () {
+docReady(async function () {
   // Fetch users
   getUsers();
+
+  // Fetch all consumers
+  await getAllConsumers();
+
+  // Put all consumers in the select for new User
+  consumersList.forEach(function (consumer) {
+    document.getElementById("newUserConsumerAccess").innerHTML += `
+    <option value="${consumer.id}">${consumer.name}</option>
+    `
+  })
+
+  // Put all consumers in the select for update User
+  consumersList.forEach(function (consumer) {
+    document.getElementById("updateUserConsumerAccess").innerHTML += `
+      <option value="${consumer.id}">${consumer.name}</option>
+      `
+  })
 });
 
 function delUser(userId, nameToDisplay) {
@@ -121,6 +152,13 @@ function createUser() {
   let lastName = document.getElementById("newUserLastName").value;
   let role = document.getElementById("newUserRole").value;
 
+  if (document.getElementById("newUserConsumerAccess").selectedOptions.length < 1) {
+    document.getElementById("newUserErrorLabel").innerHTML = "Please select at least one consumer";
+    document.getElementById("newUserErrorLabel").classList.remove("hidden");
+    setTimeout(() => { document.getElementById("newUserErrorLabel").classList.add("hidden"); }, 3000)
+    return;
+  }
+
   if (email && password) {
     let CREATE_USER_API = "../users/register"
     const config = {
@@ -132,6 +170,11 @@ function createUser() {
       firstName: firstName,
       lastName: lastName,
       role: role,
+      // Get the all the multiselected consumers from select
+      consumersAccess: document.getElementById("newUserConsumerAccess").selectedOptions.length > 0 ? [...document.getElementById("newUserConsumerAccess").selectedOptions].map(function (option) {
+        return option.value
+      }
+      ) : []
     }
     axios.post(CREATE_USER_API, data, config)
       .then(function (response) {
@@ -150,9 +193,12 @@ function createUser() {
     document.getElementById("newUserErrorLabel").classList.remove("hidden");
     setTimeout(() => { document.getElementById("newUserErrorLabel").classList.add("hidden"); }, 3000)
   }
+
+
+
 }
 
-function updateUser(id, email, firstName, lastName, role) {
+function updateUser(id, email, firstName, lastName, role, consumersAccess) {
   document.getElementById("updateUserId").value = id
 
   document.getElementById("updateUserEmail").value = email
@@ -164,6 +210,21 @@ function updateUser(id, email, firstName, lastName, role) {
   document.getElementsByClassName("updateUserUI")[1].classList.remove("hidden");
 
   document.getElementById("updateButton").focus();
+
+  consumersAccess = String(consumersAccess).split(",");
+
+  // Select only the consumers that are in the consumersAccess array
+  document.getElementById("updateUserConsumerAccess").selectedOptions.length = 0;
+  consumersAccess.forEach(function (consumerId) {
+    document.getElementById("updateUserConsumerAccess").querySelectorAll("option").forEach(function (option) {
+      if (option.value == consumerId) {
+        option.selected = true;
+      }
+    })
+  })
+
+
+  updateUserRoleChanged();
 }
 
 function updateUserCancel() {
@@ -179,6 +240,13 @@ function updateUserServer() {
   let lastName = document.getElementById("updateUserLastName").value;
   let role = document.getElementById("updateUserRole").value;
 
+  if (document.getElementById("updateUserConsumerAccess").selectedOptions.length < 1) {
+    document.getElementById("updateUserErrorLabel").innerHTML = "Please select at least one consumer";
+    document.getElementById("updateUserErrorLabel").classList.remove("hidden");
+    setTimeout(() => { document.getElementById("updateUserErrorLabel").classList.add("hidden"); }, 3000)
+    return;
+  }
+
   if (email) {
     let UPDATE_USER_API = "../users/" + id;
     const config = {
@@ -191,7 +259,15 @@ function updateUserServer() {
       firstName: firstName,
       lastName: lastName,
       role: role,
+
+      // Get the all the multiselected consumers from select
+      consumersAccess: document.getElementById("updateUserConsumerAccess").selectedOptions.length > 0 ? [...document.getElementById("updateUserConsumerAccess").selectedOptions].map(function (option) {
+        return option.value
+      }
+      ) : []
+
     }
+
     axios.put(UPDATE_USER_API, data, config)
       .then(function (response) {
         document.getElementById("updateUserLabel").classList.remove("hidden");
@@ -201,12 +277,32 @@ function updateUserServer() {
         document.getElementById("updateUserErrorLabel").innerHTML = "Error creating new user: " + error;
         document.getElementById("updateUserErrorLabel").classList.remove("hidden");
         setTimeout(() => { document.getElementById("updateUserErrorLabel").classList.add("hidden"); }, 3000)
-        console.log(error);
+        console.log("Error updating user", error);
       });
   }
   else {
     document.getElementById("updateUserErrorLabel").innerHTML = "Email cannot be empty";
     document.getElementById("updateUserErrorLabel").classList.remove("hidden");
     setTimeout(() => { document.getElementById("updateUserErrorLabel").classList.add("hidden"); }, 3000)
+  }
+}
+
+function updateUserRoleChanged() {
+  let role = document.getElementById("updateUserRole").value;
+  if (role == "admin") {
+    document.getElementById("updateUserConsumerAccess").disabled = true
+  }
+  else {
+    document.getElementById("updateUserConsumerAccess").disabled = false
+  }
+}
+
+function newUserRoleChanged() {
+  let role = document.getElementById("newUserRole").value;
+  if (role == "admin") {
+    document.getElementById("newUserConsumerAccess").disabled = true
+  }
+  else {
+    document.getElementById("newUserConsumerAccess").disabled = false
   }
 }

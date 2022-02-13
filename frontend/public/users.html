@@ -210,7 +210,7 @@
                       <span>Settings</span>
                     </a>
                   </li>
-                  <li class="flex">
+                  <li class="flex" onclick="logout()">
                     <a class="inline-flex items-center w-full px-2 py-1 text-sm font-semibold transition-colors duration-150 rounded-md hover:bg-gray-100 hover:text-gray-800 dark:hover:bg-gray-800 dark:hover:text-gray-200"
                       href="#">
                       <svg class="w-4 h-4 mr-3" aria-hidden="true" fill="none" stroke-linecap="round"
@@ -296,10 +296,21 @@
                 <span class="text-gray-700 dark:text-gray-400">
                   Role
                 </span>
-                <select id="newUserRole" autocomplete="role"
+                <select id="newUserRole" autocomplete="role" onchange="newUserRoleChanged()"
                   class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
+                </select>
+              </label>
+
+              <label class="block mt-4 text-sm">
+                <span class="text-gray-700 dark:text-gray-400">
+                  Consumers Access
+                </span>
+                <select id="newUserConsumerAccess"
+                  class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-multiselect focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray"
+                  multiple>
+
                 </select>
               </label>
 
@@ -339,6 +350,7 @@
                     <th class="px-4 py-3">User</th>
                     <th class="px-4 py-3">Last Login</th>
                     <th class="px-4 py-3">Role</th>
+                    <th class="px-4 py-3">Consumers Access</th>
                     <th class="px-4 py-3">Created Date</th>
                     <th class="px-4 py-3">Actions</th>
                   </tr>
@@ -475,12 +487,25 @@
                 <span class="text-gray-700 dark:text-gray-400">
                   Role
                 </span>
-                <select id="updateUserRole" autocomplete="role"
+                <select id="updateUserRole" autocomplete="role" onchange="updateUserRoleChanged()"
                   class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
                 </select>
               </label>
+
+              <label class="block mt-4 text-sm">
+                <span class="text-gray-700 dark:text-gray-400">
+                  Consumers Access
+                </span>
+                <select id="updateUserConsumerAccess"
+                  class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-multiselect focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray"
+                  multiple>
+
+                </select>
+              </label>
+
+
 
 
               <label class="block mt-4 text-sm">
