@@ -63,6 +63,17 @@ docReady(async function () {
     // Draw and populate the MCQs chart
     chartMCQs();
 
+    // Add tooltips using tippy.js
+    tippy('#coursesSelect', {
+        content: 'Please select a course. If you do not see the course you are looking for, it may be because there are no events received to openLRS from this particular course',
+    });
+
+    tippy('#excericseStatsExerciseId', {
+        content: 'Please select a exercise. If you do not see the exercise you are looking for, it may be because there are no events received to openLRS from this particular exercise',
+    });
+
+
+
 });
 
 async function populateConsumers() {
