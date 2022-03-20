@@ -341,21 +341,23 @@ function downloadData() {
                         else {
                             formattedDownloadedData.push(simplifyData(element));
                         }
-
-
                     }
 
-
-                    console.log("Download data", formattedDownloadedData);
-
                     let csvBlob = new Blob([JSON.stringify(formattedDownloadedData)])
-
                     downloadBlob(csvBlob, 'myfile.json');
+                }
+                else {
+                    document.getElementById("downloadErrorLabel").innerHTML = "Could not find any data to download";
+                    document.getElementById("downloadErrorLabel").classList.remove("hidden");
+                    setTimeout(() => { document.getElementById("downloadErrorLabel").classList.add("hidden"); }, 3000)
                 }
             }
         })
         .catch(function (error) {
             console.log(error);
+            document.getElementById("downloadErrorLabel").innerHTML = "Error: " + error;
+            document.getElementById("downloadErrorLabel").classList.remove("hidden");
+            setTimeout(() => { document.getElementById("downloadErrorLabel").classList.add("hidden"); }, 3000)
         });
 }
 
