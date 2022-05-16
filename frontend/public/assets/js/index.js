@@ -460,7 +460,7 @@ function chartSubmissionsByTime() {
                 for (let index = 0; index < response.data.results.length; index++) {
                     const element = response.data.results[index];
                     lineConfig.data.labels.push(element._id);
-                    lineConfig.data.datasets[0].data.push(element.submissions);
+                    lineConfig.data.datasets[0].data.push(parseInt(element.submissions));
                 }
                 window.submissionsByTimeChartId = new Chart(document.getElementById('submissionsByTimeChartId'), lineConfig)
             }
@@ -579,7 +579,7 @@ function exerciseSubmissionsByTime(exercise) {
                     const element = response.data.results[index];
 
                     lineConfig.data.labels.push(element._id);
-                    lineConfig.data.datasets[0].data.push(element.submissions);
+                    lineConfig.data.datasets[0].data.push(parseInt(element.submissions));
                 }
                 window.submissionsByTimeChartId = new Chart(document.getElementById('exerciseSubmissionsByTimeChartId'), lineConfig)
                 exerciseSubmissionsByChart = window.submissionsByTimeChartId;
