@@ -152,7 +152,8 @@ async function populateCourses() {
             {
                 "$group": {
                     "_id": "$metadata.session.context_id",
-                    "title": { "$first": "$metadata.session.context_title" }
+                    "title": { "$first": "$metadata.session.context_title" },
+                    "consumer": { "$first": "$metadata.session.custom_consumer" }
                 }
             }
         ]
@@ -194,7 +195,7 @@ async function populateCourses() {
 function addCourseToHomepage(course) {
     let myElement = document.createElement("option");
     myElement.value = course._id;
-    myElement.innerHTML = course.title + "    " + course._id;
+    myElement.innerHTML = course.title + "    " + course._id + (course.consumer ? "  Consumer: " + course.consumer : "");
     document.getElementById("coursesSelect").appendChild(myElement);
 }
 
