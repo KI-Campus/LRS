@@ -433,13 +433,11 @@ function chartSubmissionsByTime() {
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
+            // Exclude sub exercises
             {
-                // Exclude sub exercises
                 "$match": {
                     "xAPI.object.id": {
-                        "$not": {
-                            "$regex": "subContentId"
-                        }
+                        "$regex": "^((?!subContentId).)*$"
                     }
                 }
             },
@@ -556,13 +554,11 @@ function exerciseSubmissionsByTime(exercise) {
         courseId: courseId ? courseId : "all",
         pipeline: [
 
+            // Exclude sub exercises
             {
-                // Exclude sub exercises
                 "$match": {
                     "xAPI.object.id": {
-                        "$not": {
-                            "$regex": "subContentId"
-                        }
+                        "$regex": "^((?!subContentId).)*$"
                     }
                 }
             },
@@ -685,13 +681,11 @@ function populateCards() {
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
+            // Exclude sub exercises
             {
-                // Exclude sub exercises
                 "$match": {
                     "xAPI.object.id": {
-                        "$not": {
-                            "$regex": "subContentId"
-                        }
+                        "$regex": "^((?!subContentId).)*$"
                     }
                 }
             },
@@ -1187,10 +1181,12 @@ function populateExerciseStatSelector() {
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
+            // Exclude sub exercises
             {
-                // Exclude sub exercises
                 "$match": {
-                    "xAPI.object.id": { "$not": { "$regex": "subContentId" } }
+                    "xAPI.object.id": {
+                        "$regex": "^((?!subContentId).)*$"
+                    }
                 }
             },
 
@@ -1269,13 +1265,11 @@ function exerciseStatsChangeExercise() {
 
         pipeline: [
 
+            // Exclude sub exercises
             {
-                // Exclude sub exercises
                 "$match": {
                     "xAPI.object.id": {
-                        "$not": {
-                            "$regex": "subContentId"
-                        }
+                        "$regex": "^((?!subContentId).)*$"
                     }
                 }
             },
