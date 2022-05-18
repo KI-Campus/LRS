@@ -76,6 +76,11 @@ docReady(async function () {
         content: 'Please select a verb type. If you do not see the verb type you are looking for, it may be because there are no events received to openLRS from this particular verb type',
     });
 
+    tippy('#downloadVerbType', {
+        content: 'Please select a verb type. If you do not see the verb type you are looking for, it may be because there are no events received to openLRS from this particular verb type',
+    });
+
+
 });
 
 async function populateConsumers() {
@@ -429,6 +434,17 @@ function chartSubmissionsByTime() {
         courseId: courseId ? courseId : "all",
         pipeline: [
             {
+                // Exclude sub exercises
+                "$match": {
+                    "xAPI.object.id": {
+                        "$not": {
+                            "$regex": "subContentId"
+                        }
+                    }
+                }
+            },
+
+            {
                 "$match": {
                     "$or": [
                         {
@@ -539,6 +555,18 @@ function exerciseSubmissionsByTime(exercise) {
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
+
+            {
+                // Exclude sub exercises
+                "$match": {
+                    "xAPI.object.id": {
+                        "$not": {
+                            "$regex": "subContentId"
+                        }
+                    }
+                }
+            },
+
             {
                 "$match": {
                     "xAPI.object.id": { "$regex": exercise },
@@ -624,30 +652,6 @@ function populateCards() {
             console.log(error);
         });
 
-    // Fetch total submissions
-    data = {
-        comment: "Getting total submissions count",
-        consumer: consumer?.id ? consumer.id : "all",
-        courseId: courseId ? courseId : "all",
-        pipeline: [
-            {
-                "$match": { "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/interacted" }
-            },
-            {
-                "$count": "totalSubmissions"
-            }
-
-        ]
-    }
-    axios.post("../records/aggregate", data, config)
-        .then(function (response) {
-            if (response.data) {
-                document.getElementById("totalSubmissions").innerHTML = response.data.results[0].totalSubmissions;
-            }
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
 
     // Fetch Exercise types
     data = {
@@ -675,14 +679,34 @@ function populateCards() {
             console.log(error);
         });
 
-    // Fetch total completes
+    // Fetch total completes or answered
     data = {
-        comment: "Getting total completes count",
+        comment: "Getting total completes or answered count",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
             {
-                "$match": { "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed" }
+                // Exclude sub exercises
+                "$match": {
+                    "xAPI.object.id": {
+                        "$not": {
+                            "$regex": "subContentId"
+                        }
+                    }
+                }
+            },
+
+            {
+                "$match": {
+                    "$or": [
+                        {
+                            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed"
+                        },
+                        {
+                            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered"
+                        }
+                    ]
+                }
             },
             {
                 "$count": "totalCompletes"
@@ -1164,6 +1188,7 @@ function populateExerciseStatSelector() {
         courseId: courseId ? courseId : "all",
         pipeline: [
             {
+                // Exclude sub exercises
                 "$match": {
                     "xAPI.object.id": { "$not": { "$regex": "subContentId" } }
                 }
@@ -1243,6 +1268,18 @@ function exerciseStatsChangeExercise() {
         courseId: courseId ? courseId : "all",
 
         pipeline: [
+
+            {
+                // Exclude sub exercises
+                "$match": {
+                    "xAPI.object.id": {
+                        "$not": {
+                            "$regex": "subContentId"
+                        }
+                    }
+                }
+            },
+
             {
                 "$match": {
                     "xAPI.object.id": { "$regex": exerciseIdToRegex },
