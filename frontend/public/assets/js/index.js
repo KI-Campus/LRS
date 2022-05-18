@@ -720,6 +720,27 @@ function populateCards() {
 }
 
 function chartExercisesTypes() {
+
+    // Make an array with hundred different colors
+
+    // Define randomColor() function
+    function randomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+
+    var colorArray = [];
+    for (var i = 0; i < 100; i++) {
+        colorArray.push(randomColor());
+    }
+
+
+
     let pieConfig = {
         type: 'doughnut',
         data: {
@@ -730,7 +751,7 @@ function chartExercisesTypes() {
                      * These colors come from Tailwind CSS palette
                      * https://tailwindcss.com/docs/customizing-colors/#default-color-palette
                      */
-                    backgroundColor: ['#0694a2', '#1c64f2', '#7e3af2'],
+                    backgroundColor: colorArray,//['#0694a2', '#1c64f2', '#7e3af2'],
                     label: 'Dataset 1',
                 },
             ],
