@@ -621,6 +621,9 @@ function populateCards() {
         pipeline: [
             {
                 "$match": { "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/interacted" }
+            },
+            {
+                "$count": "totalSubmissions"
             }
 
         ]
@@ -628,7 +631,7 @@ function populateCards() {
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
-                document.getElementById("totalSubmissions").innerHTML = response.data.results.length;
+                document.getElementById("totalSubmissions").innerHTML = response.data.results[0].totalSubmissions;
             }
         })
         .catch(function (error) {
@@ -667,6 +670,9 @@ function populateCards() {
         pipeline: [
             {
                 "$match": { "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed" }
+            },
+            {
+                "$count": "totalCompletes"
             }
 
         ]
@@ -674,7 +680,7 @@ function populateCards() {
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
-                document.getElementById("totalCompletes").innerHTML = response.data.results.length;
+                document.getElementById("totalCompletes").innerHTML = response.data.results[0].totalCompletes;
             }
         })
         .catch(function (error) {
