@@ -147,6 +147,7 @@ async function selectConsumer(consumerId, consumerName, consumerPicture, all = f
 // Fetch all the courses Id available
 async function populateCourses() {
     data = {
+        comment: "Getting all courses",
         consumer: consumer?.id ? consumer.id : "all",
         pipeline: [
             {
@@ -219,62 +220,67 @@ function changeCourse(value) {
 
 function populateDownloadForm() {
 
+    // NOT USED ANYMORE
     // Get all distinct exercise ids
-    data = {
-        consumer: consumer?.id ? consumer.id : "all",
-        courseId: courseId ? courseId : "all",
-        pipeline: [
-            {
-                "$group": {
-                    "_id": "$xAPI.object.id"
-                }
-            }
-        ]
-    }
-    axios.post("../records/aggregate", data, config)
-        .then(function (response) {
-            if (response.data) {
-                document.getElementById("downloadExerciseId").innerHTML = "";
-                for (let index = 0; index < response.data.results.length; index++) {
-                    const element = response.data.results[index];
-                    document.getElementById("downloadExerciseId").innerHTML += `<option value="${element._id}">${JSON.stringify(element._id).slice(1, -1)}</option>`;
-                }
-                document.getElementById("downloadExerciseId").innerHTML += `<option value="all">All</option>`;
-            }
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-    // Get all distinct context ids
+    // data = {
+    //     comment: "Getting all distinct exercise ids",
+    //     consumer: consumer?.id ? consumer.id : "all",
+    //     courseId: courseId ? courseId : "all",
+    //     pipeline: [
+    //         {
+    //             "$group": {
+    //                 "_id": "$xAPI.object.id"
+    //             }
+    //         }
+    //     ]
+    // }
+    // axios.post("../records/aggregate", data, config)
+    //     .then(function (response) {
+    //         if (response.data) {
+    //             document.getElementById("downloadExerciseId").innerHTML = "";
+    //             for (let index = 0; index < response.data.results.length; index++) {
+    //                 const element = response.data.results[index];
+    //                 document.getElementById("downloadExerciseId").innerHTML += `<option value="${element._id}">${JSON.stringify(element._id).slice(1, -1)}</option>`;
+    //             }
+    //             document.getElementById("downloadExerciseId").innerHTML += `<option value="all">All</option>`;
+    //         }
+    //     })
+    //     .catch(function (error) {
+    //         console.log(error);
+    //     });
 
-    data = {
-        consumer: consumer?.id ? consumer.id : "all",
-        courseId: courseId ? courseId : "all",
-        pipeline: [
-            {
-                "$group": {
-                    "_id": "$xAPI.context.contextActivities.category"
-                }
-            }
-        ]
-    }
-    axios.post("../records/aggregate", data, config)
-        .then(function (response) {
-            if (response.data) {
-                document.getElementById("downloadContextId").innerHTML = "";
-                for (let index = 0; index < response.data.results.length; index++) {
-                    const element = response.data.results[index];
-                    document.getElementById("downloadContextId").innerHTML += `<option value="${element._id[0].id}">${JSON.stringify(element._id[0].id).slice(1, -1)}</option>`;
-                }
-                document.getElementById("downloadContextId").innerHTML += `<option value="all">All</option>`;
-            }
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+    // NOT USED ANYMORE
+    // Get all distinct exercise types
+    // data = {
+    //     comment: "Getting all distinct exercise types",
+    //     consumer: consumer?.id ? consumer.id : "all",
+    //     courseId: courseId ? courseId : "all",
+    //     pipeline: [
+    //         {
+    //             "$group": {
+    //                 "_id": "$xAPI.context.contextActivities.category"
+    //             }
+    //         }
+    //     ]
+    // }
+    // axios.post("../records/aggregate", data, config)
+    //     .then(function (response) {
+    //         if (response.data) {
+    //             document.getElementById("downloadContextId").innerHTML = "";
+    //             for (let index = 0; index < response.data.results.length; index++) {
+    //                 const element = response.data.results[index];
+    //                 document.getElementById("downloadContextId").innerHTML += `<option value="${element._id[0].id}">${JSON.stringify(element._id[0].id).slice(1, -1)}</option>`;
+    //             }
+    //             document.getElementById("downloadContextId").innerHTML += `<option value="all">All</option>`;
+    //         }
+    //     })
+    //     .catch(function (error) {
+    //         console.log(error);
+    //     });
 
     // Get all distinct activities
     data = {
+        comment: "Getting all distinct verbs",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
@@ -326,7 +332,7 @@ function downloadData() {
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
-                console.log("response", response);
+
 
                 if (response.data.results.length > 0) {
 
@@ -418,6 +424,7 @@ function chartSubmissionsByTime() {
     // Fetch the required aggregated request
 
     let data = {
+        comment: "Getting submissions by time",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
@@ -528,6 +535,7 @@ function exerciseSubmissionsByTime(exercise) {
 
 
     let data = {
+        comment: "Getting exercise submissions by time",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
@@ -596,6 +604,7 @@ function populateCards() {
     let data = {};
     // Fetch total records 
     data = {
+        comment: "Getting total records count",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
@@ -617,6 +626,7 @@ function populateCards() {
 
     // Fetch total submissions
     data = {
+        comment: "Getting total submissions count",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
@@ -641,6 +651,7 @@ function populateCards() {
 
     // Fetch Exercise types
     data = {
+        comment: "Getting exercise types count",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
@@ -666,6 +677,7 @@ function populateCards() {
 
     // Fetch total completes
     data = {
+        comment: "Getting total completes count",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
@@ -722,6 +734,7 @@ function chartExercisesTypes() {
     // Fetch the required aggregated request
 
     let data = {
+        comment: "Getting all exercise types count",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
@@ -752,96 +765,97 @@ function chartExercisesTypes() {
 }
 // Not used for now
 function chartQuizMCQs() {
-    const quizes = []
-    const subMCQs = []
+    // const quizes = []
+    // const subMCQs = []
 
-    // Get all distinct exercise ids
-    data = {
-        consumer: consumer?.id ? consumer.id : "all",
-        courseId: courseId ? courseId : "all",
-        pipeline: [
-            {
-                "$match": {
-                    "xAPI.context.contextActivities.category.id": "http://h5p.org/libraries/H5P.QuestionSet-1.17"
-                }
-            },
-            {
-                "$group": {
-                    "_id": "$xAPI.object.id"
-                }
-            }
-        ]
-    }
-    axios.post("../records/aggregate", data, config)
-        .then(function (response) {
-            if (response.data) {
-                document.getElementById("exerciseIdQuizChart").innerHTML = "";
-                let quizId = {};
-                for (let index = 0; index < response.data.results.length; index++) {
-                    const element = response.data.results[index];
-                    if (element._id.includes("?")) {
-                        element._id = element._id.substring(0, element._id.indexOf('?'));
-                    }
-                    quizId[element._id] = element;
+    // // Get all distinct exercise ids
+    // data = {
+    //     consumer: consumer?.id ? consumer.id : "all",
+    //     courseId: courseId ? courseId : "all",
+    //     pipeline: [
+    //         {
+    //             "$match": {
+    //                 "xAPI.context.contextActivities.category.id": "http://h5p.org/libraries/H5P.QuestionSet-1.17"
+    //             }
+    //         },
+    //         {
+    //             "$group": {
+    //                 "_id": "$xAPI.object.id"
+    //             }
+    //         }
+    //     ]
+    // }
+    // axios.post("../records/aggregate", data, config)
+    //     .then(function (response) {
+    //         if (response.data) {
+    //             document.getElementById("exerciseIdQuizChart").innerHTML = "";
+    //             let quizId = {};
+    //             for (let index = 0; index < response.data.results.length; index++) {
+    //                 const element = response.data.results[index];
+    //                 if (element._id.includes("?")) {
+    //                     element._id = element._id.substring(0, element._id.indexOf('?'));
+    //                 }
+    //                 quizId[element._id] = element;
 
-                }
-                for (let index = 0; index < Object.keys(quizId).length; index++) {
-                    document.getElementById("exerciseIdQuizChart").innerHTML += `<option value="${Object.keys(quizId)[index]}">${Object.keys(quizId)[index]}</option>`;
-                }
-                document.getElementById("exerciseIdQuizChart").onchange();
-            }
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+    //             }
+    //             for (let index = 0; index < Object.keys(quizId).length; index++) {
+    //                 document.getElementById("exerciseIdQuizChart").innerHTML += `<option value="${Object.keys(quizId)[index]}">${Object.keys(quizId)[index]}</option>`;
+    //             }
+    //             document.getElementById("exerciseIdQuizChart").onchange();
+    //         }
+    //     })
+    //     .catch(function (error) {
+    //         console.log(error);
+    //     });
 
 }
 
 // Not used for now
 function chartQuizMCQsChangeQuizId() {
-    let getValue = document.getElementById("exerciseIdQuizChart").value;
-    let subMCQs = [];
-    // Get Quiz's sub MCQs
-    data = {
-        consumer: consumer?.id ? consumer.id : "all",
-        courseId: courseId ? courseId : "all",
-        pipeline: [
-            {
-                "$group": {
-                    "_id": "$xAPI.object.id"
-                }
-            }
-        ]
-    }
-    axios.post("../records/aggregate", data, config)
-        .then(function (response) {
-            if (response.data) {
-                document.getElementById("exerciseIdQuizMCQidChart").innerHTML = "";
-                for (let index = 0; index < response.data.results.length; index++) {
-                    const element = response.data.results[index];
-                    if (!element._id) { break; }
+    // let getValue = document.getElementById("exerciseIdQuizChart").value;
+    // let subMCQs = [];
+    // // Get Quiz's sub MCQs
+    // data = {
+    //     consumer: consumer?.id ? consumer.id : "all",
+    //     courseId: courseId ? courseId : "all",
+    //     pipeline: [
+    //         {
+    //             "$group": {
+    //                 "_id": "$xAPI.object.id"
+    //             }
+    //         }
+    //     ]
+    // }
+    // axios.post("../records/aggregate", data, config)
+    //     .then(function (response) {
+    //         if (response.data) {
+    //             document.getElementById("exerciseIdQuizMCQidChart").innerHTML = "";
+    //             for (let index = 0; index < response.data.results.length; index++) {
+    //                 const element = response.data.results[index];
+    //                 if (!element._id) { break; }
 
-                    if (element._id.includes("subContentId")) {
-                        //element._id = element._id.substring(element._id.indexOf('?'), element._id.length);
+    //                 if (element._id.includes("subContentId")) {
+    //                     //element._id = element._id.substring(element._id.indexOf('?'), element._id.length);
 
-                        if (getValue == element._id.substring(0, element._id.indexOf('?'))) {
-                            let subMCQId = element._id.substring(element._id.indexOf('=') + 1, element._id.length);
-                            document.getElementById("exerciseIdQuizMCQidChart").innerHTML += `<option value="${subMCQId}">${subMCQId}</option>`;
-                            subMCQs.push(subMCQId)
-                        }
-                    }
-                }
-            }
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
+    //                     if (getValue == element._id.substring(0, element._id.indexOf('?'))) {
+    //                         let subMCQId = element._id.substring(element._id.indexOf('=') + 1, element._id.length);
+    //                         document.getElementById("exerciseIdQuizMCQidChart").innerHTML += `<option value="${subMCQId}">${subMCQId}</option>`;
+    //                         subMCQs.push(subMCQId)
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     })
+    //     .catch(function (error) {
+    //         console.log(error);
+    //     });
 
 }
 
 function chartMCQs() {
     // Get all MCQ ids
     data = {
+        comment: "Getting all MCQ ids",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
@@ -885,6 +899,7 @@ function chartMCQsChangeId() {
 
         // Fetch all the available choices from this particular MCQ
         data = {
+            comment: "Getting particular MCQ's choices",
             consumer: consumer?.id ? consumer.id : "all",
             courseId: courseId ? courseId : "all",
             pipeline: [
@@ -929,6 +944,7 @@ function chartMCQsChangeId() {
 
                     // Get the number of counts per choice
                     data = {
+                        comment: "Getting particular MCQ's counts",
                         consumer: consumer?.id ? consumer.id : "all",
                         courseId: courseId ? courseId : "all",
                         pipeline: [
@@ -1024,6 +1040,7 @@ function chartMCQsChangeId() {
                                 // Get the correct answers query 
                                 let correctResponsesPattern;
                                 data = {
+                                    comment: "Getting particular MCQ's correct answers",
                                     consumer: consumer?.id ? consumer.id : "all",
                                     courseId: courseId ? courseId : "all",
                                     "pipeline": [
@@ -1092,6 +1109,7 @@ function chartMCQsChangeId() {
 
         document.getElementById('mcqChartQs').innerHTML = "...";
         data = {
+            comment: "Getting particular MCQ's question",
             consumer: consumer?.id ? consumer.id : "all",
             courseId: courseId ? courseId : "all",
             "pipeline": [
@@ -1141,9 +1159,16 @@ function populateExerciseStatSelector() {
     // First populate the exercise selector to get all available exercises
     // Get all distinct exercise ids
     data = {
+        comment: "Getting all exercise ids, titles and types",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
+            {
+                "$match": {
+                    "xAPI.object.id": { "$not": { "$regex": "subContentId" } }
+                }
+            },
+
             {
                 "$group": {
                     "_id": "$xAPI.object.id",
@@ -1213,6 +1238,7 @@ function exerciseStatsChangeExercise() {
     exerciseIdToRegex = exerciseId == "all" ? "" : exerciseId;
     // Fetch number of completed or answered records for that particular exercise
     data = {
+        comment: "Getting number of completed or answered records for that particular exercise",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
 
@@ -1269,6 +1295,7 @@ function exerciseStatsChangeExercise() {
 
     // Fetch number of students who passed
     data = {
+        comment: "Getting number of students who passed",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
         pipeline: [
@@ -1318,9 +1345,10 @@ function exerciseStatsChangeExercise() {
 
     // Fetch average marks
     data = {
+        comment: "Getting average marks",
         consumer: consumer?.id ? consumer.id : "all",
         courseId: courseId ? courseId : "all",
-        "pipeline": [
+        pipeline: [
             {
                 "$match": {
                     "xAPI.object.id": { "$regex": exerciseIdToRegex },
