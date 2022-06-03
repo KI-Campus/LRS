@@ -84,6 +84,34 @@ docReady(async function () {
     $('.select2').select2({
     });
 
+    function formatConsumerDropdown(state) {
+        if (!state.id) {
+            return state.text;
+        }
+        var $state;
+        if (JSON.parse(state.id).id != "all") {
+            $state = $(
+                `<span><img src=${JSON.parse(state.id).picture}  class="img-consumer" />  ${state.text} </span>`
+            );
+        }
+        else {
+            $state = $(
+                `<span> ${state.text} </span>`
+            );
+        }
+
+        return $state;
+    };
+
+    $('.select2-consumers').select2({
+        templateResult: formatConsumerDropdown
+    });
+
+    $('.select2-consumers').on('select2:select', function (e) {
+        var data = e.params.data;
+        onConsumerSelect2Change(data.id);
+    });
+
 
 });
 
@@ -117,23 +145,20 @@ async function populateConsumers() {
 
         await selectConsumer(consumer.id, consumer.name, consumer.picture, false, false);
     }
+
+    console.log("test", JSON.stringify(consumer))
+    $('.select2-consumers').val((JSON.stringify(consumer))).trigger('change');
+
 }
 
 async function addConsumerToHomepage(consumer, empty = false) {
     if (consumer.id == "all") {
         empty = true
     }
-    const container = document.getElementById("consumersContainer");
-    const div = document.createElement("div");
-    div.className = "flex justify-center text-2xl border-2 border-gray-300 rounded-xl p-6 bg-gray-100";
-    if (!empty) {
-        div.innerHTML = ` <button onClick="selectConsumer('${consumer.id}', '${consumer.name}', '${consumer.picture}' )"> <img src="${consumer.picture}" style="max-width:300px; max-height:40px; height:40px" /> </button>`;
-    }
-    else {
 
-        div.innerHTML = ` <button onClick="selectConsumer('', '', '', true )"> All </button>`;
-    }
-    container.appendChild(div);
+
+    var newOption = new Option(consumer.name, JSON.stringify({ id: consumer.id, name: consumer.name, picture: consumer.picture }), false, false);
+    $('.select2-consumers').append(newOption);
 }
 
 
@@ -151,6 +176,11 @@ async function selectConsumer(consumerId, consumerName, consumerPicture, all = f
     reload && setTimeout(function () {
         location.reload();
     }, 500);
+}
+
+function onConsumerSelect2Change(value) {
+    const consumer = JSON.parse(value);
+    selectConsumer(consumer.id, consumer.name, consumer.picture);
 }
 
 // Fetch all the courses Id available
