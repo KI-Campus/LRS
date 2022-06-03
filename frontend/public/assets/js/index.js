@@ -80,6 +80,10 @@ docReady(async function () {
         content: 'Please select a verb type. If you do not see the verb type you are looking for, it may be because there are no events received to openLRS from this particular verb type',
     });
 
+    // Initialize select2
+    $('.select2').select2({
+    });
+
 
 });
 
