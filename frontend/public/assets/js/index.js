@@ -4,40 +4,29 @@ var exerciseSubmissionsByChart;
 var selectedExercise;
 var selectedExerciseType;
 docReady(async function () {
-    // Get config ready
-    config = {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    };
 
-    // Collect consumers in a list
-    await getAllConsumers();
+    initPage(true);
 
+});
 
-    // Set session storage for consumers
-    // Check for consumer in session storage, if not then set it to all
-    if (sessionStorage.getItem("consumer") == null) {
-        sessionStorage.setItem("consumer", JSON.stringify(consumersList[0]));
-        consumer = String(consumersList[0].id);
+async function initPage(firstLoad = false) {
+
+    if (firstLoad) {
+
+        // Get config ready
+        config = {
+            headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        };
+
+        // Collect consumers in a list
+        await getAllConsumers();
+
+        loadConsumerFromStorage();
+
+        // Populate All of the Consumers
+        await populateConsumers();
 
     }
-    try {
-        // Load the consumer from session storage
-        consumer = JSON.parse(sessionStorage.getItem("consumer"));
-        consumerID = consumer.id;
-
-    }
-    catch (e) {
-        if (typeof (sessionStorage.getItem("consumer")) == 'string') {
-            // Load the consumer from session storage
-            consumer = sessionStorage.getItem("consumer");
-
-
-        }
-    }
-
-
-    // Populate All of the Consumers
-    await populateConsumers();
 
     // Populate Course Dropdown
     await populateCourses();
@@ -63,57 +52,34 @@ docReady(async function () {
     // Draw and populate the MCQs chart
     chartMCQs();
 
-    // Add tooltips using tippy.js
-    tippy('#coursesSelect', {
-        content: 'Please select a course. If you do not see the course you are looking for, it may be because there are no events received to openLRS from this particular course',
-    });
+    if (firstLoad) {
+        // Add tooltips using tippy.js
+        tippy('#courseLabelTooltip', {
+            content: 'Please select a course. If you do not see the course you are looking for, it may be because there are no events received to openLRS from this particular course',
+        });
 
-    tippy('#excericseStatsExerciseId', {
-        content: 'Please select a exercise. If you do not see the exercise you are looking for, it may be because there are no events received to openLRS from this particular exercise',
-    });
+        tippy('#exerciseLabelTooltip', {
+            content: 'Please select a exercise. If you do not see the exercise you are looking for, it may be because there are no events received to openLRS from this particular exercise',
+        });
 
-    tippy('#downloadVerbType', {
-        content: 'Please select a verb type. If you do not see the verb type you are looking for, it may be because there are no events received to openLRS from this particular verb type',
-    });
+        tippy('#verbTypeLabelTooltip', {
+            content: 'Please select a verb type. If you do not see the verb type you are looking for, it may be because there are no events received to openLRS from this particular verb type',
+        });
 
-    tippy('#downloadVerbType', {
-        content: 'Please select a verb type. If you do not see the verb type you are looking for, it may be because there are no events received to openLRS from this particular verb type',
-    });
+        // Initialize select2
+        $('.select2').select2({
+        });
 
-    // Initialize select2
-    $('.select2').select2({
-    });
+        $('.select2-consumers').select2({
+            templateResult: formatConsumerDropdown
+        });
 
-    function formatConsumerDropdown(state) {
-        if (!state.id) {
-            return state.text;
-        }
-        var $state;
-        if (JSON.parse(state.id).id != "all") {
-            $state = $(
-                `<span><img src=${JSON.parse(state.id).picture}  class="img-consumer" />  ${state.text} </span>`
-            );
-        }
-        else {
-            $state = $(
-                `<span> ${state.text} </span>`
-            );
-        }
-
-        return $state;
-    };
-
-    $('.select2-consumers').select2({
-        templateResult: formatConsumerDropdown
-    });
-
-    $('.select2-consumers').on('select2:select', function (e) {
-        var data = e.params.data;
-        onConsumerSelect2Change(data.id);
-    });
-
-
-});
+        $('.select2-consumers').on('select2:select', function (e) {
+            var data = e.params.data;
+            onConsumerSelect2Change(data.id);
+        });
+    }
+}
 
 async function populateConsumers() {
     // Get all consumers
@@ -146,7 +112,6 @@ async function populateConsumers() {
         await selectConsumer(consumer.id, consumer.name, consumer.picture, false, false);
     }
 
-    console.log("test", JSON.stringify(consumer))
     $('.select2-consumers').val((JSON.stringify(consumer))).trigger('change');
 
 }
@@ -172,10 +137,12 @@ async function selectConsumer(consumerId, consumerName, consumerPicture, all = f
         sessionStorage.setItem("consumer", "all");
         document.getElementById("selectedConsumer").innerHTML = "All Consumers selected ";
     }
+    loadConsumerFromStorage();
+    initPage(false);
     // Reload page after some timeout
-    reload && setTimeout(function () {
-        location.reload();
-    }, 500);
+    // reload && setTimeout(function () {
+    //     location.reload();
+    // }, 500);
 }
 
 function onConsumerSelect2Change(value) {
@@ -185,6 +152,10 @@ function onConsumerSelect2Change(value) {
 
 // Fetch all the courses Id available
 async function populateCourses() {
+
+    // Empty the old courses
+    document.getElementById("coursesSelect").innerHTML = `<option value="all">All</option>`;
+
     data = {
         comment: "Getting all courses",
         consumer: consumer?.id ? consumer.id : "all",
@@ -226,9 +197,7 @@ async function populateCourses() {
         }
         else {
             sessionStorage.removeItem("courseId");
-            setTimeout(function () {
-                location.reload();
-            }, 500);
+            loadCourseFromStorage();
         }
     }
 }
@@ -250,10 +219,13 @@ function changeCourse(value) {
         sessionStorage.setItem("courseId", "all");
         //document.getElementById("selectedConsumer").innerHTML = "All Consumers selected ";
     }
+
+    loadCourseFromStorage();
+    initPage(false);
     // Reload page after some timeout
-    setTimeout(function () {
-        location.reload();
-    }, 500);
+    // setTimeout(function () {
+    //     location.reload();
+    // }, 500);
 
 }
 
@@ -926,6 +898,10 @@ function chartQuizMCQsChangeQuizId() {
 }
 
 function chartMCQs() {
+
+    // Empty the exerciseIdMCQChart
+    document.getElementById("exerciseIdMCQChart").innerHTML = "";
+
     // Get all MCQ ids
     data = {
         comment: "Getting all MCQ ids",
@@ -1211,11 +1187,8 @@ function chartMCQsChangeId() {
         axios.post("../records/aggregate", data, config)
             .then(function (response) {
                 if (response.data) {
-                    document.getElementById('mcqChartQs').innerHTML = response.data.results[0].myId;
-
+                    document.getElementById('mcqChartQs').innerHTML = response.data?.results[0]?.myId;
                 }
-
-
             }
             )
             .catch(function (error) {
@@ -1229,6 +1202,10 @@ function chartMCQsChangeId() {
 }
 
 function populateExerciseStatSelector() {
+
+    // Empty the selector
+    document.getElementById("excericseStatsExerciseId").innerHTML = "";
+
     // First populate the exercise selector to get all available exercises
     // Get all distinct exercise ids
     data = {
@@ -1481,3 +1458,22 @@ function exerciseStatsChangeExercise() {
 
     exerciseSubmissionsByTime(exerciseIdToRegex)
 }
+
+function formatConsumerDropdown(state) {
+    if (!state.id) {
+        return state.text;
+    }
+    var $state;
+    if (JSON.parse(state.id).id != "all") {
+        $state = $(
+            `<span><img src=${JSON.parse(state.id).picture}  class="img-consumer" />  ${state.text} </span>`
+        );
+    }
+    else {
+        $state = $(
+            `<span> ${state.text} </span>`
+        );
+    }
+
+    return $state;
+};

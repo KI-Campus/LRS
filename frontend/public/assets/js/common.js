@@ -49,24 +49,8 @@ docReady(function () {
         }
     }
 
+    loadCourseFromStorage();
 
-
-
-    // Check for courseId in session storage, if not then set it to all
-    if (sessionStorage.getItem("courseId") == null) {
-
-        sessionStorage.setItem("courseId", "all");
-        courseId = "all";
-
-    }
-    try {
-        // Load the courseId from session storage
-        courseId = sessionStorage.getItem("courseId");
-
-    }
-    catch (e) {
-
-    }
 
     // Set default Axios calls
     axios.defaults.headers.common['Authorization'] = "Bearer " + token;
@@ -91,6 +75,48 @@ docReady(function () {
 
 
 });
+
+function loadCourseFromStorage() {
+    // Check for courseId in session storage, if not then set it to all
+    if (sessionStorage.getItem("courseId") == null) {
+
+        sessionStorage.setItem("courseId", "all");
+        courseId = "all";
+
+    }
+    try {
+        // Load the courseId from session storage
+        courseId = sessionStorage.getItem("courseId");
+
+    }
+    catch (e) {
+
+    }
+}
+
+function loadConsumerFromStorage() {
+    // Set session storage for consumers
+    // Check for consumer in session storage, if not then set it to all
+    if (sessionStorage.getItem("consumer") == null) {
+        sessionStorage.setItem("consumer", JSON.stringify(consumersList[0]));
+        consumer = String(consumersList[0].id);
+
+    }
+    try {
+        // Load the consumer from session storage
+        consumer = JSON.parse(sessionStorage.getItem("consumer"));
+        consumerID = consumer.id;
+
+    }
+    catch (e) {
+        if (typeof (sessionStorage.getItem("consumer")) == 'string') {
+            // Load the consumer from session storage
+            consumer = sessionStorage.getItem("consumer");
+
+
+        }
+    }
+}
 
 // If not logged in, navigate to login
 function checkLogin() {

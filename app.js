@@ -1,4 +1,4 @@
-﻿let LRS_VERSION = "1.0.0";
+﻿let LRS_VERSION = "1.1.0";
 
 require("dotenv").config();
 require("rootpath")();

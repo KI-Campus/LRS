@@ -256,6 +256,9 @@
             Select Consumer
           </h2>
 
+          <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+            Select a consumer
+          </p>
           <select class="select2-consumers">
 
           </select>
@@ -273,11 +276,11 @@
 
               <div>
                 <p class="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Select a course
+                  Select a course <sup id="courseLabelTooltip">?</sup>
                 </p>
                 <select onchange="changeCourse(this.value)" id="coursesSelect"
                   class="select2 block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
-                  <option value="all">All</option>
+
                 </select>
               </div>
             </div>
@@ -376,11 +379,12 @@
             <!-- Card -->
             <div class="mb-4 font-semibold text-gray-800 dark:text-gray-300">
               <label class="block mt-4 text-sm">
-                <span class="text-gray-700 dark:text-gray-400">Exercise</span>
+                <span class="text-gray-700 dark:text-gray-400">Select an Exercise <sup
+                    id="exerciseLabelTooltip">?</sup></span>
                 <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
                   <select onchange="exerciseStatsChangeExercise()" id="excericseStatsExerciseId"
                     class="select2 block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray max-w-full">
-                    <option value="...">...</option>
+
                   </select>
                 </div>
               </label>
@@ -472,7 +476,7 @@
                   <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
                     <select onchange="chartMCQsChangeId()" id="exerciseIdMCQChart"
                       class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
-                      <option value="...">...</option>
+
                     </select>
                   </div>
                 </label>
@@ -507,7 +511,7 @@
                   <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
                     <select onchange="chartQuizMCQsChangeQuizId()" id="exerciseIdQuizChart"
                       class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
-                      <option value="...">...</option>
+
 
                     </select>
                   </div>
@@ -518,7 +522,7 @@
                   <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
                     <select id="exerciseIdQuizMCQidChart"
                       class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
-                      <option value="...">...</option>
+
                     </select>
                   </div>
                 </label>
@@ -545,8 +549,7 @@
                     <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
                       <select id="downloadExerciseId"
                         class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
-                        <option value="all">All</option>
-                        <option value="1234">Excercise 123</option>
+
                       </select>
                     </div>
                   </label>
@@ -557,22 +560,19 @@
                     <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
                       <select id="downloadContextId"
                         class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
-                        <option value="all">All</option>
-                        <option value="1234">Context ID 12334</option>
+
                       </select>
                     </div>
                   </label>
 
                   <label class="block mt-4 text-sm">
-                    <span class="text-gray-700 dark:text-gray-400">Verb Type</span>
+                    <span class="text-gray-700 dark:text-gray-400">Verb Type <sup
+                        id="verbTypeLabelTooltip">?</sup></span>
                     <!-- focus-within sets the color for the icon when input is focused -->
                     <div class="relative text-gray-500 focus-within:text-blue-600 dark:focus-within:text-blue-400">
                       <select id="downloadVerbType"
                         class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-blue-400 focus:outline-none focus:shadow-outline-blue dark:focus:shadow-outline-gray">
-                        <option value="all">All</option>
-                        <option value="answered">Answered</option>
-                        <option value="interacted">Interacted</option>
-                        <option value="attempted">Attempted</option>
+
                       </select>
                     </div>
                   </label>
