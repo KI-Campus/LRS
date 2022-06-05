@@ -49,8 +49,6 @@ docReady(function () {
         }
     }
 
-    loadCourseFromStorage();
-
 
     // Set default Axios calls
     axios.defaults.headers.common['Authorization'] = "Bearer " + token;
@@ -76,23 +74,6 @@ docReady(function () {
 
 });
 
-function loadCourseFromStorage() {
-    // Check for courseId in session storage, if not then set it to all
-    if (sessionStorage.getItem("courseId") == null) {
-
-        sessionStorage.setItem("courseId", "all");
-        courseId = "all";
-
-    }
-    try {
-        // Load the courseId from session storage
-        courseId = sessionStorage.getItem("courseId");
-
-    }
-    catch (e) {
-
-    }
-}
 
 function loadConsumerFromStorage() {
     // Set session storage for consumers
@@ -109,12 +90,7 @@ function loadConsumerFromStorage() {
 
     }
     catch (e) {
-        if (typeof (sessionStorage.getItem("consumer")) == 'string') {
-            // Load the consumer from session storage
-            consumer = sessionStorage.getItem("consumer");
-
-
-        }
+        console.log("Error loading consumer from storage", e);
     }
 }
 

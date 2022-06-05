@@ -1,15 +1,21 @@
 let config;
+
+var courseEventsByExerciseChart;
+var courseSubmissionsByChart;
+
 var mcqChart;
 var exerciseSubmissionsByChart;
 var selectedExercise;
 var selectedExerciseType;
 docReady(async function () {
 
-    initPage(true);
+    initPage(true, false);
 
 });
 
-async function initPage(firstLoad = false) {
+async function initPage(firstLoad = false, changeCourse = false) {
+
+    console.log("Initializing page", "firstload", firstLoad, "changeCourse", changeCourse);
 
     if (firstLoad) {
 
@@ -28,29 +34,11 @@ async function initPage(firstLoad = false) {
 
     }
 
-    // Populate Course Dropdown
-    await populateCourses();
+    if (firstLoad == true) {
 
-    // Populate download form fields
-    populateDownloadForm();
+        triggerCourseChange();
 
-    // Populate dashboard cards
-    populateCards();
-
-    // Populate exercise stats exercise selector dropdown
-    populateExerciseStatSelector();
-
-    // Draw Submissions by Time chart
-    chartSubmissionsByTime();
-
-    // Draw the Exercise Types pie chart
-    chartExercisesTypes();
-
-    // Draw and populate the QuizMCQs chart
-    chartQuizMCQs();
-
-    // Draw and populate the MCQs chart
-    chartMCQs();
+    }
 
     if (firstLoad) {
         // Add tooltips using tippy.js
@@ -138,11 +126,33 @@ async function selectConsumer(consumerId, consumerName, consumerPicture, all = f
         document.getElementById("selectedConsumer").innerHTML = "All Consumers selected ";
     }
     loadConsumerFromStorage();
-    initPage(false);
-    // Reload page after some timeout
-    // reload && setTimeout(function () {
-    //     location.reload();
-    // }, 500);
+    // Populate Course Dropdown
+    await populateCourses();
+    triggerCourseChange();
+
+}
+
+function triggerCourseChange() {
+    // Populate download form fields
+    populateDownloadForm();
+
+    // Populate dashboard cards
+    populateCards();
+
+    // Populate exercise stats exercise selector dropdown
+    populateExerciseStatSelector();
+
+    // Draw Submissions by Time chart
+    chartSubmissionsByTime();
+
+    // Draw the Exercise Types pie chart
+    chartExercisesTypes();
+
+    // Draw and populate the QuizMCQs chart
+    chartQuizMCQs();
+
+    // Draw and populate the MCQs chart
+    chartMCQs();
 }
 
 function onConsumerSelect2Change(value) {
@@ -154,7 +164,7 @@ function onConsumerSelect2Change(value) {
 async function populateCourses() {
 
     // Empty the old courses
-    document.getElementById("coursesSelect").innerHTML = `<option value="all">All</option>`;
+    document.getElementById("coursesSelect").innerHTML = ``;
 
     data = {
         comment: "Getting all courses",
@@ -178,6 +188,7 @@ async function populateCourses() {
                     response.data.results.forEach(element => {
                         if (element._id != null) {
                             addCourseToHomepage(element);
+
                         }
                     });
 
@@ -186,20 +197,7 @@ async function populateCourses() {
 
         });
 
-    // Select a particular course
 
-    if (courseId != "all") {
-        // Check if the course is in the list
-        let course = document.getElementById("coursesSelect").querySelector(`option[value="${courseId}"]`);
-        if (course) {
-            course.selected = true;
-            //selectCourse(courseId, course.innerHTML);
-        }
-        else {
-            sessionStorage.removeItem("courseId");
-            loadCourseFromStorage();
-        }
-    }
 }
 
 function addCourseToHomepage(course) {
@@ -210,22 +208,8 @@ function addCourseToHomepage(course) {
 }
 
 function changeCourse(value) {
-    if (value != "all") {
-        // Save course id to session storage
-        sessionStorage.setItem("courseId", value);
-        //document.getElementById("selectedCourse").innerHTML = "Selected Consumer: " + consumerName;
-    }
-    else {
-        sessionStorage.setItem("courseId", "all");
-        //document.getElementById("selectedConsumer").innerHTML = "All Consumers selected ";
-    }
-
-    loadCourseFromStorage();
-    initPage(false);
-    // Reload page after some timeout
-    // setTimeout(function () {
-    //     location.reload();
-    // }, 500);
+    courseId = value;
+    initPage(false, true);
 
 }
 
@@ -305,7 +289,7 @@ function populateDownloadForm() {
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
-                document.getElementById("downloadVerbType").innerHTML = "";
+                document.getElementById("downloadVerbType").innerHTML = "...";
                 for (let index = 0; index < response.data.results.length; index++) {
                     const element = response.data.results[index];
                     document.getElementById("downloadVerbType").innerHTML += `<option value="${element._id}">${JSON.stringify(element._id).slice(1, -1)}</option>`;
@@ -381,6 +365,9 @@ function downloadData() {
 }
 
 function chartSubmissionsByTime() {
+
+
+
     let lineConfig = {
         type: 'line',
         data: {
@@ -485,12 +472,16 @@ function chartSubmissionsByTime() {
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
+
+                if (courseSubmissionsByChart) { courseSubmissionsByChart.destroy(); }
+                document.getElementById('submissionsByTimeChartId').innerHTML = "";
+
                 for (let index = 0; index < response.data.results.length; index++) {
                     const element = response.data.results[index];
                     lineConfig.data.labels.push(element._id);
                     lineConfig.data.datasets[0].data.push(parseInt(element.submissions));
                 }
-                window.submissionsByTimeChartId = new Chart(document.getElementById('submissionsByTimeChartId'), lineConfig)
+                courseSubmissionsByChart = new Chart(document.getElementById('submissionsByTimeChartId'), lineConfig)
             }
         })
         .catch(function (error) {
@@ -611,7 +602,7 @@ function exerciseSubmissionsByTime(exercise) {
             if (response.data) {
 
                 if (exerciseSubmissionsByChart) { exerciseSubmissionsByChart.destroy(); }
-                document.getElementById('exerciseSubmissionsByTimeChartId').innerHTML = "";
+                document.getElementById('exerciseSubmissionsByTimeChartId').innerHTML = "...";
 
 
                 for (let index = 0; index < response.data.results.length; index++) {
@@ -620,8 +611,8 @@ function exerciseSubmissionsByTime(exercise) {
                     lineConfig.data.labels.push(element._id);
                     lineConfig.data.datasets[0].data.push(parseInt(element.submissions));
                 }
-                window.submissionsByTimeChartId = new Chart(document.getElementById('exerciseSubmissionsByTimeChartId'), lineConfig)
-                exerciseSubmissionsByChart = window.submissionsByTimeChartId;
+                exerciseSubmissionsByChart = new Chart(document.getElementById('exerciseSubmissionsByTimeChartId'), lineConfig)
+
             }
         })
         .catch(function (error) {
@@ -630,6 +621,11 @@ function exerciseSubmissionsByTime(exercise) {
 }
 
 function populateCards() {
+
+    // Empty the cards
+    document.getElementById("totalRecords").innerHTML = "...";
+    document.getElementById("exerciseTypes").innerHTML = "...";
+    document.getElementById("totalCompletes").innerHTML = "...";
 
     let data = {};
     // Fetch total records 
@@ -794,6 +790,8 @@ function chartExercisesTypes() {
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
+                if (courseEventsByExerciseChart) { courseEventsByExerciseChart.destroy(); }
+                document.getElementById('exercisesChartId').innerHTML = "";
                 for (let index = 0; index < response.data.results.length; index++) {
                     const element = response.data.results[index];
                     pieConfig.data.labels.push(element._id);
@@ -801,7 +799,7 @@ function chartExercisesTypes() {
                 }
                 //pieConfig.data.labels = response.data.results;
 
-                window.submissionsByTimeChartId = new Chart(document.getElementById('exercisesChartId'), pieConfig)
+                courseEventsByExerciseChart = new Chart(document.getElementById('exercisesChartId'), pieConfig)
             }
         })
         .catch(function (error) {
@@ -1081,8 +1079,8 @@ function chartMCQsChangeId() {
                                     },
                                 }
                                 if (mcqChart) { mcqChart.destroy() }
-                                const mcqChartCanvas = document.getElementById('mcqChartId');
                                 document.getElementById('mcqChartId').innerHTML = "";
+                                const mcqChartCanvas = document.getElementById('mcqChartId');
                                 mcqChart = new Chart(mcqChartCanvas, mcqChartConfig);
 
                                 // Color the correct answers
