@@ -34,7 +34,7 @@ async function initPage(firstLoad = false, changeCourse = false) {
 
     }
 
-    if (firstLoad == true) {
+    if (changeCourse) {
 
         triggerCourseChange();
 
@@ -133,6 +133,7 @@ async function selectConsumer(consumerId, consumerName, consumerPicture, all = f
 }
 
 function triggerCourseChange() {
+    console.log("Triggering course change");
     // Populate download form fields
     populateDownloadForm();
 
@@ -643,7 +644,7 @@ function populateCards() {
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
-                document.getElementById("totalRecords").innerHTML = response.data.results[0].totalRecords;
+                document.getElementById("totalRecords").innerHTML = response.data?.results[0]?.totalRecords ? response.data.results[0].totalRecords : 0;
             }
         })
         .catch(function (error) {
@@ -713,7 +714,7 @@ function populateCards() {
     axios.post("../records/aggregate", data, config)
         .then(function (response) {
             if (response.data) {
-                document.getElementById("totalCompletes").innerHTML = response.data.results[0].totalCompletes;
+                document.getElementById("totalCompletes").innerHTML = response.data?.results[0]?.totalCompletes ? response.data?.results[0]?.totalCompletes : 0;
             }
         })
         .catch(function (error) {
@@ -1120,15 +1121,17 @@ function chartMCQsChangeId() {
                                         if (response.data) {
                                             if (!response.data.results[0]) { return; }
                                             correctResponsesPattern = response.data.results[0]._id[0];
-                                            let splitResponses = correctResponsesPattern.split("[,]")
+                                            if (correctResponsesPattern) {
+                                                let splitResponses = correctResponsesPattern.split("[,]")
 
-                                            for (let index = 0; index < splitResponses.length; index++) {
-                                                const element = splitResponses[index];
-                                                // Highlight the correct responses
-                                                mcqChart.data.datasets[0].backgroundColor[element] = '#10B981';
+                                                for (let index = 0; index < splitResponses.length; index++) {
+                                                    const element = splitResponses[index];
+                                                    // Highlight the correct responses
+                                                    mcqChart.data.datasets[0].backgroundColor[element] = '#10B981';
 
+                                                }
+                                                mcqChart.update();
                                             }
-                                            mcqChart.update();
 
 
                                         }

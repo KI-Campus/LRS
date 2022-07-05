@@ -90,6 +90,8 @@ function loadConsumerFromStorage() {
 
     }
     catch (e) {
+        consumer = "all";
+        consumerID = "all";
         console.log("Error loading consumer from storage", e);
     }
 }
