@@ -49,9 +49,12 @@ async function connectMongo() {
 connectMongo();
 
 require("./consumers/consumers.js").init(m_client);
+require("./records.js").init(m_client);
 
 // Consumer API routes
 app.use("/consumers", require("./consumers/consumers.js").router);
+
+app.use("/records", require("./records.js").router);
 
 // LRS endpoint to accept post data
 app.post("/lrs", (req, res) => {
