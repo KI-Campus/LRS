@@ -1,1 +1,0 @@
-The tests in the 'content' folder are bare content.json files that are supposed to be run by the h5p-cli server. Each test allows you to check if one individual feature / setting works as intended by opening it in the browser and checking the behavior manually.
