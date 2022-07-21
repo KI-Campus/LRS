@@ -466,7 +466,7 @@ function chartSubmissionsByTime() {
             },
 
             {
-                "$sort": { "_id": 1 }
+                "$sort": { "_id": -1 }
             }
         ]
     }
@@ -593,7 +593,7 @@ function exerciseSubmissionsByTime(exercise) {
             },
 
             {
-                "$sort": { "_id": 1 }
+                "$sort": { "_id": -1 }
             }
         ]
     }
