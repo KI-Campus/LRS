@@ -217,7 +217,7 @@ async function getCourses(req, res, next) {
       },
     },
     {
-      $sort: { _id: 1 },
+      $sort: { title: 1 },
     },
   ];
   let courseId = req.query.courseId ? req.query.courseId : "all";
