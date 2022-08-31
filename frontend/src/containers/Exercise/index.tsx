@@ -144,7 +144,9 @@ const Exercise = (): React.ReactElement => {
             <Row gutter={16}>
               <Col span={8}>
                 <Card loading={exerciseLoading} title={"Exercise Title"}>
-                  <Tooltip title={"Exercise ID: " + exercise._id}>
+                  <Tooltip
+                    title={"Complete Exercise ID in xAPI: " + exercise._id}
+                  >
                     <Space>
                       {exercise?.title || "N/A"}
                       <QuestionCircleTwoTone />
@@ -180,7 +182,7 @@ const Exercise = (): React.ReactElement => {
                 </Card>
               </Col>
               {isSubExercise && (
-                <Col span={4}>
+                <Col span={6}>
                   <Card loading={exerciseLoading} title={"Exercise ID"}>
                     <Space>{isSubExercise ? subExerciseId : "N/A"}</Space>
                   </Card>
@@ -255,6 +257,10 @@ const Exercise = (): React.ReactElement => {
                           )}
                         </div>
                       ))}
+                      <h6>
+                        {mcqChartCorrectResponse && <hr /> &&
+                          "* Correct choices are in bold font"}
+                      </h6>
                     </Card>
                   </div>
                 </Col>
@@ -308,7 +314,6 @@ const Exercise = (): React.ReactElement => {
                         loading={mcqChartLoading}
                         data={mcqChartData?.choices}
                         title={"MCQ Chart Choices Count"}
-                        labelField="key"
                       />
                     </div>
                   </Col>
