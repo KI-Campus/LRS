@@ -10,6 +10,7 @@ import {
 import { Bar } from "react-chartjs-2";
 
 import type { ChartOptions } from "chart.js";
+import { NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART } from "src/utils/constants";
 
 ChartJS.register(
   CategoryScale,
@@ -47,7 +48,13 @@ export const constructChartData = (
         ? data.map((item) => {
             return props.labelField
               ? item[props.labelField]
-              : item.title || item?._id || "";
+              : (item.title?.length > NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART
+                  ? item.title
+                      .slice(0, NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART - 5)
+                      .concat("...")
+                  : item.title) ||
+                  item?._id ||
+                  "";
           })
         : [],
     datasets: [
