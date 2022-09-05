@@ -1,6 +1,6 @@
 import { GlobalStats } from "./GlobalStats";
 import { useEffect, useRef, useState } from "react";
-import {  useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import Select from "antd/lib/select";
 import Row from "antd/lib/row";
 import Col from "antd/lib/col";
@@ -18,8 +18,8 @@ import {
 import { getGlobalStatsService } from "src/services/records";
 import { CourseStats } from "./CourseStats";
 import { SubmissionsOverTime } from "../../components/SubmissionsOverTime";
-import { BarGraph } from "../../components/BarGraph";
 import { ExercisesTable } from "./ExercisesTable";
+import ExerciseTypesGraph from "./ExerciseTypesGraph";
 
 const { Option } = Select;
 const Home = (): React.ReactElement => {
@@ -73,9 +73,8 @@ const Home = (): React.ReactElement => {
         // Select the first course
         if (courseId && consumerId) {
           setSelectedCourse(courseId);
-        }
-        else if (!courseId && consumerId) {
-        setSelectedCourse(res[0]._id);
+        } else if (!courseId && consumerId) {
+          setSelectedCourse(res[0]._id);
         }
       })
       .catch((err) => {
@@ -107,9 +106,10 @@ const Home = (): React.ReactElement => {
         setConsumersLoading(false);
         // Select the first consumer
         if (consumerId) {
-          setSelectedConsumer(consumerId)
+          setSelectedConsumer(consumerId);
+        } else {
+          setSelectedConsumer(res[0].id);
         }
-        else { setSelectedConsumer(res[0].id);}
       })
       .catch((err) => {
         console.log(err);
@@ -318,7 +318,7 @@ const Home = (): React.ReactElement => {
             <Col span={12}>
               <div className="shadow-bordered">
                 {!courseExerciseTypesCountLoading ? (
-                  <BarGraph
+                  <ExerciseTypesGraph
                     loading={courseExerciseTypesCountLoading}
                     data={courseExerciseTypesCount}
                     title={"Exercise types and number of events"}

@@ -22,43 +22,42 @@ ChartJS.register(
   Legend
 );
 
-export const options: ChartOptions = {
-  responsive: true,
-
-  plugins: {
-    legend: {
-      display: false,
-      position: "top" as const,
-    },
-    title: {
-      display: true,
-      text: "Submissions Over Time",
-    },
-  },
-};
-
-export const constructChartData = (data: any) => {
-  return {
-    // Convert the data from YYYY-MM-DD to DD-MM-YYYY for better readibility
-    labels:
-      data.length > 0
-        ? data.map((item) => {
-            let date = new Date(item?._id || "");
-            return `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
-          })
-        : [],
-    datasets: [
-      {
-        label: "Submissions Over Time",
-        data: data.map((item) => item.submissions || 0),
-        borderColor: "rgba(255, 99, 132, 1)",
-        tension: 0.25,
-      },
-    ],
-  };
-};
-
 export function SubmissionsOverTime(props) {
+  const options: ChartOptions = {
+    responsive: true,
+
+    plugins: {
+      legend: {
+        display: false,
+        position: "top" as const,
+      },
+      title: {
+        display: true,
+        text: "Submissions Over Time",
+      },
+    },
+  };
+  const constructChartData = (data: any) => {
+    return {
+      // Convert the data from YYYY-MM-DD to DD-MM-YYYY for better readibility
+      labels:
+        data.length > 0
+          ? data.map((item) => {
+              let date = new Date(item?._id || "");
+              return `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
+            })
+          : [],
+      datasets: [
+        {
+          label: "Submissions Over Time",
+          data: data.map((item) => item.submissions || 0),
+          borderColor: "rgba(255, 99, 132, 1)",
+          tension: 0.25,
+        },
+      ],
+    };
+  };
+
   // @ts-ignore
   return (
     <Line

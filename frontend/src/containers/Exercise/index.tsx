@@ -8,7 +8,9 @@ import {
 } from "src/services/records";
 import { QuestionCircleTwoTone } from "@ant-design/icons";
 import { SubmissionsOverTime } from "../../components/SubmissionsOverTime";
-import { BarGraph } from "../../components/BarGraph";
+
+import ExerciseEventTypesGraph from "./ExerciseEventTypesGraph";
+import ExerciseMCQGraph from "./ExerciseMCQGraph";
 
 const Exercise = (): React.ReactElement => {
   // Fetch consumer ID and exercise ID from router : consumer/:consumerId/exercise/:exerciseId
@@ -103,32 +105,34 @@ const Exercise = (): React.ReactElement => {
 
   const childExercisesTableColumns = [
     {
-      title: "Child Exercise ID",
-      dataIndex: "childId",
-      key: "childId",
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
       render: (text: string, record: any) => (
         <Link
           to={`../../../../../consumer/${consumerId}/course/${courseId}/exercise/${record.parentId}/sub/${record.childId}`}
         >
-          {text}
+          {text ?? "N/A"}
         </Link>
       ),
-    },
-    {
-      title: "Title",
-      dataIndex: "title",
-      key: "title",
-      render: (text) => {
-        return text ?? "N/A";
-      },
     },
     {
       title: "Type",
       dataIndex: "type",
       key: "type",
       render: (text) => {
+        // Convert http://h5p.org/libraries/H5P.LibraryName-versionNumber to LibraryName versionNumber
+        let label = text[0];
+        if (label.includes("http://h5p.org/libraries/")) {
+          return label.split("http://h5p.org/libraries/")[1];
+        }
         return text ?? "N/A";
       },
+    },
+    {
+      title: "Child Exercise ID",
+      dataIndex: "childId",
+      key: "childId",
     },
   ];
 
@@ -281,12 +285,28 @@ const Exercise = (): React.ReactElement => {
               <Col span={12}>
                 <div className="shadow-bordered">
                   {exerciseVerbs && (
-                    <BarGraph
+                    <ExerciseEventTypesGraph
                       loading={exerciseLoading}
                       data={exerciseVerbs}
                       title={"Exercise Event Types"}
                     />
                   )}
+                  <Row>
+                    {/* List all the verbs that are used in the exercise */}
+                    {exerciseVerbs &&
+                      exerciseVerbs.map((verb, index) => (
+                        <div
+                          style={{ margin: "10px", fontSize: "9px" }}
+                          key={index}
+                        >
+                          <Space>
+                            <a href={verb.title} target="_blank">
+                              {verb.title}
+                            </a>
+                          </Space>
+                        </div>
+                      ))}
+                  </Row>
                 </div>
               </Col>
             </Row>
@@ -310,7 +330,7 @@ const Exercise = (): React.ReactElement => {
                 <Row gutter={16}>
                   <Col span={12}>
                     <div className="shadow-bordered">
-                      <BarGraph
+                      <ExerciseMCQGraph
                         loading={mcqChartLoading}
                         data={mcqChartData?.choices}
                         title={"MCQ Chart Choices Count"}

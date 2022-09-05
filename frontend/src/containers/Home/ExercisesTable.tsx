@@ -78,34 +78,38 @@ export function ExercisesTable(props) {
 
   const columns = [
     {
-      title: "Exercise ID",
-      dataIndex: "_id",
-      key: "_id",
-      render: (text, record) =>
-        record._id.search("subContentId") > -1 ? (
-          <Link
-            to={`consumer/${props.consumerId}/course/${props.courseId}/exercise/${
-              record._id.split("?subContentId=")[0]
-            }/sub/${record._id.split("?subContentId=")[1]}`}
-          >
-            {"SUB EXERCISE: " + record._id.split("?subContentId=")[1]}
-          </Link>
-        ) : (
-          <Link to={`consumer/${props.consumerId}/course/${props.courseId}/exercise/${record._id}`}>
-            {text}
-          </Link>
-        ),
-    },
-    {
       title: "Title",
       dataIndex: "title",
       key: "title",
+      render: (text, record) =>
+        record._id.search("subContentId") > -1 ? (
+          <Link
+            to={`consumer/${props.consumerId}/course/${
+              props.courseId
+            }/exercise/${record._id.split("?subContentId=")[0]}/sub/${
+              record._id.split("?subContentId=")[1]
+            }`}
+          >
+            {record.title}
+          </Link>
+        ) : (
+          <Link
+            to={`consumer/${props.consumerId}/course/${props.courseId}/exercise/${record._id}`}
+          >
+            {record.title}
+          </Link>
+        ),
     },
     {
       title: "Type",
       dataIndex: "type",
       key: "type",
       render: (text) => {
+        // Convert http://h5p.org/libraries/H5P.LibraryName-versionNumber to LibraryName versionNumber
+        let label = text[0];
+        if (label.includes("http://h5p.org/libraries/")) {
+          return label.split("http://h5p.org/libraries/")[1];
+        }
         return text ?? "N/A";
       },
     },
@@ -124,6 +128,11 @@ export function ExercisesTable(props) {
       render: (text, record) => {
         return record?.averageScore?.toFixed(2) ?? "N/A";
       },
+    },
+    {
+      title: "Exercise ID",
+      dataIndex: "_id",
+      key: "_id",
     },
     {
       title: "Actions",
