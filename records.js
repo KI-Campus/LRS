@@ -312,9 +312,9 @@ async function getCourse(req, res, next) {
               .collection(process.env.MONGO_XAPI_COLLECTION)
               .aggregate(totalRecordsPipleline)
               .toArray();
-            totalRecords = totalRecords[0]?.totalRecords;
+            totalRecords = totalRecords[0]?.totalRecords ?? 0;
             // Push it into result
-            if (totalRecords) result[0].totalRecords = totalRecords;
+            result[0].totalRecords = totalRecords;
 
             // Get total exercise types in course
             let exerciseTypesPipeline = [
@@ -337,9 +337,9 @@ async function getCourse(req, res, next) {
               .collection(process.env.MONGO_XAPI_COLLECTION)
               .aggregate(exerciseTypesPipeline)
               .toArray();
-            exerciseTypes = exerciseTypes[0]?.exerciseTypes;
+            exerciseTypes = exerciseTypes[0]?.exerciseTypes ?? 0;
             // Push it into result
-            if (exerciseTypes) result[0].exerciseTypes = exerciseTypes;
+            result[0].exerciseTypes = exerciseTypes;
 
             // Get total submissions in course
             let totalSubmissionsPipeline = [
@@ -380,9 +380,9 @@ async function getCourse(req, res, next) {
               .collection(process.env.MONGO_XAPI_COLLECTION)
               .aggregate(totalSubmissionsPipeline)
               .toArray();
-            totalSubmissions = totalSubmissions[0]?.totalSubmissions;
+            totalSubmissions = totalSubmissions[0]?.totalSubmissions ?? 0;
             // Push it into result
-            if (totalSubmissions) result[0].totalSubmissions = totalSubmissions;
+            result[0].totalSubmissions = totalSubmissions;
 
             // Get total sum of exercises
             let totalExercisesPipeline = [
@@ -421,9 +421,9 @@ async function getCourse(req, res, next) {
               .collection(process.env.MONGO_XAPI_COLLECTION)
               .aggregate(totalExercisesPipeline)
               .toArray();
-            totalExercises = totalExercises[0]?.totalExercises;
+            totalExercises = totalExercises[0]?.totalExercises ?? 0;
             // Push it into result
-            if (totalExercises) result[0].totalExercises = totalExercises;
+            result[0].totalExercises = totalExercises;
 
             // Get total passing exercises
             let passingExercisesPipeline = [
@@ -456,10 +456,10 @@ async function getCourse(req, res, next) {
               .collection(process.env.MONGO_XAPI_COLLECTION)
               .aggregate(passingExercisesPipeline)
               .toArray();
-            passingExercises = passingExercises[0]?.count;
+            passingExercises = passingExercises[0]?.count ?? 0;
             // Push it into result
-            if (passingExercises)
-              result[0].totalPassingExercises = passingExercises;
+
+            result[0].totalPassingExercises = passingExercises;
 
             res.status(200).send({ result }).end();
           } catch (err) {
@@ -530,7 +530,7 @@ async function getExercises(req, res, next) {
         },
       },
       {
-        $sort: { _id: 1 },
+        $sort: { title: 1 },
       },
     ];
 
@@ -790,14 +790,7 @@ async function getExerciseSubmissionsOverTime(req, res, next) {
     },
     {
       $match: {
-        $or: [
-          {
-            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
-          },
-          {
-            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
-          },
-        ],
+        "xAPI.result.completion": true,
       },
     },
 
@@ -865,14 +858,7 @@ async function getCourseSubmissionsOverTime(req, res, next) {
     },
     {
       $match: {
-        $or: [
-          {
-            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
-          },
-          {
-            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
-          },
-        ],
+        "xAPI.result.completion": true,
       },
     },
 
@@ -1315,14 +1301,7 @@ async function helperGetTotalSubmissions(exerciseId) {
     },
     {
       $match: {
-        $or: [
-          {
-            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
-          },
-          {
-            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
-          },
-        ],
+        "xAPI.result.completion": true,
       },
     },
     {
@@ -1346,14 +1325,7 @@ async function helperGetAverageScore(exerciseId) {
     },
     {
       $match: {
-        $or: [
-          {
-            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
-          },
-          {
-            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
-          },
-        ],
+        "xAPI.result.completion": true,
       },
     },
     {
@@ -1468,12 +1440,12 @@ async function helperGetChildExercises(exerciseId) {
     {
       $group: {
         _id: "$xAPI.object.id",
+        title: { $last: "$xAPI.object.definition.name.en-US" },
       },
     },
-
     {
       $sort: {
-        key: 1,
+        title: 1,
       },
     },
   ];
