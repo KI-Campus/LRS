@@ -30,4 +30,4 @@ export const API_USER_REGISTER = "users/register";
 
 export const API_GET_GLOBAL_STATS = "records/stats";
 
-export const NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART = 300;
+export const NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART = 25;

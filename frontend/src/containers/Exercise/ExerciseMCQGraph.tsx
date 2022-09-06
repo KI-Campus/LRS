@@ -29,21 +29,19 @@ export default function ExerciseMCQGraph(props) {
       labels:
         data.length > 0
           ? data.map((item) => {
-              return props.labelField
-                ? item[props.labelField]
-                : (item.title?.length >
-                  NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART
-                    ? item.title
-                        .slice(
-                          0,
-                          NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART - 5
-                        )
-                        .concat("...")
-                    : item.title) ||
-                    item?._id ||
-                    "";
+              return item._id.length >
+                NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART
+                ? item.key +
+                    "-" +
+                    item._id.substring(
+                      0,
+                      NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART
+                    ) +
+                    "..."
+                : item.key + "-" + item._id;
             })
           : [],
+
       datasets: [
         {
           label: title,

@@ -1000,20 +1000,26 @@ async function getMCQChart(req, res, next) {
     .aggregate(countsPerChoicepipeline)
     .toArray();
 
-  // Loop through choices and add the count
-  for (let i = 0; i < choices.length; i++) {
-    let choice = choices[i];
-    let countsPerChoice = countsPerChoices.find((s) => s._id === choice.key);
-    if (countsPerChoice) {
-      choice.count = countsPerChoice.count;
-    } else {
-      choice.count = 0;
+  // When grouped choices are used, we need to add the counts to the individual choices
+  let groupedChoices = countsPerChoices.filter((s) => s._id.includes("[,]"));
+  for (let i = 0; i < groupedChoices.length; i++) {
+    let groupedChoice = groupedChoices[i];
+    let individualChoices = groupedChoice._id.split("[,]");
+    for (let j = 0; j < individualChoices.length; j++) {
+      let individualChoice = individualChoices[j];
+      let choice = choices.find((s) => s.key === individualChoice);
+      if (choice) {
+        if (choice.count) {
+          choice.count += groupedChoice.count;
+        } else {
+          choice.count = groupedChoice.count;
+        }
+      }
     }
-    choice.title = choice._id;
   }
 
   // Sort the choices by key
-  choices.sort((a, b) => parseInt(b.count) - parseInt(a.count));
+  choices.sort((a, b) => parseInt(b.key) + parseInt(a.key));
 
   // Get the correct answers query
   let correctResponsesPattern;
