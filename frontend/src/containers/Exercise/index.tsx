@@ -83,7 +83,7 @@ const Exercise = (): ReactElement => {
     result
       .then((res) => {
         setMcqChartData(res);
-        setMcqChartCorrectResponse(res.correctResponsesPattern.split("[,]"));
+        setMcqChartCorrectResponse(res.correctResponsesPattern?.split("[,]"));
         setMcqChartLoading(false);
       })
       .catch((err) => {
