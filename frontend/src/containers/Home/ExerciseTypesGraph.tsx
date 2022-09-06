@@ -1,7 +1,6 @@
 import React from "react";
 import { GenericBarGraph } from "src/components/GenericBarGraph";
 import type { ChartOptions } from "chart.js";
-import { NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART } from "src/utils/constants";
 
 export default function ExerciseTypesGraph(props) {
   const constructChartData = (
@@ -29,7 +28,13 @@ export default function ExerciseTypesGraph(props) {
       labels:
         data.length > 0
           ? data.map((item) => {
-              let label = item._id[0];
+              if (!item?._id) {
+                return null;
+              }
+              if (!item?._id[0]) {
+                return null;
+              }
+              let label = item?._id[0];
               // Convert http://h5p.org/libraries/H5P.LibraryName-versionNumber to LibraryName versionNumber
               if (label.includes("http://h5p.org/libraries/")) {
                 label = label.replace("http://h5p.org/libraries/", "");

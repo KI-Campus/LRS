@@ -945,6 +945,12 @@ async function getCourseExerciseTypesAndCount(req, res, next) {
       .collection(process.env.MONGO_XAPI_COLLECTION)
       .aggregate(pipeline)
       .toArray();
+
+    // Filter out the ones which _id is null or undefined
+    exerciseTypesAndCount = exerciseTypesAndCount.filter((exercise) => {
+      return exercise._id;
+    });
+
     res.status(200).send({ result: exerciseTypesAndCount }).end();
   } catch (err) {
     console.log("Error while aggregating records", err);
