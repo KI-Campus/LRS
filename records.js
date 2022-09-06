@@ -1006,6 +1006,15 @@ async function getMCQChart(req, res, next) {
     .aggregate(countsPerChoicepipeline)
     .toArray();
 
+  // Get the number of correct answers per choice
+  for (let index = 0; index < countsPerChoices.length; index++) {
+    let choice = choices.find((s) => s.key === countsPerChoices[index]._id);
+    if (choice) {
+      // Add the count of correct answers
+      choices[index].count = countsPerChoices[index].count;
+    }
+  }
+
   // When grouped choices are used, we need to add the counts to the individual choices
   let groupedChoices = countsPerChoices.filter((s) => s._id.includes("[,]"));
   for (let i = 0; i < groupedChoices.length; i++) {
