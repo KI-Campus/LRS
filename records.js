@@ -1011,7 +1011,8 @@ async function getMCQChart(req, res, next) {
     let choice = choices.find((s) => s.key === countsPerChoices[index]._id);
     if (choice) {
       // Add the count of correct answers
-      choices[index].count = countsPerChoices[index].count;
+      if (choices[index].count)
+        choices[index].count = countsPerChoices[index].count;
     }
   }
 
