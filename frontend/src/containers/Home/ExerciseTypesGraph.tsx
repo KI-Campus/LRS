@@ -1,8 +1,8 @@
-import React from "react";
+import React, { ReactElement } from "react";
 import { GenericBarGraph } from "src/components/GenericBarGraph";
 import type { ChartOptions } from "chart.js";
 
-export default function ExerciseTypesGraph(props) {
+export default function ExerciseTypesGraph(props): ReactElement {
   const constructChartData = (
     data: Array<any>,
     title: string,

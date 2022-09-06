@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import Button from "antd/lib/button";
 import Drawer from "antd/lib/drawer";
 import Form from "antd/lib/form";
@@ -8,7 +8,7 @@ import Select from "antd/lib/select";
 import { UserInterface } from "src/Interfaces/UserInterface";
 import { updateUserService } from "src/services/users";
 
-export default function EditUser(props) {
+export default function EditUser(props): ReactElement {
   const [updateUserLoading, setUpdateUserLoading] = useState(false);
   const formRef = useRef(null);
   const [consumersAccessListDisabled, setConsumersAccessListDisabled] =

@@ -1,10 +1,10 @@
 import { Button, Space, Table, message, Checkbox } from "antd";
 import notification from "antd/lib/notification";
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getExercisesListService, downloadService } from "src/services/records";
 
-export function ExercisesTable(props) {
+export function ExercisesTable(props): ReactElement {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);

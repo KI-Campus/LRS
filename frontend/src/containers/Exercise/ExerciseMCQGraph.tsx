@@ -1,9 +1,9 @@
-import React from "react";
+import React, { ReactElement } from "react";
 import { ChartOptions } from "chart.js";
 import { GenericBarGraph } from "src/components/GenericBarGraph";
 import { NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART } from "src/utils/constants";
 
-export default function ExerciseMCQGraph(props) {
+export default function ExerciseMCQGraph(props): ReactElement {
   const constructChartData = (
     data: Array<any>,
     title: string,

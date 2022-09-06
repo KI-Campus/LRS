@@ -1,7 +1,7 @@
+import { ReactElement } from "react";
 
-const Settings = (): React.ReactElement => {
-  return <div>Settings</div>
-  };
-  
-  export default Settings;
-  
+const Settings = (): ReactElement => {
+  return <div>Settings</div>;
+};
+
+export default Settings;

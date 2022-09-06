@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { ReactElement, useRef, useState } from "react";
 import Button from "antd/lib/button";
 import Drawer from "antd/lib/drawer";
 import Form from "antd/lib/form";
@@ -9,7 +9,7 @@ import Select from "antd/lib/select";
 import Space from "antd/lib/space";
 import { createUserService } from "src/services/users";
 
-export default function CreateUser(props) {
+export default function CreateUser(props): ReactElement {
   const [createUserDrawerVisible, setCreateUserDrawerVisible] = useState(false);
   const [createUserloading, setCreateUserLoading] = useState(false);
   const formRef = useRef(null);

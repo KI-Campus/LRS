@@ -1,5 +1,5 @@
 import { Card, Col, Row, Space, Spin, Table, Tooltip } from "antd";
-import { useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   getExerciseDetailsService,
@@ -12,7 +12,7 @@ import { SubmissionsOverTime } from "../../components/SubmissionsOverTime";
 import ExerciseEventTypesGraph from "./ExerciseEventTypesGraph";
 import ExerciseMCQGraph from "./ExerciseMCQGraph";
 
-const Exercise = (): React.ReactElement => {
+const Exercise = (): ReactElement => {
   // Fetch consumer ID and exercise ID from router : consumer/:consumerId/exercise/:exerciseId
 
   // @ts-ignore

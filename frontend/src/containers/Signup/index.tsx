@@ -7,6 +7,7 @@ import Button from "antd/lib/button";
 
 import notification from "antd/lib/notification";
 import { useAppSelector } from "../../redux/hooks";
+import { ReactElement } from "react";
 
 interface RegisterParams {
   againPassword: string;
@@ -14,7 +15,7 @@ interface RegisterParams {
   email: string;
 }
 
-const Signup = () => {
+const Signup = (): ReactElement => {
   // let dispatch = useAppDispatch();
   let loading = useAppSelector((state) => state.authModal.loading);
 

@@ -5,8 +5,9 @@ import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { login } from "../../redux/auth";
+import { ReactElement } from "react";
 
-const Login = () => {
+const Login = (): ReactElement => {
   let dispatch = useAppDispatch();
   let { loading } = useAppSelector((state) => state.authModal);
 

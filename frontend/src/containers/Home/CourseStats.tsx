@@ -3,8 +3,9 @@ import Row from "antd/lib/row";
 import Col from "antd/lib/col";
 import { Space, Tooltip } from "antd";
 import { QuestionCircleTwoTone } from "@ant-design/icons";
+import { ReactElement } from "react";
 
-export function CourseStats({ courseStatsLoading, courseStats }) {
+export function CourseStats({ courseStatsLoading, courseStats }): ReactElement {
   return (
     <div className="site-card-wrapper">
       <Row gutter={16}>

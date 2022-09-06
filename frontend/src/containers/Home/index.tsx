@@ -1,5 +1,5 @@
 import { GlobalStats } from "./GlobalStats";
-import { useEffect, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import Select from "antd/lib/select";
 import Row from "antd/lib/row";
@@ -22,7 +22,7 @@ import { ExercisesTable } from "./ExercisesTable";
 import ExerciseTypesGraph from "./ExerciseTypesGraph";
 
 const { Option } = Select;
-const Home = (): React.ReactElement => {
+const Home = (): ReactElement => {
   // @ts-ignore
   const { consumerId, courseId } = useParams();
   const [globalStatsLoading, setGlobalStatsLoading] = useState(true);

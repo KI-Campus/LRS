@@ -1,9 +1,9 @@
 import { ChartOptions } from "chart.js";
-import React from "react";
+import React, { ReactElement } from "react";
 import { GenericBarGraph } from "src/components/GenericBarGraph";
 import { NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART } from "src/utils/constants";
 
-export default function ExerciseEventTypesGraph(props) {
+export default function ExerciseEventTypesGraph(props): ReactElement {
   const options: ChartOptions = {
     responsive: true,
 
