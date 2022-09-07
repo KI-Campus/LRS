@@ -157,6 +157,7 @@ export function ExercisesTable(props): ReactElement {
 
       <h5>Total Exercises {total}</h5>
       <Checkbox
+        style={{ display: "none" }}
         defaultChecked={ignoreSubExercises}
         onChange={(e) => {
           setIgnoreSubExercises(e.target.checked);
