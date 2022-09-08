@@ -105,6 +105,8 @@ export function ExercisesTable(props): ReactElement {
       dataIndex: "type",
       key: "type",
       render: (text) => {
+        if (!text) return "N/A";
+        if (!text[0]) return "N/A";
         // Convert http://h5p.org/libraries/H5P.LibraryName-versionNumber to LibraryName versionNumber
         let label = text[0];
         if (label.includes("http://h5p.org/libraries/")) {

@@ -94,8 +94,6 @@ export function checkLoginStatus() {
       if (t) {
         setHeader(t);
         let result = await Authentication.getUser(t);
-        console.log("result: ", result);
-
         dispatch(setIsLoggedIn(true));
         dispatch(setUser(result));
       } else {
