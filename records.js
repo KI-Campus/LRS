@@ -1008,11 +1008,16 @@ async function getMCQChart(req, res, next) {
 
   // Get the number of correct answers per choice
   for (let index = 0; index < countsPerChoices.length; index++) {
-    let choice = choices.find((s) => s.key === countsPerChoices[index]._id);
-    if (choice) {
-      // Add the count of correct answers
-      choices[index].count = countsPerChoices[index].count;
-    }
+    if (!countsPerChoices[index]._id) continue;
+    if (countsPerChoices[index]._id.trim() === "") continue;
+    // If its a group of choices, then ignore it
+    if (countsPerChoices[index]._id.includes("[,]")) continue;
+
+    choices.forEach((element) => {
+      if (String(element.key) === String(countsPerChoices[index]._id)) {
+        element.count = countsPerChoices[index].count;
+      }
+    });
   }
 
   // When grouped choices are used, we need to add the counts to the individual choices
@@ -1414,6 +1419,8 @@ async function helperGetQuestion(exerciseId) {
     .collection(process.env.MONGO_XAPI_COLLECTION)
     .aggregate(pipeline)
     .toArray();
+  // Filter out null values
+  question = question.filter((element) => element.question != null);
   question = question[0]?.question;
   return question;
 }
