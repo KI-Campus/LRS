@@ -78,7 +78,7 @@ docReady(function () {
 function loadConsumerFromStorage() {
     // Set session storage for consumers
     // Check for consumer in session storage, if not then set it to all
-    if (sessionStorage.getItem("consumer") == null) {
+    if (sessionStorage.getItem("consumer") == null || sessionStorage.getItem("consumer") == undefined) {
         sessionStorage.setItem("consumer", JSON.stringify(consumersList[0]));
         consumer = String(consumersList[0].id);
 
@@ -86,12 +86,12 @@ function loadConsumerFromStorage() {
     try {
         // Load the consumer from session storage
         consumer = JSON.parse(sessionStorage.getItem("consumer"));
-        consumerID = consumer.id;
+
 
     }
     catch (e) {
-        consumer = "all";
-        consumerID = "all";
+        sessionStorage.setItem("consumer", JSON.stringify(consumersList[0]));
+        consumer = String(consumersList[0].id);
         console.log("Error loading consumer from storage", e);
     }
 }
