@@ -1,7 +1,13 @@
 import React, { ReactElement } from "react";
 import { ChartOptions } from "chart.js";
 import { GenericBarGraph } from "src/components/GenericBarGraph";
-import { NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART } from "src/utils/constants";
+import {
+  NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART,
+  COLOR_CORRECT_ANSWER,
+  COLOR_WRONG_ANSWER,
+  COLOR_CORRECT_ANSWER_DARK,
+  COLOR_WRONG_ANSWER_DARK,
+} from "src/utils/constants";
 
 export default function ExerciseMCQGraph(props): ReactElement {
   const constructChartData = (
@@ -47,8 +53,12 @@ export default function ExerciseMCQGraph(props): ReactElement {
           label: title,
           display: true,
           data: data.map((item) => item.count || 0),
-          backgroundColor: data.map((item) => item.backgroundColor),
-          borderColor: data.map((item) => item.borderColor),
+          backgroundColor: data.map((item) =>
+            item.isCorrect ? COLOR_CORRECT_ANSWER : COLOR_WRONG_ANSWER
+          ),
+          borderColor: data.map((item) =>
+            item.isCorrect ? COLOR_CORRECT_ANSWER_DARK : COLOR_WRONG_ANSWER_DARK
+          ),
           borderWidth: 1,
           tension: 0.3,
         },

@@ -121,6 +121,24 @@ const Exercise = (): ReactElement => {
     }
   }, [exercise]);
 
+  // Add isCorrect property to each choice when correct MCQ response is available
+  useEffect(() => {
+    if (mcqChartCorrectResponse && mcqChartData) {
+      let mcqDataCompleteData = mcqChartData;
+      // Iterate over the mcqDataCompleteData
+      for (let i = 0; i < mcqDataCompleteData.choices.length; i++) {
+        // Current item
+        let item = mcqDataCompleteData.choices[i];
+        if (mcqChartCorrectResponse.includes(String(i))) {
+          item.isCorrect = true;
+        } else {
+          item.isCorrect = false;
+        }
+      }
+      setMcqChartData(mcqDataCompleteData);
+    }
+  }, [mcqChartCorrectResponse, mcqChartData, mcqChartLoading]);
+
   const childExercisesTableColumns = [
     {
       title: "Title",

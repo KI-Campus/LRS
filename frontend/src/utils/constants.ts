@@ -31,3 +31,9 @@ export const API_USER_REGISTER = "users/register";
 export const API_GET_GLOBAL_STATS = "records/stats";
 
 export const NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART = 25;
+
+export const COLOR_CORRECT_ANSWER = "#0000ff99";
+export const COLOR_WRONG_ANSWER = "#ff0000b3";
+
+export const COLOR_CORRECT_ANSWER_DARK = "#0000ff";
+export const COLOR_WRONG_ANSWER_DARK = "#ff0000";
