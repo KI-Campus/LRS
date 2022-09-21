@@ -11,6 +11,7 @@ import { SubmissionsOverTime } from "../../components/SubmissionsOverTime";
 
 import ExerciseEventTypesGraph from "./ExerciseEventTypesGraph";
 import ExerciseMCQGraph from "./ExerciseMCQGraph";
+import TrueFalseGraph from "./TrueFalseGraph";
 
 const Exercise = (): ReactElement => {
   // Fetch consumer ID and exercise ID from router : consumer/:consumerId/exercise/:exerciseId
@@ -37,6 +38,8 @@ const Exercise = (): ReactElement => {
   const [mcqChartLoading, setMcqChartLoading] = useState(true);
   const [mcqChartData, setMcqChartData] = useState<any>();
   const [mcqChartCorrectResponse, setMcqChartCorrectResponse] = useState<any>();
+
+  const [trueFalseChartData, setTrueFalseChartData] = useState<any>();
 
   useEffect(() => {
     fetchExercise(exerciseId, subExerciseId);
@@ -100,6 +103,21 @@ const Exercise = (): ReactElement => {
       ) !== -1
     ) {
       fetchMCQChartData(exerciseId, subExerciseId);
+    }
+
+    if (
+      String(exercise?.type).search(
+        "http://h5p.org/libraries/H5P.TrueFalse"
+      ) !== -1
+    ) {
+      let trueFalseData = [
+        { title: "True", count: exercise.totalPassingEvents },
+        {
+          title: "False",
+          count: exercise.totalSubmissions - exercise.totalPassingEvents,
+        },
+      ];
+      setTrueFalseChartData(trueFalseData);
     }
   }, [exercise]);
 
@@ -241,6 +259,21 @@ const Exercise = (): ReactElement => {
                   <div className="shadow-bordered">
                     <Card loading={exerciseLoading} title={"Exercise Question"}>
                       {exercise?.question || "N/A"}
+                    </Card>
+                  </div>
+                </Col>
+              </Row>
+            )}
+            <br />
+            {String(exercise?.type)?.search("H5P.TrueFalse") > 0 && (
+              <Row>
+                <Col span={6}>
+                  <div className="shadow-bordered">
+                    <Card loading={exerciseLoading} title={"True False Chart"}>
+                      <TrueFalseGraph
+                        data={trueFalseChartData}
+                        loading={exerciseLoading}
+                      />
                     </Card>
                   </div>
                 </Col>
