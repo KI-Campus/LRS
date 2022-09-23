@@ -1,10 +1,16 @@
 import { GlobalStats } from "./GlobalStats";
-import { ReactElement, useEffect, useRef, useState } from "react";
+import {
+  ReactComponentElement,
+  ReactElement,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useParams } from "react-router-dom";
 import Select from "antd/lib/select";
 import Row from "antd/lib/row";
 import Col from "antd/lib/col";
-import { Divider, Space, Spin } from "antd";
+import { Button, Divider, Space, Spin } from "antd";
 
 import { ConsumerInterface } from "src/Interfaces/ConsumerInterface";
 import { CourseInterface } from "src/Interfaces/CourseInterface";
@@ -20,6 +26,9 @@ import { CourseStats } from "./CourseStats";
 import { SubmissionsOverTime } from "../../components/SubmissionsOverTime";
 import { ExercisesTable } from "./ExercisesTable";
 import ExerciseTypesGraph from "./ExerciseTypesGraph";
+import DownloadModal, {
+  DownloadModalProps,
+} from "src/components/DownloadModal";
 
 const { Option } = Select;
 const Home = (): ReactElement => {
@@ -53,6 +62,20 @@ const Home = (): ReactElement => {
   const [courseExerciseTypesCount, setCourseExerciseTypesCount] = useState<any>(
     {}
   );
+
+  const [downloadModalOpen, setDownloadModalOpen] = useState<boolean>(false);
+  const [downloadOptions, setDownloadOptions] = useState<DownloadModalProps>({
+    consumer: "",
+    course: "",
+    exercise: "",
+    ignoreSubExercises: 0,
+    includeSimplifyRecords: 1,
+    includeRAWRecords: 1,
+    isConsumerSelected: false,
+    isCourseSelected: false,
+    isExerciseSelected: false,
+    selectedText: "",
+  });
 
   const handleConsumerSelect = (value: string) => {
     // window.history.replaceState(null, document.title, "/consumer/" + value)
@@ -192,9 +215,15 @@ const Home = (): ReactElement => {
         globalStatsLoading={globalStatsLoading}
         globalStats={globalStats}
       />
-
+      <DownloadModal
+        {...downloadOptions}
+        isOpen={downloadModalOpen}
+        modalCloserFunction={setDownloadModalOpen}
+        consumer={consumerId}
+        course={courseId}
+        selectedText={downloadOptions.selectedText}
+      />
       <Divider />
-
       <Row align="bottom">
         <Col span={4}>
           <h3>Select a consumer</h3>
@@ -231,10 +260,29 @@ const Home = (): ReactElement => {
             })}
           </Select>
         </Col>
+        <Col span={6} style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            onClick={() => {
+              setDownloadModalOpen(true);
+              setDownloadOptions({
+                consumer: selectedConsumer,
+                course: null,
+                exercise: null,
+                ignoreSubExercises: 0,
+                includeSimplifyRecords: 0,
+                includeRAWRecords: 1,
+                isConsumerSelected: true,
+                isCourseSelected: false,
+                isExerciseSelected: false,
+                selectedText: "Consumer " + selectedConsumer,
+              });
+            }}
+          >
+            Download
+          </Button>
+        </Col>
       </Row>
-
       <Divider></Divider>
-
       <Row align="bottom">
         <Col span={4}>
           <h3>Select a course</h3>
@@ -290,6 +338,28 @@ const Home = (): ReactElement => {
               );
             })}
           </Select>
+        </Col>
+        <Col span={6} style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button
+            disabled={!selectedCourse}
+            onClick={() => {
+              setDownloadModalOpen(true);
+              setDownloadOptions({
+                consumer: selectedConsumer,
+                course: selectedCourse,
+                exercise: null,
+                ignoreSubExercises: 0,
+                includeSimplifyRecords: 0,
+                includeRAWRecords: 1,
+                isConsumerSelected: false,
+                isCourseSelected: true,
+                isExerciseSelected: false,
+                selectedText: "Course " + selectedCourseDetails.title,
+              });
+            }}
+          >
+            Download
+          </Button>
         </Col>
       </Row>
       <Divider></Divider>

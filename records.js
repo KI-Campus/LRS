@@ -1121,7 +1121,7 @@ async function download(req, res, next) {
   if (exerciseId) {
     pipeline.push({
       $match: {
-        "xAPI.object.id": exerciseId,
+        "xAPI.object.id": { $regex: exerciseId },
       },
     });
   }

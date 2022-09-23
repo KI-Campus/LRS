@@ -32,9 +32,9 @@ export const downloadService = async (
   consumerId: string = null,
   courseId: string = null,
   exerciseId: string = null,
-  ignoreSubExercises = false,
-  includeSimplifyRecords = true,
-  includeRAWRecords = true
+  ignoreSubExercises = null,
+  includeSimplifyRecords = null,
+  includeRAWRecords = null
 ) => {
   let query = `${API_GET_DOWNLOAD}?`;
 
@@ -44,11 +44,11 @@ export const downloadService = async (
 
   if (exerciseId) query += `exercise=${exerciseId}&`;
 
-  if (ignoreSubExercises) query += "&ignoreSubExercises=true";
+  if (ignoreSubExercises) query += "&ignoreSubExercises=1";
 
-  if (includeSimplifyRecords) query += "&includeSimplifyRecords=true";
+  if (includeSimplifyRecords) query += "&includeSimplifyRecords=1";
 
-  if (includeRAWRecords) query += "&includeRAWRecords=true";
+  if (includeRAWRecords) query += "&includeRAWRecords=1";
 
   const response = await axios.get(query);
   return response.data;

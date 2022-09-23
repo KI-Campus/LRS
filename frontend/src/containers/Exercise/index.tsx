@@ -1,4 +1,4 @@
-import { Card, Col, Row, Space, Spin, Table, Tooltip } from "antd";
+import { Button, Card, Col, Row, Space, Spin, Table, Tooltip } from "antd";
 import { ReactElement, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
@@ -12,6 +12,7 @@ import { SubmissionsOverTime } from "../../components/SubmissionsOverTime";
 import ExerciseEventTypesGraph from "./ExerciseEventTypesGraph";
 import ExerciseMCQGraph from "./ExerciseMCQGraph";
 import TrueFalseGraph from "./TrueFalseGraph";
+import DownloadModal from "src/components/DownloadModal";
 
 const Exercise = (): ReactElement => {
   // Fetch consumer ID and exercise ID from router : consumer/:consumerId/exercise/:exerciseId
@@ -40,6 +41,8 @@ const Exercise = (): ReactElement => {
   const [mcqChartCorrectResponse, setMcqChartCorrectResponse] = useState<any>();
 
   const [trueFalseChartData, setTrueFalseChartData] = useState<any>();
+
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
 
   useEffect(() => {
     fetchExercise(exerciseId, subExerciseId);
@@ -176,7 +179,28 @@ const Exercise = (): ReactElement => {
 
   return (
     <>
-      <h2>Exercise Details</h2>
+      <Row>
+        <Col span={18}>
+          <h2>Exercise Details</h2>
+        </Col>
+        <Col span={6} style={{ display: "flex", justifyContent: "flex-end" }}>
+          <Button onClick={() => setDownloadModalOpen(true)}>Download</Button>
+        </Col>
+      </Row>
+      <DownloadModal
+        consumer={consumerId}
+        course={courseId}
+        exercise={exerciseId}
+        ignoreSubExercises={0}
+        includeSimplifyRecords={0}
+        includeRAWRecords={1}
+        isConsumerSelected={false}
+        isCourseSelected={false}
+        isExerciseSelected={true}
+        selectedText={exercise?.title ?? ""}
+        isOpen={downloadModalOpen}
+        modalCloserFunction={setDownloadModalOpen}
+      />
 
       {exerciseLoading ? (
         <Spin>Loading</Spin>

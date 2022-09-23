@@ -2,6 +2,9 @@ import { Button, Space, Table, message, Checkbox } from "antd";
 import notification from "antd/lib/notification";
 import { ReactElement, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import DownloadModal, {
+  DownloadModalProps,
+} from "src/components/DownloadModal";
 import { getExercisesListService, downloadService } from "src/services/records";
 
 export function ExercisesTable(props): ReactElement {
@@ -13,6 +16,20 @@ export function ExercisesTable(props): ReactElement {
 
   const [selectedExercise, setSelectedExercise] = useState("");
   const [ignoreSubExercises, setIgnoreSubExercises] = useState(true);
+
+  const [downloadModalOpen, setDownloadModalOpen] = useState<boolean>(false);
+  const [downloadOptions, setDownloadOptions] = useState<DownloadModalProps>({
+    consumer: "",
+    course: "",
+    exercise: "",
+    ignoreSubExercises: 0,
+    includeSimplifyRecords: 1,
+    includeRAWRecords: 1,
+    isConsumerSelected: false,
+    isCourseSelected: false,
+    isExerciseSelected: false,
+    selectedText: "",
+  });
 
   const fetchExercises = async (currentPage, pageSize) => {
     setLoading(true);
@@ -42,34 +59,21 @@ export function ExercisesTable(props): ReactElement {
   };
 
   const onExerciseDownload = (exercise) => {
-    let messageReturn = message.loading({ content: "Downloading exercise..." });
-
-    downloadService(props.consumer, props.course, exercise._id)
-      .then((res) => {
-        const file = new Blob([JSON.stringify(res)], {
-          type: "application/json",
-        });
-        const fileURL = URL.createObjectURL(file);
-        const link = document.createElement("a");
-        link.href = fileURL;
-        link.setAttribute("download", exercise.title + ".json");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        messageReturn();
-        message.success({
-          content: "Exercise Downloaded Successfully!",
-          duration: 1,
-        });
-      })
-      .catch((err) => {
-        console.log("Error while downloading exercise", err);
-        message.error({
-          content: "Error downloading",
-          duration: 2,
-        });
-      });
+    console.log("downloading exercise", exercise);
+    setDownloadModalOpen(true);
+    setDownloadOptions({
+      consumer: props.consumerId,
+      course: props.courseId,
+      exercise: exercise._id,
+      ignoreSubExercises: 0,
+      includeSimplifyRecords: 0,
+      includeRAWRecords: 1,
+      isConsumerSelected: false,
+      isCourseSelected: false,
+      isExerciseSelected: true,
+      selectedText:
+        "Exercise " + exercise.title + " (ID: " + exercise._id + ")",
+    });
   };
 
   useEffect(() => {
@@ -156,6 +160,15 @@ export function ExercisesTable(props): ReactElement {
   return (
     <>
       <h3>List of Exercises</h3>
+
+      <DownloadModal
+        {...downloadOptions}
+        isOpen={downloadModalOpen}
+        modalCloserFunction={setDownloadModalOpen}
+        consumer={props.consumerId}
+        course={props.courseId}
+        selectedText={downloadOptions.selectedText}
+      />
 
       <h5>Total Exercises {total}</h5>
       <Checkbox
