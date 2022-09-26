@@ -63,6 +63,9 @@ const Home = (): ReactElement => {
     {}
   );
 
+  const [courseExerciseTypesOnly, setCourseExerciseTypesOnly] =
+    useState<string[]>();
+
   const [downloadModalOpen, setDownloadModalOpen] = useState<boolean>(false);
   const [downloadOptions, setDownloadOptions] = useState<DownloadModalProps>({
     consumer: "",
@@ -174,10 +177,18 @@ const Home = (): ReactElement => {
     result
       .then((res) => {
         setCourseExerciseTypesCount(res);
+        // Loop through the result and get the exercise types
+        let exerciseTypes = [];
+        res.forEach((element) => {
+          exerciseTypes.push(element._id);
+        });
+
+        setCourseExerciseTypesOnly(exerciseTypes);
         setCourseExerciseTypesCountLoading(false);
       })
       .catch((err) => {
         console.log(err);
+        setCourseExerciseTypesOnly([]);
         setCourseExerciseTypesCountLoading(false);
       });
   };
@@ -404,6 +415,7 @@ const Home = (): ReactElement => {
             <Col span={24}>
               {selectedConsumer && selectedCourse && (
                 <ExercisesTable
+                  types={courseExerciseTypesOnly}
                   courseId={selectedCourse}
                   consumerId={selectedConsumer}
                 />

@@ -18,11 +18,21 @@ export const getExercisesListService = async (
   courseId: string,
   page: number,
   pageSize: number,
-  ignoreSubExercises = true
+  ignoreSubExercises = true,
+  exerciseTypeFilters: string[] = [],
+  search: string = undefined
 ) => {
   let url = `${API_GET_EXERCISES}?consumer=${consumerId}&course=${courseId}&page=${page}&pageSize=${pageSize}`;
   if (ignoreSubExercises) {
     url += "&ignoreSubExercises=1";
+  }
+  // Include only the exercise types that are selected in the filter with inverted commas
+  if (exerciseTypeFilters.length > 0) {
+    url += `&exerciseTypeFilters=${JSON.stringify(exerciseTypeFilters)}`;
+  }
+  // Include the search text if it is not empty
+  if (search) {
+    url += `&search=${search}`;
   }
   const response = await axios.get(url);
   return response.data;

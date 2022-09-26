@@ -479,6 +479,16 @@ async function getExercises(req, res, next) {
   let consumer = req.query.consumer ? req.query.consumer : "all";
   let courseId = req.query.course ? req.query.course : undefined;
 
+  let search = req.query.search ? req.query.search : undefined;
+  let exerciseTypeFilters = req.query.exerciseTypeFilters
+    ? req.query.exerciseTypeFilters
+    : undefined;
+
+  // Convert exerciseTypeFilters into Javascript array
+  if (exerciseTypeFilters) {
+    exerciseTypeFilters = JSON.parse(exerciseTypeFilters);
+  }
+
   if (!courseId) {
     res.status(400).send({ error: "Invalid course ID" }).end();
     return;
@@ -540,6 +550,39 @@ async function getExercises(req, res, next) {
           "metadata.session.custom_consumer": consumer,
         },
       });
+    }
+
+    if (search) {
+      let searchPipeline = {
+        $match: {
+          $or: [
+            {
+              title: {
+                $regex: search,
+                $options: "i",
+              },
+            },
+            {
+              _id: {
+                $regex: search,
+                $options: "i",
+              },
+            },
+          ],
+        },
+      };
+      pipeline.splice(3, 0, searchPipeline);
+    }
+
+    if (exerciseTypeFilters) {
+      let exerciseTypeFiltersPipeline = {
+        $match: {
+          type: {
+            $in: exerciseTypeFilters,
+          },
+        },
+      };
+      pipeline.splice(3, 0, exerciseTypeFiltersPipeline);
     }
 
     if (ignoreSubExercises) {

@@ -1,4 +1,15 @@
-import { Button, Space, Table, message, Checkbox } from "antd";
+import {
+  Button,
+  Space,
+  Table,
+  message,
+  Checkbox,
+  Menu,
+  Radio,
+  Row,
+  Col,
+  Input,
+} from "antd";
 import notification from "antd/lib/notification";
 import { ReactElement, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -31,6 +42,9 @@ export function ExercisesTable(props): ReactElement {
     selectedText: "",
   });
 
+  const [exerciseTypesFilter, setExerciseTypesFilter] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState<string>(undefined);
+
   const fetchExercises = async (currentPage, pageSize) => {
     setLoading(true);
     let result = getExercisesListService(
@@ -38,7 +52,9 @@ export function ExercisesTable(props): ReactElement {
       props.courseId,
       currentPage,
       pageSize,
-      ignoreSubExercises
+      ignoreSubExercises,
+      exerciseTypesFilter,
+      searchText
     );
     result
       .then((res) => {
@@ -59,7 +75,6 @@ export function ExercisesTable(props): ReactElement {
   };
 
   const onExerciseDownload = (exercise) => {
-    console.log("downloading exercise", exercise);
     setDownloadModalOpen(true);
     setDownloadOptions({
       consumer: props.consumerId,
@@ -78,7 +93,18 @@ export function ExercisesTable(props): ReactElement {
 
   useEffect(() => {
     fetchExercises(page, pageSize);
-  }, [props.courseId, props.consumerId, ignoreSubExercises]);
+  }, [
+    props.courseId,
+    props.consumerId,
+    ignoreSubExercises,
+    exerciseTypesFilter,
+    searchText,
+  ]);
+
+  useEffect(() => {
+    setSearchText(undefined);
+    setExerciseTypesFilter([]);
+  }, [props.courseId, props.consumerId]);
 
   const columns = [
     {
@@ -118,6 +144,49 @@ export function ExercisesTable(props): ReactElement {
         }
         return text ?? "N/A";
       },
+      filteredValue: exerciseTypesFilter,
+      filterDropdown: ({ confirm }) => (
+        <div>
+          <Menu>
+            {props.types?.map &&
+              props.types?.map((type) => (
+                <Menu.Item key={type}>
+                  <Checkbox
+                    style={{ width: "100%" }}
+                    checked={exerciseTypesFilter.includes(type)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setExerciseTypesFilter([...exerciseTypesFilter, type]);
+                      } else {
+                        setExerciseTypesFilter(
+                          exerciseTypesFilter.filter((t) => t !== type)
+                        );
+                      }
+                    }}
+                  >
+                    {String(type)?.split("http://h5p.org/libraries/")[1]}
+                  </Checkbox>
+                </Menu.Item>
+              ))}
+          </Menu>
+          <div>
+            <Button
+              onClick={() => {
+                setExerciseTypesFilter([]);
+              }}
+              style={{
+                width: "90%",
+                marginTop: 2,
+                marginBottom: 8,
+                marginLeft: 8,
+                marginRight: 8,
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
     },
     {
       title: "Total Submissions",
@@ -160,6 +229,43 @@ export function ExercisesTable(props): ReactElement {
   return (
     <>
       <h3>List of Exercises</h3>
+      {searchText && (
+        <>
+          <Row gutter={20}>
+            <Col>
+              <h3>Showing search results for: {searchText}</h3>
+            </Col>
+            <Col>
+              <Button
+                onClick={() => {
+                  setSearchText(undefined);
+                }}
+                size={"small"}
+              >
+                Clear
+              </Button>
+            </Col>
+          </Row>
+          <br />
+        </>
+      )}
+
+      {!searchText && (
+        <>
+          <Row gutter={20}>
+            <Col>
+              <Input.Search
+                placeholder="Search by exercise title or ID"
+                onSearch={(value) => {
+                  setSearchText(value);
+                }}
+                enterButton
+              />
+            </Col>
+          </Row>
+          <br />
+        </>
+      )}
 
       <DownloadModal
         {...downloadOptions}
