@@ -114,7 +114,7 @@ export function ExercisesTable(props): ReactElement {
       render: (text, record) =>
         record._id.search("subContentId") > -1 ? (
           <Link
-            to={`consumer/${props.consumerId}/course/${
+            to={`/consumer/${props.consumerId}/course/${
               props.courseId
             }/exercise/${record._id.split("?subContentId=")[0]}/sub/${
               record._id.split("?subContentId=")[1]
@@ -124,7 +124,7 @@ export function ExercisesTable(props): ReactElement {
           </Link>
         ) : (
           <Link
-            to={`consumer/${props.consumerId}/course/${props.courseId}/exercise/${record._id}`}
+            to={`/consumer/${props.consumerId}/course/${props.courseId}/exercise/${record._id}`}
           >
             {record.title}
           </Link>

@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useHistory } from "react-router-dom";
 import Select from "antd/lib/select";
 import Row from "antd/lib/row";
 import Col from "antd/lib/col";
@@ -32,6 +32,8 @@ import DownloadModal, {
 
 const { Option } = Select;
 const Home = (): ReactElement => {
+  let history = useHistory();
+
   // @ts-ignore
   const { consumerId, courseId } = useParams();
   const [globalStatsLoading, setGlobalStatsLoading] = useState(true);
@@ -81,12 +83,12 @@ const Home = (): ReactElement => {
   });
 
   const handleConsumerSelect = (value: string) => {
-    // window.history.replaceState(null, document.title, "/consumer/" + value)
+    history.push("/consumer/" + value);
     setSelectedConsumer(value);
   };
 
   const handleCourseSelect = (value: string) => {
-    // window.history.replaceState(null, document.title, "/consumer/" + String(selectedConsumer) + String("/course/") + String(value))
+    history.push("/consumer/" + consumerId + "/course/" + value);
     setSelectedCourse(value);
   };
 

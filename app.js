@@ -16,6 +16,26 @@ app.use(express.json({ limit: "500mb" }));
 // Serve files in public folder
 app.use(express.static("frontend/build"));
 
+app.use("/consumer/:consumerId", express.static("frontend/build"));
+app.use(
+  "/consumer/:consumerId/course/:courseId",
+  express.static("frontend/build")
+);
+app.use(
+  "/consumer/:consumerId/course/:courseId/exercise/:exerciseId",
+  express.static("frontend/build")
+);
+
+app.use(
+  "/consumer/:consumerId/course/:courseId/exercise/:exerciseId/sub/:subExerciseId",
+  express.static("frontend/build")
+);
+
+app.use("/consumers", express.static("frontend/build"));
+app.use("/users", express.static("frontend/build"));
+app.use("/login", express.static("frontend/build"));
+app.use("/register", express.static("frontend/build"));
+
 // Use JWT auth to secure the API
 app.use(jwt());
 
