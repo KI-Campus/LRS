@@ -96,7 +96,9 @@ const Home = (): ReactElement => {
   };
 
   const fetchCourses = () => {
-    let result = getCoursesListService(selectedConsumer);
+    let result;
+    if (!courseId) result = getCoursesListService(selectedConsumer);
+    else result = getCoursesListService(consumerId);
     result
       .then((res) => {
         setCourses(res);
