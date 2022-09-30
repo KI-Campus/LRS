@@ -14,6 +14,7 @@ import ExerciseMCQGraph from "./ExerciseMCQGraph";
 import TrueFalseGraph from "./TrueFalseGraph";
 import DownloadModal from "src/components/DownloadModal";
 
+import BackButton from "src/components/BackButton";
 const Exercise = (): ReactElement => {
   // Fetch consumer ID and exercise ID from router : consumer/:consumerId/exercise/:exerciseId
 
@@ -181,7 +182,12 @@ const Exercise = (): ReactElement => {
     <>
       <Row>
         <Col span={18}>
-          <h2>Exercise Details</h2>
+          <h2>
+            <Space>
+              <BackButton />
+              Exercise Details
+            </Space>
+          </h2>
         </Col>
         <Col span={6} style={{ display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={() => setDownloadModalOpen(true)}>Download</Button>

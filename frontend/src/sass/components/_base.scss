@@ -145,3 +145,10 @@ body {
 .shadow-bordered {
   box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.2);
 }
+
+.backButton { 
+  cursor: pointer;
+}
+.backButton:hover {
+  color: #116af4;
+}
