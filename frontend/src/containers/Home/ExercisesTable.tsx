@@ -126,7 +126,7 @@ export function ExercisesTable(props): ReactElement {
           <Link
             to={`/consumer/${props.consumerId}/course/${props.courseId}/exercise/${record._id}`}
           >
-            {record.title}
+            {record.title ?? "N/A"}
           </Link>
         ),
     },
