@@ -88,7 +88,10 @@ const Home = (): ReactElement => {
   };
 
   const handleCourseSelect = (value: string) => {
-    history.push("/consumer/" + consumerId + "/course/" + value);
+    if (consumerId)
+      history.push("/consumer/" + consumerId + "/course/" + value);
+    if (selectedConsumer)
+      history.push("/consumer/" + selectedConsumer + "/course/" + value);
     setSelectedCourse(value);
   };
 
@@ -132,7 +135,7 @@ const Home = (): ReactElement => {
       .then((res) => {
         setConsumers(res);
         setConsumersLoading(false);
-        // Select the first consumer
+        // Select the first consumer or the one from the URL
         if (consumerId) {
           setSelectedConsumer(consumerId);
         } else {
