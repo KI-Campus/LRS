@@ -1,6 +1,12 @@
 import { ChartOptions } from "chart.js";
 import React, { ReactElement } from "react";
 import { GenericBarGraph } from "src/components/GenericBarGraph";
+import {
+  COLOR_CORRECT_ANSWER,
+  COLOR_CORRECT_ANSWER_DARK,
+  COLOR_WRONG_ANSWER,
+  COLOR_WRONG_ANSWER_DARK,
+} from "src/utils/constants";
 
 export default function TrueFalseGraph(props): ReactElement {
   const options: ChartOptions = {
@@ -25,7 +31,7 @@ export default function TrueFalseGraph(props): ReactElement {
   ) => {
     // Add random color to the data
 
-    for (let i = 0; i < data.length; i++) {
+    for (let i = 0; i < data?.length; i++) {
       let randomRed = Math.floor(Math.random() * 255);
       let randomGreen = Math.floor(Math.random() * 255);
       let randomBlue = Math.floor(Math.random() * 255);
@@ -51,8 +57,12 @@ export default function TrueFalseGraph(props): ReactElement {
           label: "Number of times submitted",
           display: true,
           data: data.map((item) => item.count || 0),
-          backgroundColor: data.map((item) => item.backgroundColor),
-          borderColor: data.map((item) => item.borderColor),
+          backgroundColor: data.map((item) =>
+            item.isCorrect ? COLOR_CORRECT_ANSWER : COLOR_WRONG_ANSWER
+          ),
+          borderColor: data.map((item) =>
+            item.isCorrect ? COLOR_CORRECT_ANSWER_DARK : COLOR_WRONG_ANSWER_DARK
+          ),
           borderWidth: 1,
           tension: 0.3,
         },

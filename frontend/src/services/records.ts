@@ -6,6 +6,7 @@ import {
   API_GET_EXERCISE_DETAILS,
   API_GET_EXERCISE_SUBMISSIONS_BY_TIME,
   API_GET_MCQ_CHART,
+  API_GET_TRUE_FALSE_CHART,
 } from "src/utils/constants";
 
 export const getGlobalStatsService = async () => {
@@ -94,6 +95,20 @@ export const getMCQChartService = async (
   subExerciseId: string
 ) => {
   let query = `${API_GET_MCQ_CHART}/${exerciseId}`;
+  if (subExerciseId) {
+    query += `/${subExerciseId}`;
+  }
+  const response = await axios.get(query);
+
+  return response.data;
+};
+
+// Get True False
+export const getTrueFalseChartService = async (
+  exerciseId: string,
+  subExerciseId: string
+) => {
+  let query = `${API_GET_TRUE_FALSE_CHART}/${exerciseId}`;
   if (subExerciseId) {
     query += `/${subExerciseId}`;
   }

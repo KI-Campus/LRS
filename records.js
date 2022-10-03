@@ -33,6 +33,9 @@ router.use("/exerciseSubmissionsOverTime/:id/:subExerciseId", checkUserAccess);
 router.use("/mcqChart/:id", checkUserAccess);
 router.use("/mcqChart/:id/:subExerciseId", checkUserAccess);
 
+router.use("/trueFalseChart/:id", checkUserAccess);
+router.use("/trueFalseChart/:id/:subExerciseId", checkUserAccess);
+
 // openLRS routes
 router.get("/stats", getStats);
 router.get("/courses", getCourses);
@@ -52,6 +55,9 @@ router.get(
 );
 router.get("/mcqChart/:id", getMCQChart);
 router.get("/mcqChart/:id/:subExerciseId", getMCQChart);
+
+router.get("/trueFalseChart/:id", getTrueFalseChart);
+router.get("/trueFalseChart/:id/:subExerciseId", getTrueFalseChart);
 
 async function checkUserAccess(req, res, next) {
   req.query.consumer ? (consumer = req.body.consumer) : (consumer = "all");
@@ -1027,8 +1033,9 @@ async function getMCQChart(req, res, next) {
   let countsPerChoicepipeline = [
     {
       $match: {
-        "xAPI.context.contextActivities.category.id":
-          "http://h5p.org/libraries/H5P.MultiChoice-1.14",
+        "xAPI.context.contextActivities.category.id": {
+          $regex: "http://h5p.org/libraries/H5P.MultiChoice",
+        },
         "xAPI.object.id": exerciseId,
         "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
       },
@@ -1090,8 +1097,9 @@ async function getMCQChart(req, res, next) {
   correctResponsePipeline = [
     {
       $match: {
-        "xAPI.context.contextActivities.category.id":
-          "http://h5p.org/libraries/H5P.MultiChoice-1.14",
+        "xAPI.context.contextActivities.category.id": {
+          $regex: "http://h5p.org/libraries/H5P.MultiChoice",
+        },
         "xAPI.object.id": exerciseId,
         "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
       },
@@ -1122,6 +1130,55 @@ async function getMCQChart(req, res, next) {
   }
 
   res.status(200).send({ choices, correctResponsesPattern });
+}
+
+async function getTrueFalseChart(req, res, next) {
+  let exerciseId = req.params.id ? req.params.id : undefined;
+  // let subExerciseId
+
+  if (!exerciseId) {
+    res.status(400).send({ error: "Invalid exerciseId" }).end();
+    return;
+  }
+
+  let subExerciseId = req.params.subExerciseId
+    ? req.params.subExerciseId
+    : undefined;
+  if (subExerciseId) {
+    exerciseId = exerciseId + "?subContentId=" + subExerciseId;
+  }
+
+  // Get the correct answers query
+  correctResponsePipeline = [
+    {
+      $match: {
+        "xAPI.object.id": exerciseId,
+        "xAPI.result.completion": true,
+      },
+    },
+
+    {
+      $group: {
+        _id: "$xAPI.result.response",
+        title: { $last: "$xAPI.result.response" },
+        isCorrect: { $last: "$xAPI.result.success" },
+        count: { $sum: 1 },
+      },
+    },
+    {
+      $sort: {
+        title: -1,
+      },
+    },
+  ];
+
+  let correctResponsesPatternQuery = await m_client
+    .db()
+    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .aggregate(correctResponsePipeline)
+    .toArray();
+
+  res.status(200).send(correctResponsesPatternQuery);
 }
 
 async function download(req, res, next) {

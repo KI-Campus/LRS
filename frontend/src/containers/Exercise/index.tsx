@@ -5,6 +5,7 @@ import {
   getExerciseDetailsService,
   getExerciseSubmissionsOverTimeService,
   getMCQChartService,
+  getTrueFalseChartService,
 } from "src/services/records";
 import { QuestionCircleTwoTone } from "@ant-design/icons";
 import { SubmissionsOverTime } from "../../components/SubmissionsOverTime";
@@ -42,6 +43,8 @@ const Exercise = (): ReactElement => {
   const [mcqChartCorrectResponse, setMcqChartCorrectResponse] = useState<any>();
 
   const [trueFalseChartData, setTrueFalseChartData] = useState<any>();
+  const [trueFalseChartDataLoading, setTrueFalseChartDataLoading] =
+    useState(true);
 
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
 
@@ -94,8 +97,22 @@ const Exercise = (): ReactElement => {
         setMcqChartLoading(false);
       })
       .catch((err) => {
-        console.log("Error while loading exercise submissions over time", err);
+        console.log("Error while loading MCQ chart data", err);
         setMcqChartLoading(false);
+      });
+  };
+
+  const fetchTrueFalseChartData = (id: string, subId = null) => {
+    setTrueFalseChartDataLoading(true);
+    let result = getTrueFalseChartService(id, subId);
+    result
+      .then((res) => {
+        setTrueFalseChartDataLoading(false);
+        setTrueFalseChartData(res);
+      })
+      .catch((err) => {
+        setTrueFalseChartDataLoading(false);
+        console.log("Error while loading True False Chart Data", err);
       });
   };
 
@@ -114,14 +131,7 @@ const Exercise = (): ReactElement => {
         "http://h5p.org/libraries/H5P.TrueFalse"
       ) !== -1
     ) {
-      let trueFalseData = [
-        { title: "True", count: exercise.totalPassingEvents },
-        {
-          title: "False",
-          count: exercise.totalSubmissions - exercise.totalPassingEvents,
-        },
-      ];
-      setTrueFalseChartData(trueFalseData);
+      fetchTrueFalseChartData(exerciseId, subExerciseId);
     }
   }, [exercise]);
 
@@ -262,6 +272,7 @@ const Exercise = (): ReactElement => {
               )}
             </Row>
             <br />
+
             <Row gutter={16}>
               <Col span={4}>
                 <Card loading={exerciseLoading} title="Total Records">
@@ -312,21 +323,26 @@ const Exercise = (): ReactElement => {
                 </Col>
               </Row>
             )}
+
             <br />
-            {String(exercise?.type)?.search("H5P.TrueFalse") > 0 && (
-              <Row>
-                <Col span={6}>
-                  <div className="shadow-bordered">
-                    <Card loading={exerciseLoading} title={"True False Chart"}>
-                      <TrueFalseGraph
-                        data={trueFalseChartData}
+            {String(exercise?.type)?.search("H5P.TrueFalse") > 0 &&
+              trueFalseChartData?.length > 0 && (
+                <Row>
+                  <Col span={6}>
+                    <div className="shadow-bordered">
+                      <Card
                         loading={exerciseLoading}
-                      />
-                    </Card>
-                  </div>
-                </Col>
-              </Row>
-            )}
+                        title={"True False Chart"}
+                      >
+                        <TrueFalseGraph
+                          data={trueFalseChartData}
+                          loading={exerciseLoading}
+                        />
+                      </Card>
+                    </div>
+                  </Col>
+                </Row>
+              )}
             <br />
             {exercise?.choices && exercise?.choices.length > 0 && (
               <Row>
@@ -408,6 +424,7 @@ const Exercise = (): ReactElement => {
               </Row>
             )}
             <br />
+
             {mcqChartData?.choices?.length > 0 &&
               mcqChartData?.choices?.some((choice) => choice.count > 0) && (
                 <Row gutter={16}>
