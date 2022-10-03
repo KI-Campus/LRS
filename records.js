@@ -30,8 +30,8 @@ router.use("/exerciseDetails/:id", checkUserAccess);
 router.use("/exerciseDetails/:id/:subExerciseId", checkUserAccess);
 router.use("/exerciseSubmissionsOverTime/:id", checkUserAccess);
 router.use("/exerciseSubmissionsOverTime/:id/:subExerciseId", checkUserAccess);
-router.use("/mcqChat/:id", checkUserAccess);
-router.use("/mcqChat/:id/:subExerciseId", checkUserAccess);
+router.use("/mcqChart/:id", checkUserAccess);
+router.use("/mcqChart/:id/:subExerciseId", checkUserAccess);
 
 // openLRS routes
 router.get("/stats", getStats);
@@ -50,8 +50,8 @@ router.get(
   "/exerciseSubmissionsOverTime/:id/:subExerciseId",
   getExerciseSubmissionsOverTime
 );
-router.get("/mcqChat/:id", getMCQChart);
-router.get("/mcqChat/:id/:subExerciseId", getMCQChart);
+router.get("/mcqChart/:id", getMCQChart);
+router.get("/mcqChart/:id/:subExerciseId", getMCQChart);
 
 async function checkUserAccess(req, res, next) {
   req.query.consumer ? (consumer = req.body.consumer) : (consumer = "all");

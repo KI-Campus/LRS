@@ -20,7 +20,7 @@ export const API_GET_EXERCISES = "records/exercises";
 export const API_GET_EXERCISE_DETAILS = "records/exerciseDetails";
 export const API_GET_EXERCISE_SUBMISSIONS_BY_TIME =
   "records/exerciseSubmissionsOverTime";
-export const API_GET_MCQ_CHART = "records/mcqChat";
+export const API_GET_MCQ_CHART = "records/mcqChart";
 
 export const API_GET_DOWNLOAD = "records/download";
 
