@@ -1318,7 +1318,11 @@ function helperSimplifyData(element, includexAPIRaw = false) {
       // Put the choices in the response in correct order and new lines
       let choicesString = "";
       for (let index = 0; index < choices.length; index++) {
-        choicesString += "[" + choices[index]?.id + "] " + choices[index]?.name;
+        choicesString +=
+          "[" +
+          (choices[index]?.id ?? "") +
+          "] " +
+          (choices[index]?.name ?? "");
       }
       response["Choices"] = choicesString;
 
@@ -1336,12 +1340,13 @@ function helperSimplifyData(element, includexAPIRaw = false) {
         for (let index = 0; index < correctResponses?.length; index++) {
           let id = correctResponses[index];
           response["Correct response"] +=
-            "[" + id + "] " + choices[id]?.name + "\n";
+            "[" + (id ?? "") + "] " + (choices[id]?.name ?? "") + "\n";
         }
       } else {
         // Single correct response
         let id = element?.xAPI?.object?.definition?.correctResponsesPattern;
-        response["Correct response"] = "[" + id + "] " + choices[id]?.name;
+        response["Correct response"] =
+          "[" + (id ?? "") + "] " + (choices[id]?.name ?? "");
       }
 
       // Assign the user answer
@@ -1351,12 +1356,14 @@ function helperSimplifyData(element, includexAPIRaw = false) {
         response["User answer"] = "";
         for (let index = 0; index < responses.length; index++) {
           let id = responses[index];
-          response["User answer"] += "[" + id + "] " + choices[id]?.name + "\n";
+          response["User answer"] +=
+            "[" + (id ?? "") + "] " + (choices[id]?.name ?? "") + "\n";
         }
       } else {
         // Single response
         let id = element.xAPI?.result?.response;
-        response["User answer"] = "[" + id + "] " + choices[id]?.name;
+        response["User answer"] =
+          "[" + (id ?? "") + "] " + (choices[id]?.name ?? "");
       }
 
       // Result completion
