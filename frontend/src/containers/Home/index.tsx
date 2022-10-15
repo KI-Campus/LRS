@@ -65,7 +65,9 @@ const Home = (): ReactElement => {
     {}
   );
 
-  const [courseExerciseTypesOnly, setCourseExerciseTypesOnly] =
+  const [courseExerciseTypes, setCourseExerciseTypes] = useState<string[]>();
+
+  const [courseRootExerciseTypes, setCourseRootExerciseTypes] =
     useState<string[]>();
 
   const [downloadModalOpen, setDownloadModalOpen] = useState<boolean>(false);
@@ -157,10 +159,14 @@ const Home = (): ReactElement => {
       .then((res) => {
         setSelectedCourseDetails(res[0]);
         setSelectedCourseDetailsLoading(false);
+        setCourseExerciseTypes(res[0].exerciseTypesList);
+        setCourseRootExerciseTypes(res[0].rootExerciseTypesList);
       })
       .catch((err) => {
         console.log(err);
         setSelectedCourseDetailsLoading(false);
+        setCourseExerciseTypes([]);
+        setCourseRootExerciseTypes([]);
       });
   };
 
@@ -184,18 +190,12 @@ const Home = (): ReactElement => {
     result
       .then((res) => {
         setCourseExerciseTypesCount(res);
-        // Loop through the result and get the exercise types
-        let exerciseTypes = [];
-        res.forEach((element) => {
-          exerciseTypes.push(element._id);
-        });
 
-        setCourseExerciseTypesOnly(exerciseTypes);
         setCourseExerciseTypesCountLoading(false);
       })
       .catch((err) => {
         console.log(err);
-        setCourseExerciseTypesOnly([]);
+
         setCourseExerciseTypesCountLoading(false);
       });
   };
@@ -422,7 +422,7 @@ const Home = (): ReactElement => {
             <Col span={24}>
               {selectedConsumer && selectedCourse && (
                 <ExercisesTable
-                  types={courseExerciseTypesOnly}
+                  types={courseRootExerciseTypes}
                   courseId={selectedCourse}
                   consumerId={selectedConsumer}
                 />

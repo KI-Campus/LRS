@@ -325,7 +325,7 @@ async function getCourse(req, res, next) {
             // Push it into result
             result[0].totalRecords = totalRecords;
 
-            // Get total exercise types in course
+            // Get exercise types in course
             let exerciseTypesPipeline = [
               {
                 $match: {
@@ -338,7 +338,7 @@ async function getCourse(req, res, next) {
                 },
               },
               {
-                $count: "exerciseTypes",
+                $sort: { _id: 1 },
               },
             ];
             let exerciseTypes = await m_client
@@ -346,9 +346,49 @@ async function getCourse(req, res, next) {
               .collection(process.env.MONGO_XAPI_COLLECTION)
               .aggregate(exerciseTypesPipeline)
               .toArray();
-            exerciseTypes = exerciseTypes[0]?.exerciseTypes ?? 0;
+
             // Push it into result
-            result[0].exerciseTypes = exerciseTypes;
+            result[0].exerciseTypes = exerciseTypes.length;
+            // Loop through exercise types and get only the id
+            result[0].exerciseTypesList = exerciseTypes.map(
+              (exerciseType) => exerciseType?._id
+            );
+
+            // Get root exercise types in course
+            let rootExerciseTypesPipeline = [
+              {
+                $match: {
+                  "metadata.session.context_id": courseId,
+                },
+              },
+              {
+                $match: {
+                  "xAPI.object.id": {
+                    $regex: "^((?!subContentId).)*$",
+                  },
+                },
+              },
+              {
+                $group: {
+                  _id: "$xAPI.context.contextActivities.category.id",
+                },
+              },
+              {
+                $sort: { _id: 1 },
+              },
+            ];
+            let rootExerciseTypes = await m_client
+              .db()
+              .collection(process.env.MONGO_XAPI_COLLECTION)
+              .aggregate(rootExerciseTypesPipeline)
+              .toArray();
+
+            // Push it into result
+            result[0].rootExerciseTypes = rootExerciseTypes.length;
+            // Loop through exercise types and get only the id
+            result[0].rootExerciseTypesList = rootExerciseTypes.map(
+              (exerciseType) => exerciseType?._id
+            );
 
             // Get total submissions in course
             let totalSubmissionsPipeline = [
