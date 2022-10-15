@@ -109,7 +109,7 @@ async function getStats(req, res, next) {
       .collection("records")
       .aggregate(totalRecordsPipeline)
       .toArray();
-    result.totalRecords = totalRecords[0].totalRecords;
+    result.totalRecords = totalRecords[0]?.totalRecords;
 
     // Get total submissions
     let totalSubmissionsPipeline = [
@@ -136,7 +136,7 @@ async function getStats(req, res, next) {
       .collection("records")
       .aggregate(totalSubmissionsPipeline)
       .toArray();
-    result.totalSubmissions = totalSubmissions[0].totalSubmissions;
+    result.totalSubmissions = totalSubmissions[0]?.totalSubmissions;
 
     // Get total exercise types
     let totalExerciseTypesPipeline = [
@@ -154,7 +154,7 @@ async function getStats(req, res, next) {
       .collection("records")
       .aggregate(totalExerciseTypesPipeline)
       .toArray();
-    result.exerciseTypes = totalExerciseTypes[0].exerciseTypes;
+    result.exerciseTypes = totalExerciseTypes[0]?.exerciseTypes;
 
     // Get total consumers
     let totalConsumersPipeline = [
@@ -163,13 +163,16 @@ async function getStats(req, res, next) {
           _id: "$metadata.session.custom_consumer",
         },
       },
+      {
+        $sort: { _id: 1 },
+      },
     ];
     let totalConsumers = await m_client
       .db()
       .collection("records")
       .aggregate(totalConsumersPipeline)
       .toArray();
-    result.totalConsumers = totalConsumers.length;
+    result.totalConsumers = totalConsumers?.length;
     result.totalConsumersList = totalConsumers;
 
     // Get total passing exercises
@@ -204,7 +207,7 @@ async function getStats(req, res, next) {
       .collection("records")
       .aggregate(totalPassingExercisesPipeline)
       .toArray();
-    result.totalPassingExercises = totalPassingExercises[0].count;
+    result.totalPassingExercises = totalPassingExercises[0]?.count;
 
     res.status(200).send({ result }).end();
   } catch (err) {
