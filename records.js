@@ -106,7 +106,7 @@ async function getStats(req, res, next) {
 
     let totalRecords = await m_client
       .db()
-      .collection("records")
+      .collection(process.env.MONGO_XAPI_COLLECTION)
       .aggregate(totalRecordsPipeline)
       .toArray();
     result.totalRecords = totalRecords[0]?.totalRecords;
@@ -133,7 +133,7 @@ async function getStats(req, res, next) {
 
     let totalSubmissions = await m_client
       .db()
-      .collection("records")
+      .collection(process.env.MONGO_XAPI_COLLECTION)
       .aggregate(totalSubmissionsPipeline)
       .toArray();
     result.totalSubmissions = totalSubmissions[0]?.totalSubmissions;
@@ -151,7 +151,7 @@ async function getStats(req, res, next) {
     ];
     let totalExerciseTypes = await m_client
       .db()
-      .collection("records")
+      .collection(process.env.MONGO_XAPI_COLLECTION)
       .aggregate(totalExerciseTypesPipeline)
       .toArray();
     result.exerciseTypes = totalExerciseTypes[0]?.exerciseTypes;
@@ -169,7 +169,7 @@ async function getStats(req, res, next) {
     ];
     let totalConsumers = await m_client
       .db()
-      .collection("records")
+      .collection(process.env.MONGO_XAPI_COLLECTION)
       .aggregate(totalConsumersPipeline)
       .toArray();
     result.totalConsumers = totalConsumers?.length;
@@ -204,7 +204,7 @@ async function getStats(req, res, next) {
 
     let totalPassingExercises = await m_client
       .db()
-      .collection("records")
+      .collection(process.env.MONGO_XAPI_COLLECTION)
       .aggregate(totalPassingExercisesPipeline)
       .toArray();
     result.totalPassingExercises = totalPassingExercises[0]?.count;
