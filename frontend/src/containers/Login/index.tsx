@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { login } from "../../redux/auth";
 import { ReactElement } from "react";
+import { Tooltip } from "antd";
 
 const Login = (): ReactElement => {
   let dispatch = useAppDispatch();
@@ -78,7 +79,11 @@ const Login = (): ReactElement => {
           </Form.Item>
 
           <p className="forget-pass link">
-            <Link to="/forget-password"> Forget Password?</Link>
+            <Tooltip
+              title={"Forget password is disabled, please contact system admin"}
+            >
+              <Link to="/forget-password">Forget Password?</Link>
+            </Tooltip>
           </p>
           <Form.Item>
             <Button

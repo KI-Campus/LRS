@@ -15,7 +15,9 @@ const ForgetPassword = () => {
     <>
       <div className="forget-password">
         <h2 className="main-heading center">Forgot Password</h2>
-        <p className="sub-heading">No worries we got you covered</p>
+        <p className="sub-heading">
+          Forgot password form is disabled. Please contact your system admin
+        </p>
         <Form
           name="basic"
           layout="vertical"
@@ -32,6 +34,7 @@ const ForgetPassword = () => {
               type="email"
               className="form-input"
               placeholder="Enter Email"
+              disabled={true}
             />
           </Form.Item>
 
@@ -41,6 +44,7 @@ const ForgetPassword = () => {
               style={{ width: 400, marginTop: 8 }}
               type="primary"
               htmlType="submit"
+              disabled={true}
             >
               Reset Password
             </Button>
