@@ -312,6 +312,29 @@ const Exercise = (): ReactElement => {
               )}
             </Row>
             <br />
+            <Row gutter={16}>
+              {exercise?.totalActorsCount && (
+                <Col span={4}>
+                  <Card
+                    loading={exerciseLoading}
+                    title="Students (Unique Users)"
+                  >
+                    {exercise?.totalActorsCount ?? "0"}
+                  </Card>
+                </Col>
+              )}
+              {exercise?.totalActorsCompletedCount && (
+                <Col span={4}>
+                  <Card
+                    loading={exerciseLoading}
+                    title="Students who completed the exercise"
+                  >
+                    {exercise?.totalActorsCompletedCount ?? "0"}
+                  </Card>
+                </Col>
+              )}
+            </Row>
+            <br />
             {exercise?.question && (
               <Row>
                 <Col span={24}>

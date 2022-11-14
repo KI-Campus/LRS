@@ -209,6 +209,24 @@ async function getStats(req, res, next) {
       .toArray();
     result.totalPassingExercises = totalPassingExercises[0]?.count;
 
+    // Get total actors
+    let totalActorsPipeline = [
+      {
+        $group: {
+          _id: "$xAPI.actor.name",
+        },
+      },
+      {
+        $count: "totalActorsCount",
+      },
+    ];
+    let totalActorsCount = await m_client
+      .db()
+      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .aggregate(totalActorsPipeline)
+      .toArray();
+    result.totalActorsCount = totalActorsCount[0]?.totalActorsCount ?? 0;
+
     res.status(200).send({ result }).end();
   } catch (err) {
     console.log("Error while getting stats", err);
@@ -510,6 +528,31 @@ async function getCourse(req, res, next) {
 
             result[0].totalPassingExercises = passingExercises;
 
+            // Get total actors in course
+            let totalActorsCountPipeline = [
+              {
+                $match: {
+                  "metadata.session.context_id": courseId,
+                },
+              },
+              {
+                $group: {
+                  _id: "$xAPI.actor.name",
+                },
+              },
+              {
+                $count: "totalActorsCount",
+              },
+            ];
+
+            let totalActorsCount = await m_client
+              .db()
+              .collection(process.env.MONGO_XAPI_COLLECTION)
+              .aggregate(totalActorsCountPipeline)
+              .toArray();
+            result[0].totalActorsCount =
+              totalActorsCount[0]?.totalActorsCount ?? 0;
+
             res.status(200).send({ result }).end();
           } catch (err) {
             console.log("Error while getting course: ", err);
@@ -765,14 +808,14 @@ async function getExerciseDetails(req, res, next) {
       .aggregate(passingEventsPipeline)
       .toArray();
 
-    passingEvents = passingEvents[0]?.count || 0;
+    passingEvents = passingEvents[0]?.count ?? 0;
     // Push it into result
     if (exercise[0]) exercise[0].totalPassingEvents = passingEvents;
 
     // Get total submissions
     let totalSubmissions = await helperGetTotalSubmissions(exerciseId);
 
-    if (exercise[0]) exercise[0].totalSubmissions = totalSubmissions || 0;
+    if (exercise[0]) exercise[0].totalSubmissions = totalSubmissions ?? 0;
 
     // Get total interactions
     let totalInteractionsPipeline = [
@@ -806,6 +849,17 @@ async function getExerciseDetails(req, res, next) {
     // Get exercise attempted
     let attempted = await helperGetAttempted(exerciseId);
     if (exercise[0]) exercise[0].attempted = attempted;
+
+    // Get total actors count
+    let totalActorsCount = await helperGetTotalActorsCount(exerciseId);
+    if (exercise[0]) exercise[0].totalActorsCount = totalActorsCount;
+
+    // Get total actors completed count
+    let totalActorsCompletedCount = await helperGetTotalActorsCompletedCount(
+      exerciseId
+    );
+    if (exercise[0])
+      exercise[0].totalActorsCompletedCount = totalActorsCompletedCount;
 
     // Try to get exercise question or more info (for example MCQ question)
     let question = await helperGetQuestion(exerciseId);
@@ -1492,6 +1546,59 @@ async function helperGetTotalSubmissions(exerciseId) {
   totalSubmissions = totalSubmissions[0]?.totalSubmissions;
   return totalSubmissions;
 }
+
+async function helperGetTotalActorsCount(exerciseId) {
+  let pipeline = [
+    {
+      $match: {
+        "xAPI.object.id": exerciseId,
+      },
+    },
+    {
+      $group: { _id: "$xAPI.actor.name" },
+    },
+    {
+      $count: "totalActorsCount",
+    },
+  ];
+  let totalActorsCount = await m_client
+    .db()
+    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .aggregate(pipeline)
+    .toArray();
+  totalActorsCount = totalActorsCount[0]?.totalActorsCount;
+  return totalActorsCount;
+}
+
+async function helperGetTotalActorsCompletedCount(exerciseId) {
+  let pipeline = [
+    {
+      $match: {
+        "xAPI.object.id": exerciseId,
+      },
+    },
+    {
+      $match: {
+        "xAPI.result.completion": true,
+      },
+    },
+    {
+      $group: { _id: "$xAPI.actor.name" },
+    },
+    {
+      $count: "totalActorsCompletedCount",
+    },
+  ];
+  let totalActorsCompletedCount = await m_client
+    .db()
+    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .aggregate(pipeline)
+    .toArray();
+  totalActorsCompletedCount =
+    totalActorsCompletedCount[0]?.totalActorsCompletedCount;
+  return totalActorsCompletedCount;
+}
+
 async function helperGetAverageScore(exerciseId) {
   let pipeline = [
     {

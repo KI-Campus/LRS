@@ -22,27 +22,33 @@ export function CourseStats({ courseStatsLoading, courseStats }): ReactElement {
       </Row>
       <br />
       <Row gutter={16}>
-        <Col span={6}>
+        <Col span={4}>
           <Card loading={courseStatsLoading} title="Total Records">
             {courseStats?.totalRecords}
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={4}>
           <Card loading={courseStatsLoading} title="Total Submissions">
             {courseStats?.totalSubmissions}
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={4}>
           <Card loading={courseStatsLoading} title="Exercise Types">
             {courseStats?.exerciseTypes}
           </Card>
         </Col>
-        <Col span={6}>
+        <Col span={4}>
           <Card
             loading={courseStatsLoading}
             title="Number of times Exercises Passed"
           >
             {courseStats?.totalPassingExercises}
+          </Card>
+        </Col>
+
+        <Col span={4}>
+          <Card loading={courseStatsLoading} title="Total Students">
+            {courseStats?.totalActorsCount}
           </Card>
         </Col>
       </Row>

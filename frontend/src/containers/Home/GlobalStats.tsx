@@ -49,6 +49,11 @@ export function GlobalStats({ globalStatsLoading, globalStats }): ReactElement {
             </Tooltip>
           </Card>
         </Col>
+        <Col span={4}>
+          <Card loading={globalStatsLoading} title="Total Students">
+            {globalStats?.totalActorsCount}
+          </Card>
+        </Col>
       </Row>
     </div>
   );
