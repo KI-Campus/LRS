@@ -1,7 +1,8 @@
 export const APP_NAME = "openLRS";
 export const APP_VERSION = "v2";
 
-export const API_ENDPOINT = "/";
+export const API_ENDPOINT =
+  process.env.NODE_ENV === "development" ? "http://localhost:4000/" : "/";
 export const API_USER_LOGIN = "users/authenticate";
 
 export const API_GET_CONSUMERS = "consumers/getall";
