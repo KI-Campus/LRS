@@ -1,6 +1,6 @@
 import { Button, Card, Col, Row, Space, Spin, Table, Tooltip } from "antd";
 import { ReactElement, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 import {
   getExerciseDetailsService,
   getExerciseSubmissionsOverTimeService,
@@ -18,6 +18,8 @@ import DownloadModal from "src/components/DownloadModal";
 import BackButton from "src/components/BackButton";
 const Exercise = (): ReactElement => {
   // Fetch consumer ID and exercise ID from router : consumer/:consumerId/exercise/:exerciseId
+
+  const location = useLocation();
 
   // @ts-ignore
   const { exerciseId, subExerciseId } = useParams();
@@ -49,8 +51,15 @@ const Exercise = (): ReactElement => {
   const [downloadModalOpen, setDownloadModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchExercise(exerciseId, subExerciseId);
-    fetchExerciseSubmissionsOverTime(exerciseId, subExerciseId);
+    // @ts-ignore
+    fetchExercise(exerciseId, subExerciseId, location?.state?.actor);
+
+    fetchExerciseSubmissionsOverTime(
+      exerciseId,
+      subExerciseId,
+      // @ts-ignore
+      location?.state?.actor
+    );
     return () => {};
   }, []);
 
@@ -59,9 +68,9 @@ const Exercise = (): ReactElement => {
     setExerciseVerbs(exercise.eventTypes);
   }, [exercise]);
 
-  const fetchExercise = async (id: string, subId = null) => {
+  const fetchExercise = async (id: string, subId = null, actor = null) => {
     setExerciseLoading(true);
-    let result = getExerciseDetailsService(id, subId);
+    let result = getExerciseDetailsService(consumerId, id, subId, actor);
     result
       .then((res) => {
         setExercise(res);
@@ -73,9 +82,18 @@ const Exercise = (): ReactElement => {
       });
   };
 
-  const fetchExerciseSubmissionsOverTime = async (id: string, subId = null) => {
+  const fetchExerciseSubmissionsOverTime = async (
+    id: string,
+    subId = null,
+    actor = null
+  ) => {
     setExerciseSubmissionsOverTimeLoading(true);
-    let result = getExerciseSubmissionsOverTimeService(id, subId);
+    let result = getExerciseSubmissionsOverTimeService(
+      consumerId,
+      id,
+      subId,
+      actor
+    );
     result
       .then((res) => {
         setExerciseSubmissionsOverTime(res);
@@ -87,9 +105,9 @@ const Exercise = (): ReactElement => {
       });
   };
 
-  const fetchMCQChartData = (id: string, subId = null) => {
+  const fetchMCQChartData = (id: string, subId = null, actor = null) => {
     setMcqChartLoading(true);
-    let result = getMCQChartService(id, subId);
+    let result = getMCQChartService(consumerId, id, subId, actor);
     result
       .then((res) => {
         setMcqChartData(res);
@@ -102,9 +120,9 @@ const Exercise = (): ReactElement => {
       });
   };
 
-  const fetchTrueFalseChartData = (id: string, subId = null) => {
+  const fetchTrueFalseChartData = (id: string, subId = null, actor = null) => {
     setTrueFalseChartDataLoading(true);
-    let result = getTrueFalseChartService(id, subId);
+    let result = getTrueFalseChartService(consumerId, id, subId, actor);
     result
       .then((res) => {
         setTrueFalseChartDataLoading(false);
@@ -123,7 +141,8 @@ const Exercise = (): ReactElement => {
         "http://h5p.org/libraries/H5P.MultiChoice"
       ) !== -1
     ) {
-      fetchMCQChartData(exerciseId, subExerciseId);
+      // @ts-ignore
+      fetchMCQChartData(exerciseId, subExerciseId, location?.state?.actor);
     }
 
     if (
@@ -131,7 +150,13 @@ const Exercise = (): ReactElement => {
         "http://h5p.org/libraries/H5P.TrueFalse"
       ) !== -1
     ) {
-      fetchTrueFalseChartData(exerciseId, subExerciseId);
+      // @ts-ignore
+      fetchTrueFalseChartData(
+        exerciseId,
+        subExerciseId,
+        // @ts-ignore
+        location?.state?.actor
+      );
     }
   }, [exercise]);
 
@@ -313,26 +338,45 @@ const Exercise = (): ReactElement => {
             </Row>
             <br />
             <Row gutter={16}>
-              {exercise?.totalActorsCount && (
-                <Col span={4}>
-                  <Card
-                    loading={exerciseLoading}
-                    title="Students (Unique Users)"
-                  >
-                    {exercise?.totalActorsCount ?? "0"}
-                  </Card>
-                </Col>
-              )}
-              {exercise?.totalActorsCompletedCount && (
-                <Col span={4}>
-                  <Card
-                    loading={exerciseLoading}
-                    title="Students who completed the exercise"
-                  >
-                    {exercise?.totalActorsCompletedCount ?? "0"}
-                  </Card>
-                </Col>
-              )}
+              {
+                // @ts-ignore
+                location?.state?.actor && (
+                  <Col span={4}>
+                    <Card loading={exerciseLoading} title="Selected Student">
+                      {
+                        // @ts-ignore
+                        location?.state?.actor
+                      }
+                    </Card>
+                  </Col>
+                )
+              }
+              {
+                // @ts-ignore
+                exercise?.totalActorsCount && !location?.state?.actor && (
+                  <Col span={4}>
+                    <Card
+                      loading={exerciseLoading}
+                      title="Students (Unique Users)"
+                    >
+                      {exercise?.totalActorsCount ?? "0"}
+                    </Card>
+                  </Col>
+                )
+              }
+              {
+                // @ts-ignore
+                exercise?.totalActorsCompletedCount && !location?.state?.actor && (
+                  <Col span={4}>
+                    <Card
+                      loading={exerciseLoading}
+                      title="Students who completed the exercise"
+                    >
+                      {exercise?.totalActorsCompletedCount ?? "0"}
+                    </Card>
+                  </Col>
+                )
+              }
             </Row>
             <br />
             {exercise?.question && (

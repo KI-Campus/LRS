@@ -33,6 +33,9 @@ export const API_USER_REGISTER = "users/register";
 
 export const API_GET_GLOBAL_STATS = "records/stats";
 
+export const API_GET_ACTORS = "records/actors";
+export const GET_ACTORS_PAGE_SIZE = 5;
+
 export const NO_OF_CHARS_TO_CONCAT_MCQ_ANSWERS_IN_CHART = 25;
 
 export const COLOR_CORRECT_ANSWER = "#0000ff99";

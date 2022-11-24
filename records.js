@@ -17,7 +17,7 @@ function init(mongoClient) {
 }
 
 // Middleware check for user access
-router.use("/stats", checkUserAccess);
+// router.use("/stats", checkUserAccess);       //Stats are public
 router.use("/courses", checkUserAccess);
 router.use("/course/:id", checkUserAccess);
 
@@ -32,6 +32,8 @@ router.use("/exerciseSubmissionsOverTime/:id", checkUserAccess);
 router.use("/exerciseSubmissionsOverTime/:id/:subExerciseId", checkUserAccess);
 router.use("/mcqChart/:id", checkUserAccess);
 router.use("/mcqChart/:id/:subExerciseId", checkUserAccess);
+
+router.use("/actors", checkUserAccess);
 
 router.use("/trueFalseChart/:id", checkUserAccess);
 router.use("/trueFalseChart/:id/:subExerciseId", checkUserAccess);
@@ -59,10 +61,13 @@ router.get("/mcqChart/:id/:subExerciseId", getMCQChart);
 router.get("/trueFalseChart/:id", getTrueFalseChart);
 router.get("/trueFalseChart/:id/:subExerciseId", getTrueFalseChart);
 
-async function checkUserAccess(req, res, next) {
-  req.query.consumer ? (consumer = req.body.consumer) : (consumer = "all");
-  req.query.courseId ? (courseId = req.body.courseId) : (courseId = "all");
+router.get("/actors", getActors);
 
+async function checkUserAccess(req, res, next) {
+  let consumer;
+  let courseId;
+  req.query.consumer ? (consumer = req.query.consumer) : (consumer = "all");
+  req.query.courseId ? (courseId = req.query.courseId) : (courseId = "all");
   let hasConsumerAccess = false;
   // Check in the user collection mongodb if consumerAccess array includes consumer
   await m_client
@@ -75,7 +80,7 @@ async function checkUserAccess(req, res, next) {
         return;
       } else {
         if (
-          resultUser.consumersAccess.includes(req.body.consumer) ||
+          resultUser.consumersAccess.includes(consumer) ||
           resultUser.role == "admin"
         ) {
           hasConsumerAccess = true;
@@ -309,6 +314,9 @@ async function getCourse(req, res, next) {
       },
     },
   ];
+
+  // Add filters to pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
 
   try {
     m_client
@@ -687,6 +695,9 @@ async function getExercises(req, res, next) {
       });
     }
 
+    // Add filter parameters to the pipeline
+    addFiltersToPipeline(pipeline, req.query.filters);
+
     let count = await m_client
       .db()
       .collection(process.env.MONGO_XAPI_COLLECTION)
@@ -710,7 +721,7 @@ async function getExercises(req, res, next) {
     for (let i = 0; i < exercises.length; i++) {
       let exercise = exercises[i];
       let exerciseId = exercise._id;
-      let totalSubmissions = await helperGetTotalSubmissions(exerciseId);
+      let totalSubmissions = await helperGetTotalSubmissions(req, exerciseId);
       exercise.totalSubmissions = totalSubmissions;
     }
 
@@ -718,7 +729,7 @@ async function getExercises(req, res, next) {
     for (let i = 0; i < exercises.length; i++) {
       let exercise = exercises[i];
       let exerciseId = exercise._id;
-      let averageScore = await helperGetAverageScore(exerciseId);
+      let averageScore = await helperGetAverageScore(req, exerciseId);
       exercise.averageScore = averageScore;
     }
 
@@ -776,6 +787,9 @@ async function getExerciseDetails(req, res, next) {
       },
     ];
 
+    // Add filter parameters to the pipeline
+    addFiltersToPipeline(pipeline, req.query.filters);
+
     let exercise = await m_client
       .db()
       .collection(process.env.MONGO_XAPI_COLLECTION)
@@ -802,6 +816,9 @@ async function getExerciseDetails(req, res, next) {
       },
     ];
 
+    // Add filter parameters to the pipeline
+    addFiltersToPipeline(passingEventsPipeline, req.query.filters);
+
     let passingEvents = await m_client
       .db()
       .collection(process.env.MONGO_XAPI_COLLECTION)
@@ -813,7 +830,7 @@ async function getExerciseDetails(req, res, next) {
     if (exercise[0]) exercise[0].totalPassingEvents = passingEvents;
 
     // Get total submissions
-    let totalSubmissions = await helperGetTotalSubmissions(exerciseId);
+    let totalSubmissions = await helperGetTotalSubmissions(req, exerciseId);
 
     if (exercise[0]) exercise[0].totalSubmissions = totalSubmissions ?? 0;
 
@@ -843,30 +860,31 @@ async function getExerciseDetails(req, res, next) {
     if (exercise[0]) exercise[0].totalInteractions = totalInteractions;
 
     // Get exercise average score
-    let averageScore = await helperGetAverageScore(exerciseId);
+    let averageScore = await helperGetAverageScore(req, exerciseId);
     if (exercise[0]) exercise[0].averageScore = averageScore;
 
     // Get exercise attempted
-    let attempted = await helperGetAttempted(exerciseId);
+    let attempted = await helperGetAttempted(req, exerciseId);
     if (exercise[0]) exercise[0].attempted = attempted;
 
     // Get total actors count
-    let totalActorsCount = await helperGetTotalActorsCount(exerciseId);
+    let totalActorsCount = await helperGetTotalActorsCount(req, exerciseId);
     if (exercise[0]) exercise[0].totalActorsCount = totalActorsCount;
 
     // Get total actors completed count
     let totalActorsCompletedCount = await helperGetTotalActorsCompletedCount(
+      req,
       exerciseId
     );
     if (exercise[0])
       exercise[0].totalActorsCompletedCount = totalActorsCompletedCount;
 
     // Try to get exercise question or more info (for example MCQ question)
-    let question = await helperGetQuestion(exerciseId);
+    let question = await helperGetQuestion(req, exerciseId);
     if (exercise[0]) exercise[0].question = question;
 
     // Try to get exercise choices (for MCQs)
-    let choices = await helperGetChoices(exerciseId);
+    let choices = await helperGetChoices(req, exerciseId);
     if (exercise[0]) exercise[0].choices = choices;
 
     // For each distinct verbs get the number of events
@@ -902,7 +920,7 @@ async function getExerciseDetails(req, res, next) {
     if (exercise[0]) exercise[0].eventTypes = verbCount;
 
     // Get the child exercises if any
-    let childExercises = await helperGetChildExercises(exerciseId);
+    let childExercises = await helperGetChildExercises(req, exerciseId);
     if (exercise[0]) exercise[0].childExercises = childExercises;
 
     res.status(200).send({ result: exercise[0] }).end();
@@ -974,6 +992,9 @@ async function getExerciseSubmissionsOverTime(req, res, next) {
     },
   ];
 
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
+
   try {
     let submissions = await m_client
       .db()
@@ -1042,6 +1063,9 @@ async function getCourseSubmissionsOverTime(req, res, next) {
     },
   ];
 
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
+
   try {
     let submissions = await m_client
       .db()
@@ -1084,6 +1108,9 @@ async function getCourseExerciseTypesAndCount(req, res, next) {
       },
     },
   ];
+
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
 
   try {
     let exerciseTypesAndCount = await m_client
@@ -1146,6 +1173,9 @@ async function getMCQChart(req, res, next) {
       $sort: { _id: 1 },
     },
   ];
+
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(countsPerChoicepipeline, req.query.filters);
 
   let countsPerChoices = await m_client
     .db()
@@ -1216,6 +1246,9 @@ async function getMCQChart(req, res, next) {
     },
   ];
 
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(correctResponsePipeline, req.query.filters);
+
   let correctResponsesPatternQuery = await m_client
     .db()
     .collection(process.env.MONGO_XAPI_COLLECTION)
@@ -1269,6 +1302,9 @@ async function getTrueFalseChart(req, res, next) {
     },
   ];
 
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(correctResponsePipeline, req.query.filters);
+
   let correctResponsesPatternQuery = await m_client
     .db()
     .collection(process.env.MONGO_XAPI_COLLECTION)
@@ -1276,6 +1312,109 @@ async function getTrueFalseChart(req, res, next) {
     .toArray();
 
   res.status(200).send(correctResponsesPatternQuery);
+}
+
+async function getActors(req, res, next) {
+  // Get all actors from a particular course
+
+  let consumer = req.query.consumer ? req.query.consumer : "all";
+  let courseId = req.query.course ? req.query.course : undefined;
+
+  if (!courseId) {
+    res.status(400).send({ error: "Invalid course ID" }).end();
+    return;
+  }
+
+  // We need this in the meta
+  //   "pagination": {
+  //     "page": 1,
+  //     "pageSize": 25,
+  //     "pageCount": 1,
+  //     "total": 6
+  // }
+
+  let pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 10;
+
+  // Make the pageSize positive
+  if (pageSize < 0) pageSize = -pageSize;
+  if (pageSize > 100) pageSize = 100;
+  if (pageSize < 1) pageSize = 1;
+
+  let page = req.query.page ? parseInt(req.query.page) : 1;
+
+  // Make the page always positive
+  if (page < 1) page = 1;
+  if (page > 100) page = 100;
+  if (page < 1) page = 1;
+
+  // Calculate skip
+  let skip = pageSize * (page - 1);
+
+  let limit = pageSize;
+
+  try {
+    let pipeline = [
+      {
+        $match: {
+          "metadata.session.context_id": courseId,
+        },
+      },
+
+      {
+        $group: {
+          _id: "$xAPI.actor.name",
+          email: { $last: "$xAPI.actor.mbox" },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+    ];
+
+    if (consumer != "all") {
+      pipeline.unshift({
+        $match: {
+          "metadata.session.custom_consumer": consumer,
+        },
+      });
+    }
+
+    let count = await m_client
+      .db()
+      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .aggregate(pipeline)
+      .toArray();
+
+    count = count.length;
+
+    // Calculate the page count
+    let pageCount = Math.ceil(count / pageSize);
+
+    let actors = await m_client
+      .db()
+      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .aggregate(pipeline)
+      .skip(skip)
+      .limit(limit)
+      .toArray();
+
+    res
+      .status(200)
+      .send({
+        pagination: {
+          page: page,
+          pageSize: pageSize,
+          pageCount: pageCount,
+          total: count,
+        },
+        result: actors,
+      })
+      .end();
+  } catch (err) {
+    console.log("Error while aggregating records", err);
+    console.log("Pipeline was: ", pipeline);
+    res.status(500).end();
+  }
 }
 
 async function download(req, res, next) {
@@ -1522,7 +1661,7 @@ function helperSimplifyData(element, includexAPIRaw = false) {
   return response;
 }
 
-async function helperGetTotalSubmissions(exerciseId) {
+async function helperGetTotalSubmissions(req, exerciseId) {
   let pipeline = [
     {
       $match: {
@@ -1538,6 +1677,10 @@ async function helperGetTotalSubmissions(exerciseId) {
       $count: "totalSubmissions",
     },
   ];
+
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
+
   let totalSubmissions = await m_client
     .db()
     .collection(process.env.MONGO_XAPI_COLLECTION)
@@ -1547,7 +1690,7 @@ async function helperGetTotalSubmissions(exerciseId) {
   return totalSubmissions;
 }
 
-async function helperGetTotalActorsCount(exerciseId) {
+async function helperGetTotalActorsCount(req, exerciseId) {
   let pipeline = [
     {
       $match: {
@@ -1561,6 +1704,10 @@ async function helperGetTotalActorsCount(exerciseId) {
       $count: "totalActorsCount",
     },
   ];
+
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
+
   let totalActorsCount = await m_client
     .db()
     .collection(process.env.MONGO_XAPI_COLLECTION)
@@ -1570,7 +1717,7 @@ async function helperGetTotalActorsCount(exerciseId) {
   return totalActorsCount;
 }
 
-async function helperGetTotalActorsCompletedCount(exerciseId) {
+async function helperGetTotalActorsCompletedCount(req, exerciseId) {
   let pipeline = [
     {
       $match: {
@@ -1589,6 +1736,10 @@ async function helperGetTotalActorsCompletedCount(exerciseId) {
       $count: "totalActorsCompletedCount",
     },
   ];
+
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
+
   let totalActorsCompletedCount = await m_client
     .db()
     .collection(process.env.MONGO_XAPI_COLLECTION)
@@ -1599,7 +1750,7 @@ async function helperGetTotalActorsCompletedCount(exerciseId) {
   return totalActorsCompletedCount;
 }
 
-async function helperGetAverageScore(exerciseId) {
+async function helperGetAverageScore(req, exerciseId) {
   let pipeline = [
     {
       $match: {
@@ -1621,6 +1772,10 @@ async function helperGetAverageScore(exerciseId) {
       $sort: { _id: 1 },
     },
   ];
+
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
+
   let averageScore = await m_client
 
     .db()
@@ -1633,7 +1788,7 @@ async function helperGetAverageScore(exerciseId) {
   return averageScore;
 }
 
-async function helperGetAttempted(exerciseId) {
+async function helperGetAttempted(req, exerciseId) {
   let pipeline = [
     {
       $match: {
@@ -1649,6 +1804,10 @@ async function helperGetAttempted(exerciseId) {
       $count: "attempted",
     },
   ];
+
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
+
   let attempted = await m_client
     .db()
     .collection(process.env.MONGO_XAPI_COLLECTION)
@@ -1657,7 +1816,7 @@ async function helperGetAttempted(exerciseId) {
   attempted = attempted[0]?.attempted;
   return attempted;
 }
-async function helperGetQuestion(exerciseId) {
+async function helperGetQuestion(req, exerciseId) {
   let pipeline = [
     {
       $match: {
@@ -1682,7 +1841,7 @@ async function helperGetQuestion(exerciseId) {
   return question;
 }
 
-async function helperGetChoices(exerciseId) {
+async function helperGetChoices(req, exerciseId) {
   let pipeline = [
     {
       $match: {
@@ -1715,7 +1874,7 @@ async function helperGetChoices(exerciseId) {
   return choices;
 }
 
-async function helperGetChildExercises(exerciseId) {
+async function helperGetChildExercises(req, exerciseId) {
   let pipeline = [
     {
       $match: {
@@ -1734,6 +1893,10 @@ async function helperGetChildExercises(exerciseId) {
       },
     },
   ];
+
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
+
   let childExercises = await m_client
     .db()
     .collection(process.env.MONGO_XAPI_COLLECTION)
@@ -1766,6 +1929,10 @@ async function helperGetChildExercises(exerciseId) {
         },
       },
     ];
+
+    // Add filter parameters to the pipeline
+    addFiltersToPipeline(pipeline, req.query.filters);
+
     let info = await m_client
       .db()
       .collection(process.env.MONGO_XAPI_COLLECTION)
@@ -1780,4 +1947,16 @@ async function helperGetChildExercises(exerciseId) {
   }
 
   return childExercisesInfo;
+}
+
+async function addFiltersToPipeline(pipeline, filters) {
+  if (typeof filters === "object" && pipeline instanceof Array) {
+    // Loop through the filters object and add them to the pipeline
+    for (const [key, value] of Object.entries(filters)) {
+      let filter = {};
+      filter[key] = value;
+
+      pipeline.unshift({ $match: { [key]: value } });
+    }
+  }
 }

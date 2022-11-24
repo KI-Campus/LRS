@@ -7,6 +7,7 @@ import {
   API_GET_EXERCISE_SUBMISSIONS_BY_TIME,
   API_GET_MCQ_CHART,
   API_GET_TRUE_FALSE_CHART,
+  API_GET_ACTORS,
 } from "src/utils/constants";
 
 export const getGlobalStatsService = async () => {
@@ -21,7 +22,8 @@ export const getExercisesListService = async (
   pageSize: number,
   ignoreSubExercises = true,
   exerciseTypeFilters: string[] = [],
-  search: string = undefined
+  search: string = undefined,
+  actor?: string
 ) => {
   let url = `${API_GET_EXERCISES}?consumer=${consumerId}&course=${courseId}&page=${page}&pageSize=${pageSize}`;
   if (ignoreSubExercises) {
@@ -34,6 +36,9 @@ export const getExercisesListService = async (
   // Include the search text if it is not empty
   if (search) {
     url += `&search=${search}`;
+  }
+  if (actor) {
+    url += `&filters[xAPI.actor.name]=${actor}`;
   }
   const response = await axios.get(url);
   return response.data;
@@ -66,23 +71,35 @@ export const downloadService = async (
 };
 
 export const getExerciseDetailsService = async (
+  consumer: string,
   exerciseId: string,
-  subExerciseId: string
+  subExerciseId: string,
+  actor?: string
 ) => {
   let query = `${API_GET_EXERCISE_DETAILS}/${exerciseId}`;
   if (subExerciseId) query += `/${subExerciseId}`;
+  query += `?consumer=${consumer}`;
+  if (actor) {
+    query += `&filters[xAPI.actor.name]=${actor}`;
+  }
   const response = await axios.get(query);
   return response.data.result;
 };
 
 // Get Exercise Submissions By Time Service
 export const getExerciseSubmissionsOverTimeService = async (
+  consumer: string,
   exerciseId: string,
-  subExerciseId: string
+  subExerciseId: string,
+  actor?: string
 ) => {
   let query = `${API_GET_EXERCISE_SUBMISSIONS_BY_TIME}/${exerciseId}`;
   if (subExerciseId) {
     query += `/${subExerciseId}`;
+  }
+  query += `?consumer=${consumer}`;
+  if (actor) {
+    query += `&filters[xAPI.actor.name]=${actor}`;
   }
   const response = await axios.get(query);
 
@@ -91,12 +108,18 @@ export const getExerciseSubmissionsOverTimeService = async (
 
 // Get Exercise Submissions By Time Service
 export const getMCQChartService = async (
+  consumer: string,
   exerciseId: string,
-  subExerciseId: string
+  subExerciseId: string,
+  actor?: string
 ) => {
   let query = `${API_GET_MCQ_CHART}/${exerciseId}`;
   if (subExerciseId) {
     query += `/${subExerciseId}`;
+  }
+  query += `?consumer=${consumer}`;
+  if (actor) {
+    query += `&filters[xAPI.actor.name]=${actor}`;
   }
   const response = await axios.get(query);
 
@@ -105,14 +128,32 @@ export const getMCQChartService = async (
 
 // Get True False
 export const getTrueFalseChartService = async (
+  consumer: string,
   exerciseId: string,
-  subExerciseId: string
+  subExerciseId: string,
+  actor?: string
 ) => {
   let query = `${API_GET_TRUE_FALSE_CHART}/${exerciseId}`;
   if (subExerciseId) {
     query += `/${subExerciseId}`;
   }
+  query += `?consumer=${consumer}`;
+  if (actor) {
+    query += `&filters[xAPI.actor.name]=${actor}`;
+  }
   const response = await axios.get(query);
 
+  return response.data;
+};
+
+export const getActorsService = async (
+  consumer: string,
+  course: string,
+  page: number,
+  pageSize: number
+) => {
+  const response = await axios.get(
+    `${API_GET_ACTORS}?consumer=${consumer}&course=${course}&page=${page}&pageSize=${pageSize}`
+  );
   return response.data;
 };

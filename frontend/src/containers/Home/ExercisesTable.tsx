@@ -54,7 +54,8 @@ export function ExercisesTable(props): ReactElement {
       pageSize,
       ignoreSubExercises,
       exerciseTypesFilter,
-      searchText
+      searchText,
+      props.actor
     );
     result
       .then((res) => {
@@ -99,6 +100,7 @@ export function ExercisesTable(props): ReactElement {
     ignoreSubExercises,
     exerciseTypesFilter,
     searchText,
+    props.actor,
   ]);
 
   useEffect(() => {
@@ -114,17 +116,23 @@ export function ExercisesTable(props): ReactElement {
       render: (text, record) =>
         record._id.search("subContentId") > -1 ? (
           <Link
-            to={`/consumer/${props.consumerId}/course/${
-              props.courseId
-            }/exercise/${record._id.split("?subContentId=")[0]}/sub/${
-              record._id.split("?subContentId=")[1]
-            }`}
+            to={{
+              state: { actor: props.actor },
+              pathname: `/consumer/${props.consumerId}/course/${
+                props.courseId
+              }/exercise/${record._id.split("?subContentId=")[0]}/sub/${
+                record._id.split("?subContentId=")[1]
+              }`,
+            }}
           >
             {record.title}
           </Link>
         ) : (
           <Link
-            to={`/consumer/${props.consumerId}/course/${props.courseId}/exercise/${record._id}`}
+            to={{
+              state: { actor: props.actor },
+              pathname: `/consumer/${props.consumerId}/course/${props.courseId}/exercise/${record._id}`,
+            }}
           >
             {record.title ?? "N/A"}
           </Link>

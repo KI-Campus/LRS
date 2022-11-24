@@ -51,6 +51,8 @@ const Home = (): ReactElement => {
   const [selectedCourseDetailsLoading, setSelectedCourseDetailsLoading] =
     useState(true);
 
+  const [selectedActor, setSelectedActor] = useState(null);
+
   const [courseSubmissionsOverTime, setCourseSubmissionsOverTime] =
     useState<any>([]);
   const [
@@ -154,7 +156,11 @@ const Home = (): ReactElement => {
 
   const fetchCourse = () => {
     setSelectedCourseDetailsLoading(true);
-    let result = getCourseDetailsService(selectedCourse);
+    let result = getCourseDetailsService(
+      selectedConsumer,
+      selectedCourse,
+      selectedActor
+    );
     result
       .then((res) => {
         setSelectedCourseDetails(res[0]);
@@ -172,7 +178,11 @@ const Home = (): ReactElement => {
 
   const fetchCourseSubmissionsOverTime = () => {
     setCourseSubmissionsOverTimeLoading(true);
-    let result = getCourseSubmissionsOverTimeService(selectedCourse);
+    let result = getCourseSubmissionsOverTimeService(
+      selectedConsumer,
+      selectedCourse,
+      selectedActor
+    );
     result
       .then((res) => {
         setCourseSubmissionsOverTime(res);
@@ -186,7 +196,11 @@ const Home = (): ReactElement => {
 
   const fetchCourseExerciseTypesCount = () => {
     setCourseExerciseTypesCountLoading(true);
-    let result = getCourseExerciseTypesCountsService(selectedCourse);
+    let result = getCourseExerciseTypesCountsService(
+      selectedConsumer,
+      selectedCourse,
+      selectedActor
+    );
     result
       .then((res) => {
         setCourseExerciseTypesCount(res);
@@ -211,6 +225,7 @@ const Home = (): ReactElement => {
     setCoursesLoading(true);
     setCourses([]);
     setSelectedCourse(null);
+    setSelectedActor(null);
     if (selectedConsumer) {
       // Get all courses for selected consumer
       fetchCourses();
@@ -224,7 +239,7 @@ const Home = (): ReactElement => {
       fetchCourseSubmissionsOverTime();
       fetchCourseExerciseTypesCount();
     }
-  }, [selectedCourse]);
+  }, [selectedCourse, selectedActor]);
 
   return (
     <div>
@@ -383,8 +398,11 @@ const Home = (): ReactElement => {
       <Divider></Divider>
       {selectedCourse && (
         <CourseStats
+          consumer={selectedConsumer}
           courseStatsLoading={selectedCourseDetailsLoading}
           courseStats={selectedCourseDetails}
+          selectedActor={selectedActor}
+          setSelectedActor={setSelectedActor}
         />
       )}
       <Divider></Divider>
@@ -425,6 +443,7 @@ const Home = (): ReactElement => {
                   types={courseRootExerciseTypes}
                   courseId={selectedCourse}
                   consumerId={selectedConsumer}
+                  actor={selectedActor}
                 />
               )}
             </Col>

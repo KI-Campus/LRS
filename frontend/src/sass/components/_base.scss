@@ -152,3 +152,10 @@ body {
 .backButton:hover {
   color: #116af4;
 }
+.hoverable {
+  cursor: pointer;
+}
+.hoverable:hover {
+  color: #116af4;
+  background-color: #f0f2f5;
+}
