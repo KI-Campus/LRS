@@ -185,7 +185,13 @@ const Exercise = (): ReactElement => {
       key: "title",
       render: (text: string, record: any) => (
         <Link
-          to={`../../../../../consumer/${consumerId}/course/${courseId}/exercise/${record.parentId}/sub/${record.childId}`}
+          to={{
+            state: {
+              // @ts-ignore
+              actor: location?.state?.actor ? location?.state?.actor : null,
+            },
+            pathname: `../../../../../consumer/${consumerId}/course/${courseId}/exercise/${record.parentId}/sub/${record.childId}`,
+          }}
         >
           {text ?? "N/A"}
         </Link>
@@ -276,9 +282,18 @@ const Exercise = (): ReactElement => {
                   <Space>
                     {isSubExercise ? (
                       <Link
-                        to={`/consumer/${consumerId}/course/${courseId}/exercise/${
-                          exercise?._id.split("?subContentId=")[0]
-                        }`}
+                        to={{
+                          state: {
+                            // @ts-ignore
+                            actor: location?.state?.actor
+                              ? // @ts-ignore
+                                location?.state?.actor
+                              : null,
+                          },
+                          pathname: `/consumer/${consumerId}/course/${courseId}/exercise/${
+                            exercise?._id.split("?subContentId=")[0]
+                          }`,
+                        }}
                       >
                         {exercise?._id.split("?subContentId=")[0]}
                       </Link>
