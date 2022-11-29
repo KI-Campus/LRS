@@ -452,8 +452,12 @@ function chartSubmissionsByTime() {
                 "$project": {
                     "DayMonthYear": {
                         "$dateToString": {
-                            "format": "%d-%m-%Y",
-                            "date": "$_id"
+                            "format": "%Y-%m-%d",
+                            "date": {
+                                $dateFromString: {
+                                    dateString: '$metadata.createdAt'
+                                }
+                            }
                         }
                     }
                 }
@@ -466,7 +470,7 @@ function chartSubmissionsByTime() {
             },
 
             {
-                "$sort": { "_id": -1 }
+                "$sort": { "_id": 1 }
             }
         ]
     }
@@ -579,8 +583,12 @@ function exerciseSubmissionsByTime(exercise) {
                 "$project": {
                     "DayMonthYear": {
                         "$dateToString": {
-                            "format": "%d-%m-%Y",
-                            "date": "$_id"
+                            "format": "%Y-%m-%d",
+                            "date": {
+                                $dateFromString: {
+                                    dateString: '$metadata.createdAt'
+                                }
+                            }
                         }
                     }
                 }
@@ -593,7 +601,7 @@ function exerciseSubmissionsByTime(exercise) {
             },
 
             {
-                "$sort": { "_id": -1 }
+                "$sort": { "_id": 1 }
             }
         ]
     }
