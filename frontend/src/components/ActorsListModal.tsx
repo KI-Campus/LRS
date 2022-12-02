@@ -82,7 +82,7 @@ export default function ActorsListModal(props: ActorsListModalProps) {
             }}
             className={"hoverable"}
           >
-            <List.Item.Meta title={item._id} description={item.email} />
+            <List.Item.Meta title={item._id} />
             <div>{index + 1 + page * pageSize - pageSize}</div>
           </List.Item>
         )}

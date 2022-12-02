@@ -1363,7 +1363,6 @@ async function getActors(req, res, next) {
       {
         $group: {
           _id: "$xAPI.actor.name",
-          email: { $last: "$xAPI.actor.mbox" },
         },
       },
       {
