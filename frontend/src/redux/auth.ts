@@ -2,13 +2,14 @@ import { createSlice } from "@reduxjs/toolkit";
 import Authentication from "src/services/auth";
 import { setHeader } from "src/utils/axios";
 import notification from "antd/lib/notification";
+import { UserInterface } from "src/Interfaces/UserInterface";
 
 // interfaces
 interface initialStateInterface {
   isLoggedIn: undefined | null | boolean;
   loading: boolean;
   globalLoading: boolean;
-  user: any;
+  user: UserInterface;
 }
 
 const initialState: initialStateInterface = {
@@ -50,9 +51,10 @@ export function login({ email, password }) {
       // login logic
       let result = await Authentication.login(email, password);
       setHeader(result.data?.token);
-      console.log("Login result", result);
 
-      dispatch(setUser(result));
+      let resultUser = await Authentication.getUser(result.data?.token);
+      dispatch(setUser(resultUser?.data));
+
       dispatch(setIsLoggedIn(true));
       localStorage.setItem("token", result.data?.token);
 
@@ -94,15 +96,14 @@ export function checkLoginStatus() {
       if (t) {
         setHeader(t);
         let result = await Authentication.getUser(t);
+        dispatch(setUser(result?.data));
         dispatch(setIsLoggedIn(true));
-        dispatch(setUser(result));
       } else {
+        dispatch(logout());
         dispatch(setIsLoggedIn(null));
       }
     } catch (error: any) {
-      notification.error({
-        message: error.message,
-      });
+      dispatch(logout());
     }
   };
 }

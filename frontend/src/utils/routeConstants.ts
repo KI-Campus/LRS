@@ -131,6 +131,7 @@ export const routeConstants = [
   // },
 
   {
+    isAdminOnly: true,
     showInSidebar: true,
     title: "Consumers",
     icons: {
@@ -148,6 +149,7 @@ export const routeConstants = [
   },
 
   {
+    isAdminOnly: true,
     showInSidebar: true,
     title: "Users",
     icons: {

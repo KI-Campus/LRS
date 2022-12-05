@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useHistory } from "react-router";
 import Layout from "antd/lib/layout";
 import Col from "antd/lib/col";
@@ -15,12 +15,28 @@ import Footer from "src/containers/Footer";
 const { Content } = Layout;
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
-  let { globalLoading } = useAppSelector((state) => state.authModal);
+  let { globalLoading, user, isLoggedIn, loading } = useAppSelector(
+    (state) => state.authModal
+  );
   let { location } = useHistory();
+
+  const [filteredSideMenu, setFilteredSideMenu] = useState([]);
 
   let history = useHistory();
 
-  let filteredSideMenu = routeConstants.filter((v) => v.showInSidebar === true);
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    if (user?.role === "admin") {
+      setFilteredSideMenu(
+        routeConstants.filter((v) => v.showInSidebar === true || v.isAdminOnly)
+      );
+    } else {
+      setFilteredSideMenu(
+        routeConstants.filter((v) => v.showInSidebar === true && !v.isAdminOnly)
+      );
+    }
+  }, [user, isLoggedIn, globalLoading, loading]);
+
   return (
     <div>
       <Spin spinning={globalLoading}>
