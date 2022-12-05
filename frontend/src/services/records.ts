@@ -150,10 +150,13 @@ export const getActorsService = async (
   consumer: string,
   course: string,
   page: number,
-  pageSize: number
+  pageSize: number,
+  search: string = undefined
 ) => {
-  const response = await axios.get(
-    `${API_GET_ACTORS}?consumer=${consumer}&course=${course}&page=${page}&pageSize=${pageSize}`
-  );
+  let query = `${API_GET_ACTORS}?consumer=${consumer}&course=${course}&page=${page}&pageSize=${pageSize}`;
+  if (search) {
+    query += `&search=${search}`;
+  }
+  const response = await axios.get(query);
   return response.data;
 };

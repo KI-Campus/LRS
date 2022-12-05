@@ -1,4 +1,4 @@
-import { List, Modal, Pagination } from "antd";
+import { Button, Col, Input, List, Modal, Pagination, Row } from "antd";
 import { useEffect, useState } from "react";
 import { getActorsService } from "src/services/records";
 import { GET_ACTORS_PAGE_SIZE } from "src/utils/constants";
@@ -22,13 +22,16 @@ export default function ActorsListModal(props: ActorsListModalProps) {
   const [total, setTotal] = useState(0);
   const [actorsList, setActorsList] = useState([]);
 
+  const [searchText, setSearchText] = useState<string>(undefined);
+
   const fetchActorsList = async () => {
     setLoading(true);
     const response = await getActorsService(
       props.consumer,
       props.course,
       page,
-      pageSize
+      pageSize,
+      searchText
     );
     if (response) {
       setActorsList(response?.result);
@@ -41,7 +44,7 @@ export default function ActorsListModal(props: ActorsListModalProps) {
     if (props.isOpen) {
       fetchActorsList();
     }
-  }, [props.isOpen, page]);
+  }, [props.isOpen, page, searchText]);
 
   const handleOk = () => {
     props.modalCloserFunction(false);
@@ -59,9 +62,47 @@ export default function ActorsListModal(props: ActorsListModalProps) {
       onCancel={handleCancel}
       footer={null}
     >
+      {searchText && (
+        <>
+          <Row gutter={20}>
+            <Col>
+              <h3>Showing search results for: {searchText}</h3>
+            </Col>
+            <Col>
+              <Button
+                onClick={() => {
+                  setSearchText(undefined);
+                }}
+                size={"small"}
+              >
+                Clear
+              </Button>
+            </Col>
+          </Row>
+          <br />
+        </>
+      )}
+
+      {!searchText && (
+        <>
+          <Row gutter={20}>
+            <Col>
+              <Input.Search
+                placeholder="Search student by ID or name"
+                onSearch={(value) => {
+                  setSearchText(value);
+                }}
+                enterButton
+              />
+            </Col>
+          </Row>
+          <br />
+        </>
+      )}
       <h4>
         Select a student to view their records for this course and exercise
       </h4>
+
       <List
         loading={loading}
         size={"small"}
@@ -75,6 +116,7 @@ export default function ActorsListModal(props: ActorsListModalProps) {
         }}
         renderItem={(item, index) => (
           <List.Item
+            style={{ boxShadow: "5px 5px 20px rgb(0 0 0 / 5%)" }}
             key={item._id}
             onClick={() => {
               props.setSelectedActor(item._id);

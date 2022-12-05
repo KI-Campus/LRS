@@ -1319,6 +1319,9 @@ async function getActors(req, res, next) {
 
   let consumer = req.query.consumer ? req.query.consumer : "all";
   let courseId = req.query.course ? req.query.course : undefined;
+  let search = req.query.search ? req.query.search : undefined;
+
+  let pipeline;
 
   if (!courseId) {
     res.status(400).send({ error: "Invalid course ID" }).end();
@@ -1353,7 +1356,7 @@ async function getActors(req, res, next) {
   let limit = pageSize;
 
   try {
-    let pipeline = [
+    pipeline = [
       {
         $match: {
           "metadata.session.context_id": courseId,
@@ -1376,6 +1379,18 @@ async function getActors(req, res, next) {
           "metadata.session.custom_consumer": consumer,
         },
       });
+    }
+
+    if (search) {
+      let searchPipeline = {
+        $match: {
+          "xAPI.actor.name": {
+            $regex: search,
+            $options: "i",
+          },
+        },
+      };
+      pipeline.splice(2, 0, searchPipeline);
     }
 
     let count = await m_client
