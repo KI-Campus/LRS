@@ -98,6 +98,10 @@ export default function CreateUser(props): ReactElement {
                 required: true,
                 message: "Please provide password",
               },
+              {
+                min: 6,
+                message: "Please enter a password with 6 or more characters",
+              },
             ]}
           >
             <Input.Password />
