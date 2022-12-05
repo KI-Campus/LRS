@@ -5,6 +5,7 @@ import { Button, Skeleton, Space, Tooltip } from "antd";
 import { QuestionCircleTwoTone } from "@ant-design/icons";
 import { ReactElement, useState } from "react";
 import ActorsListModal from "src/components/ActorsListModal";
+import { useAppSelector } from "src/redux/hooks";
 
 export function CourseStats({
   courseStatsLoading,
@@ -14,6 +15,8 @@ export function CourseStats({
   setSelectedActor,
 }): ReactElement {
   const [actorsListModalVisible, setActorsListModalVisible] = useState(false);
+
+  const { isLoggedIn, user } = useAppSelector((state) => state.authModal);
 
   return (
     <div className="site-card-wrapper">
@@ -65,17 +68,19 @@ export function CourseStats({
 
         <Col span={4}>
           <Card loading={courseStatsLoading} title="Students">
-            <Tooltip title="Click to see the list of students">
-              <Space>
-                {courseStats?.totalActorsCount}
-                <Button
-                  type="default"
-                  onClick={() => setActorsListModalVisible(true)}
-                >
-                  Select
-                </Button>
-              </Space>
-            </Tooltip>
+            <Space>
+              {courseStats?.totalActorsCount}
+              {user.role === "admin" && (
+                <Tooltip title="Click to see the list of students">
+                  <Button
+                    type="default"
+                    onClick={() => setActorsListModalVisible(true)}
+                  >
+                    Select
+                  </Button>
+                </Tooltip>
+              )}
+            </Space>
           </Card>
         </Col>
 

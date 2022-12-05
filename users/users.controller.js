@@ -4,7 +4,7 @@ const router = express.Router();
 const userService = require("./user.service");
 
 let jwtScopeOptions = {
-  failWithError: true,
+  failWithError: false,
   customScopeKey: "role",
 };
 

@@ -4,7 +4,7 @@ const router = express.Router();
 const fs = require("fs");
 
 let jwtScopeOptions = {
-  failWithError: true,
+  failWithError: false,
   customScopeKey: "role",
 };
 
@@ -61,7 +61,7 @@ router.get("/mcqChart/:id/:subExerciseId", getMCQChart);
 router.get("/trueFalseChart/:id", getTrueFalseChart);
 router.get("/trueFalseChart/:id/:subExerciseId", getTrueFalseChart);
 
-router.get("/actors", getActors);
+router.get("/actors", jwtAuthz(["admin"], jwtScopeOptions), getActors);
 
 async function checkUserAccess(req, res, next) {
   let consumer;
