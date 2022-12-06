@@ -41,7 +41,7 @@ export default function DownloadModal(props: DownloadModalProps) {
   const handleOk = () => {
     setDownloading(true);
 
-    let messageReturn = message.loading({ content: "Downloading exercise..." });
+    let messageReturn = message.loading({ content: "Downloading..." });
 
     downloadService(
       props.consumer,
@@ -58,7 +58,17 @@ export default function DownloadModal(props: DownloadModalProps) {
         const fileURL = URL.createObjectURL(file);
         const link = document.createElement("a");
         link.href = fileURL;
-        link.setAttribute("download", props.exercise + ".json");
+
+        let fileName;
+        if (props.isExerciseSelected) {
+          fileName = props.exercise;
+        } else if (props.isCourseSelected) {
+          fileName = props.course;
+        } else if (props.isConsumerSelected) {
+          fileName = props.consumer;
+        }
+
+        link.setAttribute("download", fileName + ".json");
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -109,7 +119,7 @@ export default function DownloadModal(props: DownloadModalProps) {
   return (
     <>
       <Modal
-        title={"Download Data: " + props.selectedText}
+        title={"Download: " + props.selectedText}
         closable={true}
         visible={props.isOpen}
         onOk={handleOk}

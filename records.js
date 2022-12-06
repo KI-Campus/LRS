@@ -1511,10 +1511,14 @@ async function download(req, res, next) {
       }
     }
 
-    fs.writeFileSync(
-      `tmp/${req.user.email || ""}_tmp.json`,
-      JSON.stringify({ result: myResponse })
-    );
+    try {
+      fs.writeFileSync(
+        `tmp/${req.user.email || ""}_tmp.json`,
+        JSON.stringify({ result: myResponse })
+      );
+    } catch (err) {
+      console.log("Error writing file for download", err);
+    }
 
     res
       .status(200)
