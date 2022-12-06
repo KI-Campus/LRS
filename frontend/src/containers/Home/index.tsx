@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useHistory, useLocation } from "react-router-dom";
 import Select from "antd/lib/select";
 import Row from "antd/lib/row";
 import Col from "antd/lib/col";
@@ -29,10 +29,17 @@ import ExerciseTypesGraph from "./ExerciseTypesGraph";
 import DownloadModal, {
   DownloadModalProps,
 } from "src/components/DownloadModal";
+import EditUser from "../Users/EditUser";
+import { UserInterface } from "src/Interfaces/UserInterface";
+import { useAppSelector } from "src/redux/hooks";
 
 const { Option } = Select;
 const Home = (): ReactElement => {
   let history = useHistory();
+
+  let location = useLocation();
+
+  const { user } = useAppSelector((state) => state.authModal);
 
   // @ts-ignore
   const { consumerId, courseId } = useParams();
@@ -85,6 +92,9 @@ const Home = (): ReactElement => {
     isExerciseSelected: false,
     selectedText: "",
   });
+
+  const [editUser, setEditUser] = useState<UserInterface>();
+  const [editDrawerVisible, setEditDrawerVisible] = useState(false);
 
   const handleConsumerSelect = (value: string) => {
     history.push("/consumer/" + value);
@@ -242,8 +252,26 @@ const Home = (): ReactElement => {
     }
   }, [selectedCourse, selectedActor]);
 
+  // When react router state is editCurrentUser is true
+  useEffect(() => {
+    // @ts-ignore
+    if (location.state?.editCurrentUser === true) {
+      setEditUser(user);
+      setEditDrawerVisible(true);
+    }
+  }, [location.state, user]);
+
   return (
     <div>
+      <EditUser
+        visible={editDrawerVisible}
+        editUser={editUser}
+        fetchUsers={null}
+        consumers={consumers}
+        editDrawerVisible={editDrawerVisible}
+        setEditDrawerVisible={setEditDrawerVisible}
+        isCurrentUser={true}
+      />
       <h2>Welcome to openLRS Dashboard</h2>
       <GlobalStats
         globalStatsLoading={globalStatsLoading}
