@@ -141,11 +141,12 @@ const Home = (): ReactElement => {
       .then((res) => {
         setConsumers(res);
         setConsumersLoading(false);
-        // Select the first consumer or the one from the URL
         if (consumerId) {
           setSelectedConsumer(consumerId);
         } else {
-          setSelectedConsumer(res[0].id);
+          // Select the first consumer or the one from the URL
+          // Disabled for now
+          //setSelectedConsumer(res[0].id);
         }
       })
       .catch((err) => {
