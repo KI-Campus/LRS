@@ -44,7 +44,14 @@ export default function ActorsListModal(props: ActorsListModalProps) {
     if (props.isOpen) {
       fetchActorsList();
     }
-  }, [props.isOpen, page, searchText]);
+  }, [props.isOpen, page]);
+
+  useEffect(() => {
+    if (props.isOpen) {
+      setPage(1);
+      fetchActorsList();
+    }
+  }, [searchText]);
 
   const handleOk = () => {
     props.modalCloserFunction(false);
@@ -111,6 +118,7 @@ export default function ActorsListModal(props: ActorsListModalProps) {
           onChange: (page) => {
             setPage(page);
           },
+          current: page,
           pageSize: pageSize,
           total: total,
         }}
