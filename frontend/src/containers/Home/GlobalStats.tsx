@@ -4,6 +4,7 @@ import Col from "antd/lib/col";
 import { Space, Tooltip } from "antd";
 import { QuestionCircleTwoTone } from "@ant-design/icons";
 import { ReactElement } from "react";
+import { TEXT_ACTORS_COUNT_MISINFORMATION } from "src/utils/constants";
 
 export function GlobalStats({ globalStatsLoading, globalStats }): ReactElement {
   return (
@@ -44,14 +45,19 @@ export function GlobalStats({ globalStatsLoading, globalStats }): ReactElement {
             >
               <Space>
                 {globalStats?.totalConsumers}
-                <QuestionCircleTwoTone />
+                <QuestionCircleTwoTone style={{ cursor: "pointer" }} />
               </Space>
             </Tooltip>
           </Card>
         </Col>
         <Col span={4}>
           <Card loading={globalStatsLoading} title="Total Students">
-            {globalStats?.totalActorsCount}
+            <Space>
+              {globalStats?.totalActorsCount}
+              <Tooltip title={TEXT_ACTORS_COUNT_MISINFORMATION}>
+                <QuestionCircleTwoTone style={{ cursor: "pointer" }} />
+              </Tooltip>
+            </Space>
           </Card>
         </Col>
       </Row>

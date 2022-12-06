@@ -44,3 +44,6 @@ export const COLOR_WRONG_ANSWER = "#ff0000b3";
 
 export const COLOR_CORRECT_ANSWER_DARK = "#0000ff";
 export const COLOR_WRONG_ANSWER_DARK = "#ff0000";
+
+export const TEXT_ACTORS_COUNT_MISINFORMATION =
+  "The number of students in the system is not accurate. This is because the system has started to track students only from 10th November 2022. The number of students before that date is not accurate.";

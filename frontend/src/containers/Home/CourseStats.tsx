@@ -6,6 +6,7 @@ import { QuestionCircleTwoTone } from "@ant-design/icons";
 import { ReactElement, useState } from "react";
 import ActorsListModal from "src/components/ActorsListModal";
 import { useAppSelector } from "src/redux/hooks";
+import { TEXT_ACTORS_COUNT_MISINFORMATION } from "src/utils/constants";
 
 export function CourseStats({
   courseStatsLoading,
@@ -33,7 +34,7 @@ export function CourseStats({
             <Tooltip title={"Course ID: " + courseStats._id}>
               <Space>
                 {courseStats?.title || ""}
-                <QuestionCircleTwoTone />
+                <QuestionCircleTwoTone style={{ cursor: "pointer" }} />
               </Space>
               <Skeleton loading={courseStatsLoading} active />
             </Tooltip>
@@ -70,6 +71,9 @@ export function CourseStats({
           <Card loading={courseStatsLoading} title="Students">
             <Space>
               {courseStats?.totalActorsCount}
+              <Tooltip title={TEXT_ACTORS_COUNT_MISINFORMATION}>
+                <QuestionCircleTwoTone style={{ cursor: "pointer" }} />
+              </Tooltip>
               {user.role === "admin" && (
                 <Tooltip title="Click to see the list of students">
                   <Button

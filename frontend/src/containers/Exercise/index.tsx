@@ -16,6 +16,7 @@ import TrueFalseGraph from "./TrueFalseGraph";
 import DownloadModal from "src/components/DownloadModal";
 
 import BackButton from "src/components/BackButton";
+import { TEXT_ACTORS_COUNT_MISINFORMATION } from "src/utils/constants";
 const Exercise = (): ReactElement => {
   // Fetch consumer ID and exercise ID from router : consumer/:consumerId/exercise/:exerciseId
 
@@ -262,7 +263,7 @@ const Exercise = (): ReactElement => {
                   >
                     <Space>
                       {exercise?.title || "N/A"}
-                      <QuestionCircleTwoTone />
+                      <QuestionCircleTwoTone style={{ cursor: "pointer" }} />
                     </Space>
                   </Tooltip>
                 </Card>
@@ -374,23 +375,39 @@ const Exercise = (): ReactElement => {
                       loading={exerciseLoading}
                       title="Students (Unique Users)"
                     >
-                      {exercise?.totalActorsCount ?? "0"}
+                      <Space>
+                        {exercise?.totalActorsCount ?? "0"}
+                        <Tooltip title={TEXT_ACTORS_COUNT_MISINFORMATION}>
+                          <QuestionCircleTwoTone
+                            style={{ cursor: "pointer" }}
+                          />
+                        </Tooltip>
+                      </Space>
                     </Card>
                   </Col>
                 )
               }
               {
                 // @ts-ignore
-                exercise?.totalActorsCompletedCount && !location?.state?.actor && (
-                  <Col span={4}>
-                    <Card
-                      loading={exerciseLoading}
-                      title="Students who completed the exercise"
-                    >
-                      {exercise?.totalActorsCompletedCount ?? "0"}
-                    </Card>
-                  </Col>
-                )
+                exercise?.totalActorsCompletedCount &&
+                  // @ts-ignore
+                  !location?.state?.actor && (
+                    <Col span={4}>
+                      <Card
+                        loading={exerciseLoading}
+                        title="Students who completed the exercise"
+                      >
+                        <Space>
+                          {exercise?.totalActorsCompletedCount ?? "0"}
+                          <Tooltip title={TEXT_ACTORS_COUNT_MISINFORMATION}>
+                            <QuestionCircleTwoTone
+                              style={{ cursor: "pointer" }}
+                            />
+                          </Tooltip>
+                        </Space>
+                      </Card>
+                    </Col>
+                  )
               }
             </Row>
             <br />
