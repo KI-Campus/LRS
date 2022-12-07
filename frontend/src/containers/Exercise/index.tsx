@@ -248,6 +248,8 @@ const Exercise = (): ReactElement => {
         selectedText={exercise?.title ?? ""}
         isOpen={downloadModalOpen}
         modalCloserFunction={setDownloadModalOpen}
+        // @ts-ignore
+        actor={location?.state?.actor ? location?.state?.actor : null}
       />
 
       {exerciseLoading ? (

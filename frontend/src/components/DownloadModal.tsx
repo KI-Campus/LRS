@@ -1,4 +1,13 @@
-import { Alert, Button, Checkbox, Form, Input, message, Modal } from "antd";
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Form,
+  Input,
+  message,
+  Modal,
+  Space,
+} from "antd";
 import React, { useEffect, useRef, useState } from "react";
 import { downloadService } from "src/services/records";
 
@@ -6,6 +15,7 @@ export interface DownloadModalProps {
   consumer: string;
   course: string;
   exercise?: string;
+  actor?: string;
   ignoreSubExercises?: 0 | 1;
   includeSimplifyRecords?: 0 | 1;
   includeRAWRecords?: 0 | 1;
@@ -49,7 +59,8 @@ export default function DownloadModal(props: DownloadModalProps) {
       props.exercise,
       ignoreSubExercises,
       includeSimplifyRecords,
-      includeRAWRecords
+      includeRAWRecords,
+      props.actor
     )
       .then((res) => {
         const file = new Blob([JSON.stringify(res)], {
@@ -60,7 +71,9 @@ export default function DownloadModal(props: DownloadModalProps) {
         link.href = fileURL;
 
         let fileName;
-        if (props.isExerciseSelected) {
+        if (props.isExerciseSelected && props.actor) {
+          fileName = props.exercise + "_" + props.actor;
+        } else if (props.isExerciseSelected && !props.actor) {
           fileName = props.exercise;
         } else if (props.isCourseSelected) {
           fileName = props.course;
@@ -147,19 +160,29 @@ export default function DownloadModal(props: DownloadModalProps) {
             showIcon
           />
         )}
-        {props.isExerciseSelected && (
-          <Alert
-            message="Information"
-            style={{ marginRight: "1rem" }}
-            description="This will download all data for the selected exercise. "
-            type="info"
-            showIcon
-          />
-        )}
-        <br />
-        <p>
-          <h5>Downloaded data will be in JSON format</h5>
-        </p>
+        <Space direction="vertical">
+          {props.isExerciseSelected && (
+            <Alert
+              message="Information"
+              style={{ marginRight: "1rem" }}
+              description="This will download all data for the selected exercise. "
+              type="info"
+              showIcon
+            />
+          )}
+          {props.actor && (
+            <Alert
+              style={{ marginRight: "1rem" }}
+              description={`Downloaded data will be for the selected exercise for the student: ${props.actor}.`}
+              type={"warning"}
+              showIcon
+            />
+          )}
+          <p>
+            <h5>Downloaded data will be in JSON format</h5>
+          </p>
+        </Space>
+
         <p>
           <h5>
             To convert JSON format to CSV, you can use any third-party

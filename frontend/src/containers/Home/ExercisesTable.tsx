@@ -40,6 +40,7 @@ export function ExercisesTable(props): ReactElement {
     isCourseSelected: false,
     isExerciseSelected: false,
     selectedText: "",
+    actor: props.actor ?? null,
   });
 
   const [exerciseTypesFilter, setExerciseTypesFilter] = useState<string[]>([]);
@@ -89,6 +90,7 @@ export function ExercisesTable(props): ReactElement {
       isExerciseSelected: true,
       selectedText:
         "Exercise " + exercise.title + " (ID: " + exercise._id + ")",
+      actor: props.actor ?? null,
     });
   };
 

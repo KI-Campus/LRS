@@ -1486,6 +1486,9 @@ async function download(req, res, next) {
     });
   }
 
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
+
   try {
     let records = await m_client
       .db()

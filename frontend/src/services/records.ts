@@ -50,7 +50,8 @@ export const downloadService = async (
   exerciseId: string = null,
   ignoreSubExercises = null,
   includeSimplifyRecords = null,
-  includeRAWRecords = null
+  includeRAWRecords = null,
+  actor: string = null
 ) => {
   let query = `${API_GET_DOWNLOAD}?`;
 
@@ -65,6 +66,8 @@ export const downloadService = async (
   if (includeSimplifyRecords) query += "&includeSimplifyRecords=1";
 
   if (includeRAWRecords) query += "&includeRAWRecords=1";
+
+  if (actor) query += `&filters[xAPI.actor.name]=${actor}`;
 
   const response = await axios.get(query);
   return response.data;
