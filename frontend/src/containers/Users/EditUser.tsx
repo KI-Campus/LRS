@@ -7,8 +7,13 @@ import notification from "antd/lib/notification";
 import Select from "antd/lib/select";
 import { UserInterface } from "src/Interfaces/UserInterface";
 import { updateUserService } from "src/services/users";
+import { useAppDispatch } from "src/redux/hooks";
+import { checkLoginStatus } from "src/redux/auth";
+import { useHistory } from "react-router-dom";
 
 export default function EditUser(props): ReactElement {
+  let dispatch = useAppDispatch();
+  const history = useHistory();
   const [updateUserLoading, setUpdateUserLoading] = useState(false);
   const formRef = useRef(null);
   const [consumersAccessListDisabled, setConsumersAccessListDisabled] =
@@ -21,6 +26,7 @@ export default function EditUser(props): ReactElement {
 
   const updateUser = (userId: string, values: UserInterface) => {
     setUpdateUserLoading(true);
+    if (props.isCurrentUser) userId = "current";
     let ret = updateUserService(userId, values);
     ret
       .then((res) => {
@@ -36,8 +42,12 @@ export default function EditUser(props): ReactElement {
         setUpdateUserLoading(false);
       });
   };
+
   const onEditFormFinish = (values: UserInterface) => {
     updateUser(props.editUser.id, values);
+    history.push({ state: {} });
+    // Fetch current user again if props.isCurrentUser is true
+    if (props.isCurrentUser) dispatch(checkLoginStatus());
   };
 
   useEffect(() => {
@@ -87,7 +97,7 @@ export default function EditUser(props): ReactElement {
               },
             ]}
           >
-            <Input />
+            <Input disabled={props.isCurrentUser} />
           </Form.Item>
 
           <Form.Item
@@ -132,6 +142,7 @@ export default function EditUser(props): ReactElement {
             ]}
           >
             <Select
+              disabled={props.isCurrentUser}
               onChange={(value) => {
                 if (value === "admin") {
                   setConsumersAccessListDisabled(true);
@@ -158,7 +169,10 @@ export default function EditUser(props): ReactElement {
               },
             ]}
           >
-            <Select mode="multiple" disabled={consumersAccessListDisabled}>
+            <Select
+              mode="multiple"
+              disabled={consumersAccessListDisabled || props.isCurrentUser}
+            >
               {props.consumers.map((item) => (
                 <Select.Option value={item.id} key={item.id}>
                   {item.name}
