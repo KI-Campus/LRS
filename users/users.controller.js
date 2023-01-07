@@ -10,7 +10,15 @@ let jwtScopeOptions = {
 
 // Public routes
 router.post("/authenticate", authenticate);
-router.post("/register", register); // For initial deployment, make /register reachable
+
+// Make /register reachable for development environment. But for initial deployment, make /register reachable
+if (process.env.NODE_ENV === "development") {
+  router.post("/register", registerAdmin);
+}
+// Make /register reachable only for admin scope in production environment
+else {
+  router.post("/register", jwtAuthz(["admin"], jwtScopeOptions), registerAdmin);
+}
 
 // User scope private routes
 router.get("/current", getCurrent);
