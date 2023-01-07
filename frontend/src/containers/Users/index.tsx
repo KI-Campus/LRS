@@ -63,7 +63,23 @@ const Users = (): React.ReactElement => {
       });
   };
 
-  const deleteUser = (user: UserInterface) => {
+  const deleteUser = (user: UserInterface, users: UserInterface[]) => {
+    // Loop through users and check if the user is the last admin
+    let adminCount = 0;
+    users.forEach((user: UserInterface) => {
+      if (user.role === "admin") {
+        adminCount++;
+      }
+    });
+
+    if (user.role === "admin" && adminCount === 1) {
+      notification.error({
+        message: "Error",
+        description: "Cannot delete the last admin",
+      });
+      return;
+    }
+
     setUsersLoading(true);
     let ret = deleteUserService(user);
     ret
@@ -187,7 +203,7 @@ const Users = (): React.ReactElement => {
               "?"
             }
             onConfirm={() => {
-              deleteUser(record);
+              deleteUser(record, users);
             }}
             okText="Yes Delete"
             cancelText="Cancel"
