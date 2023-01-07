@@ -154,9 +154,10 @@ const Home = (): ReactElement => {
         if (consumerId) {
           setSelectedConsumer(consumerId);
         } else {
-          // Select the first consumer or the one from the URL
-          // Disabled for now
-          //setSelectedConsumer(res[0].id);
+          // Select the consumer if there is only one
+          if (res.length === 1) {
+            setSelectedConsumer(res[0].id);
+          }
         }
       })
       .catch((err) => {
@@ -296,7 +297,7 @@ const Home = (): ReactElement => {
             value={selectedConsumer}
             ref={consumerSelectComponentRef}
             loading={consumersLoading}
-            disabled={consumersLoading}
+            disabled={consumersLoading || consumers.length <= 1}
             style={{ width: "100%" }}
             onSelect={handleConsumerSelect}
           >
