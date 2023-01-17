@@ -55,7 +55,10 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 onSelect={(e) => {
                   history.push(e.key);
                 }}
-                selectedKeys={[location.pathname]}
+                selectedKeys={[
+                  location.pathname,
+                  location.pathname?.includes("/consumer/") ? "/" : "",
+                ]}
                 className="main-menu"
                 mode="inline"
               >
