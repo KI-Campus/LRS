@@ -154,8 +154,8 @@ export default function EditUser(props): ReactElement {
                 }
               }}
             >
-              <Select.Option value="user">User</Select.Option>
               <Select.Option value="admin">Admin</Select.Option>
+              <Select.Option value="user">User</Select.Option>
             </Select>
           </Form.Item>
 
