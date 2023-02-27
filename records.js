@@ -971,7 +971,7 @@ async function getExerciseSubmissionsOverTime(req, res, next) {
       $project: {
         YearMonthDay: {
           $dateToString: {
-            format: "%Y-%m-%d",
+            format: "%d-%m-%Y",
             date: "$date",
           },
         },
@@ -1042,7 +1042,7 @@ async function getCourseSubmissionsOverTime(req, res, next) {
       $project: {
         YearMonthDay: {
           $dateToString: {
-            format: "%Y-%m-%d",
+            format: "%d-%m-%Y",
             date: "$date",
           },
         },

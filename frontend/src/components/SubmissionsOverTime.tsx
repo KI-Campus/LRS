@@ -39,12 +39,10 @@ export function SubmissionsOverTime(props) {
   };
   const constructChartData = (data: any) => {
     return {
-      // Convert the data from YYYY-MM-DD to DD-MM-YYYY for better readibility
       labels:
         data.length > 0
           ? data.map((item) => {
-              let date = new Date(item?._id || "");
-              return `${date.getDate()}-${date.getMonth()}-${date.getFullYear()}`;
+              return item._id;
             })
           : [],
       datasets: [
