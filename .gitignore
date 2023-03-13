@@ -62,3 +62,8 @@ frontend/package-lock.json
 tmp/*.json
 
 frontend/build
+
+.DS_STORE
+yarn.lock
+frontend/.DS_STORE
+frontend/yarn.lock
