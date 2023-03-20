@@ -257,8 +257,8 @@ const Exercise = (): ReactElement => {
       ) : (
         <>
           <div className="site-card-wrapper">
-            <Row gutter={16}>
-              <Col span={8}>
+            <Row gutter={[24, 24]}>
+              <Col xs={24} xl={8} span={8}>
                 <Card loading={exerciseLoading} title={"Exercise Title"}>
                   <Tooltip
                     title={"Complete Exercise ID in xAPI: " + exercise._id}
@@ -271,16 +271,28 @@ const Exercise = (): ReactElement => {
                 </Card>
               </Col>
               {exercise?.type && (
-                <Col span={6}>
-                  <Card loading={exerciseLoading} title={"Exercise Type"}>
-                    <Space>{exercise?.type || "N/A"}</Space>
+                <Col xs={24} sm={24} md={24} lg={24} xl={8} span={8}>
+                  <Card loading={exerciseLoading} title={"Type"}>
+                    <Tooltip
+                      title={
+                        "Complete Exercise Type in xAPI: " + exercise?.type
+                      }
+                    >
+                      <Space>
+                        {String(exercise?.type)
+                          ?.split("/")
+                          ?.pop()
+                          ?.split("-")[0] || "N/A"}
+                        <QuestionCircleTwoTone style={{ cursor: "pointer" }} />
+                      </Space>
+                    </Tooltip>
                   </Card>
                 </Col>
               )}
-              <Col span={4}>
+              <Col xs={0} xl={8} span={8}>
                 <Card
                   loading={exerciseLoading}
-                  title={isSubExercise ? "Parent Exercise ID" : "Exercise ID"}
+                  title={isSubExercise ? "Parent ID" : "ID"}
                 >
                   <Space>
                     {isSubExercise ? (
@@ -316,28 +328,32 @@ const Exercise = (): ReactElement => {
             </Row>
             <br />
 
-            <Row gutter={16}>
-              <Col span={4}>
+            <Row gutter={[24, 24]}>
+              <Col sm={24} lg={8} span={8}>
                 <Card loading={exerciseLoading} title="Total Records">
                   {exercise?.totalRecords}
                 </Card>
               </Col>
-              <Col span={4}>
+              <Col sm={24} lg={8} span={8}>
                 <Card loading={exerciseLoading} title="Attempted">
                   {exercise?.attempted ?? "0"}
                 </Card>
               </Col>
-              <Col span={4}>
+              <Col sm={24} lg={8} span={8}>
                 <Card loading={exerciseLoading} title="Total Interactions">
                   {exercise?.totalInteractions ?? "0"}
                 </Card>
               </Col>
-              <Col span={4}>
+            </Row>
+            <br />
+
+            <Row gutter={[24, 24]}>
+              <Col sm={24} lg={8} span={8}>
                 <Card loading={exerciseLoading} title="Total Submissions">
                   {exercise?.totalSubmissions ?? "0"}
                 </Card>
               </Col>
-              <Col span={4}>
+              <Col sm={24} lg={8} span={8}>
                 <Card
                   loading={exerciseLoading}
                   title="Number of times Exercise Passed"
@@ -347,7 +363,7 @@ const Exercise = (): ReactElement => {
               </Col>
 
               {exercise?.averageScore && (
-                <Col span={4}>
+                <Col sm={24} lg={8} span={8}>
                   <Card loading={exerciseLoading} title="Average Score">
                     {exercise?.averageScore?.toFixed(2) ?? "N/A"}
                   </Card>
@@ -355,11 +371,11 @@ const Exercise = (): ReactElement => {
               )}
             </Row>
             <br />
-            <Row gutter={16}>
+            <Row gutter={[24, 24]}>
               {
                 // @ts-ignore
                 location?.state?.actor && (
-                  <Col span={4}>
+                  <Col sm={24} lg={8} span={8}>
                     <Card loading={exerciseLoading} title="Selected Student">
                       {
                         // @ts-ignore
@@ -372,7 +388,7 @@ const Exercise = (): ReactElement => {
               {
                 // @ts-ignore
                 exercise?.totalActorsCount && !location?.state?.actor && (
-                  <Col span={4}>
+                  <Col sm={24} lg={8} span={8}>
                     <Card
                       loading={exerciseLoading}
                       title="Students (Unique Users)"
@@ -394,7 +410,7 @@ const Exercise = (): ReactElement => {
                 exercise?.totalActorsCompletedCount &&
                   // @ts-ignore
                   !location?.state?.actor && (
-                    <Col span={4}>
+                    <Col sm={24} lg={8} span={8}>
                       <Card
                         loading={exerciseLoading}
                         title="Students who completed the exercise"
@@ -471,9 +487,9 @@ const Exercise = (): ReactElement => {
               </Row>
             )}
             <br />
-            <Row gutter={16}>
+            <Row gutter={[24, 24]}>
               {exercise?.totalSubmissions > 0 && (
-                <Col span={12}>
+                <Col sm={24} lg={12} span={12}>
                   <div className="shadow-bordered">
                     <SubmissionsOverTime
                       loading={exerciseSubmissionsOverTimeLoading}
@@ -482,7 +498,7 @@ const Exercise = (): ReactElement => {
                   </div>
                 </Col>
               )}
-              <Col span={12}>
+              <Col sm={24} lg={12} span={12}>
                 <div className="shadow-bordered">
                   {exerciseVerbs && (
                     <ExerciseEventTypesGraph
@@ -513,7 +529,7 @@ const Exercise = (): ReactElement => {
             <br />
             <br />
             {exercise.childExercises.length > 0 && (
-              <Row gutter={16}>
+              <Row gutter={[24, 24]}>
                 <Col span={24}>
                   <Table
                     rowKey={(record) => record._id}
@@ -528,8 +544,8 @@ const Exercise = (): ReactElement => {
 
             {mcqChartData?.choices?.length > 0 &&
               mcqChartData?.choices?.some((choice) => choice.count > 0) && (
-                <Row gutter={16}>
-                  <Col span={12}>
+                <Row gutter={[24, 24]}>
+                  <Col sm={24} span={12}>
                     <div className="shadow-bordered">
                       <ExerciseMCQGraph
                         loading={mcqChartLoading}

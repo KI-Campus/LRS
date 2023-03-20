@@ -438,8 +438,8 @@ const Home = (): ReactElement => {
       <Divider></Divider>
       {selectedCourse && (
         <>
-          <Row gutter={16}>
-            <Col span={12}>
+          <Row gutter={[24, 24]}>
+            <Col md={24} lg={24} xl={12} span={12}>
               <div className="shadow-bordered">
                 {!courseSubmissionsOverTimeLoading ? (
                   <SubmissionsOverTime
@@ -451,7 +451,7 @@ const Home = (): ReactElement => {
                 )}
               </div>
             </Col>
-            <Col span={12}>
+            <Col md={24} lg={24} xl={12} span={12}>
               <div className="shadow-bordered">
                 {!courseExerciseTypesCountLoading ? (
                   <ExerciseTypesGraph

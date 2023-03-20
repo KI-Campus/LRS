@@ -8,10 +8,12 @@ import Space from "antd/lib/space";
 import Button from "antd/lib/button";
 import Popconfirm from "antd/lib/popconfirm";
 import Table from "antd/lib/table";
+import type { ColumnsType } from "antd/es/table";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import EditConsumer from "./EditConsumer";
 import notification from "antd/lib/notification";
 import CreateConsumer from "./CreateConsumer";
+import { Col, Row } from "antd";
 
 const Consumers = (): React.ReactElement => {
   const [loading, setLoading] = useState(true);
@@ -66,10 +68,12 @@ const Consumers = (): React.ReactElement => {
       });
   };
 
-  const consumerColumns = [
+  const consumerColumns: ColumnsType<ConsumerInterface> = [
     {
       title: "#",
       key: "no",
+      // Responsive, show on bigger devices
+      responsive: ["xl", "xxl"],
       render: (text, record, index) => index + 1,
     },
     {
@@ -90,6 +94,8 @@ const Consumers = (): React.ReactElement => {
       title: "ID",
       dataIndex: "id",
       key: "id",
+      // Responsive, show on bigger devices
+      responsive: ["xl", "xxl"],
     },
     {
       title: "Picture",
@@ -111,6 +117,8 @@ const Consumers = (): React.ReactElement => {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
+      // Responsive, show on bigger devices
+      responsive: ["xl", "xxl"],
       render: (text, record: ConsumerInterface) => {
         return new Date(record.createdAt).toLocaleString() || "";
       },
@@ -120,29 +128,33 @@ const Consumers = (): React.ReactElement => {
       title: "Action",
       key: "action",
       render: (_, record: ConsumerInterface) => (
-        <Space size="middle">
-          <Button onClick={() => handleEditClick(record)}>
-            <Space>
-              Edit
-              <EditOutlined />
-            </Space>
-          </Button>
-          <Popconfirm
-            title={"Are you sure to delete " + record.name + "?"}
-            onConfirm={() => {
-              deleteConsumer(record);
-            }}
-            okText="Yes Delete"
-            cancelText="Cancel"
-          >
-            <Button danger>
+        <Row gutter={[24, 24]}>
+          <Col md={24} xl={12}>
+            <Button onClick={() => handleEditClick(record)}>
               <Space>
-                <DeleteOutlined />
-                Delete
+                Edit
+                <EditOutlined />
               </Space>
             </Button>
-          </Popconfirm>
-        </Space>
+          </Col>
+          <Col md={24} xl={12}>
+            <Popconfirm
+              title={"Are you sure to delete " + record.name + "?"}
+              onConfirm={() => {
+                deleteConsumer(record);
+              }}
+              okText="Yes Delete"
+              cancelText="Cancel"
+            >
+              <Button danger>
+                <Space>
+                  <DeleteOutlined />
+                  Delete
+                </Space>
+              </Button>
+            </Popconfirm>
+          </Col>
+        </Row>
       ),
     },
   ];

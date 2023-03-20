@@ -9,23 +9,23 @@ import { TEXT_ACTORS_COUNT_MISINFORMATION } from "src/utils/constants";
 export function GlobalStats({ globalStatsLoading, globalStats }): ReactElement {
   return (
     <div className="site-card-wrapper">
-      <Row gutter={16}>
-        <Col span={4}>
+      <Row gutter={[24, 24]}>
+        <Col sm={24} md={24} lg={8} xl={4} span={4}>
           <Card loading={globalStatsLoading} title="Total Records">
             {globalStats?.totalRecords}
           </Card>
         </Col>
-        <Col span={4}>
+        <Col sm={24} md={24} lg={8} xl={4} span={4}>
           <Card loading={globalStatsLoading} title="Total Submissions">
             {globalStats?.totalSubmissions}
           </Card>
         </Col>
-        <Col span={4}>
+        <Col sm={24} md={24} lg={8} xl={4} span={4}>
           <Card loading={globalStatsLoading} title="Exercise Types">
             {globalStats?.exerciseTypes}
           </Card>
         </Col>
-        <Col span={4}>
+        <Col sm={24} md={24} lg={16} xl={8} span={8}>
           <Card
             loading={globalStatsLoading}
             title="Number of times Exercises Passed"
@@ -33,7 +33,7 @@ export function GlobalStats({ globalStatsLoading, globalStats }): ReactElement {
             {globalStats?.totalPassingExercises}
           </Card>
         </Col>
-        <Col span={4}>
+        <Col sm={24} md={24} lg={8} xl={4} span={4}>
           <Card loading={globalStatsLoading} title="Total Consumers">
             <Tooltip
               title={
@@ -50,7 +50,7 @@ export function GlobalStats({ globalStatsLoading, globalStats }): ReactElement {
             </Tooltip>
           </Card>
         </Col>
-        <Col span={4}>
+        <Col sm={24} md={24} lg={8} xl={4} span={4}>
           <Card loading={globalStatsLoading} title="Total Students">
             <Space>
               {globalStats?.totalActorsCount}

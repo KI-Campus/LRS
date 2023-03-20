@@ -3,6 +3,7 @@ import Button from "antd/lib/button";
 import Popconfirm from "antd/lib/popconfirm";
 import Space from "antd/lib/space";
 import Table from "antd/lib/table";
+import type { ColumnsType } from "antd/es/table";
 import Tag from "antd/lib/tag";
 import notification from "antd/lib/notification";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
@@ -12,6 +13,7 @@ import { getConsumersListService } from "src/services/consumers";
 import { deleteUserService, getUsersListService } from "src/services/users";
 import CreateUser from "./CreateUser";
 import EditUser from "./EditUser";
+import { Col, Row } from "antd";
 
 const Users = (): React.ReactElement => {
   const [usersLoading, setUsersLoading] = useState(true);
@@ -106,10 +108,12 @@ const Users = (): React.ReactElement => {
     showEditDrawer();
   };
 
-  const userColumns = [
+  const userColumns: ColumnsType<UserInterface> = [
     {
       title: "#",
       key: "no",
+      // Responsive, show on bigger devices
+      responsive: ["xxl"],
       render: (text, record, index) => index + 1,
     },
     {
@@ -130,6 +134,8 @@ const Users = (): React.ReactElement => {
       title: "Role",
       dataIndex: "role",
       key: "role",
+      // Responsive, don't show on devices smaller than xl
+      responsive: ["xl", "xxl"],
       render: (text, record: UserInterface) => (
         <Tag color={record.role === "admin" ? "volcano" : "geekblue"}>
           {record.role?.toUpperCase()}
@@ -145,6 +151,8 @@ const Users = (): React.ReactElement => {
       title: "Consumers Access List",
       dataIndex: "consumerAccess",
       key: "consumerAccessList",
+      // Responsive, show on bigger devices
+      responsive: ["xxl"],
       render: (text, record: UserInterface) => {
         if (record.role === "admin") {
           return <div>Admin has access to all consumers </div>;
@@ -169,6 +177,8 @@ const Users = (): React.ReactElement => {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",
+      // Responsive, show on bigger devices
+      responsive: ["xxl"],
       render: (text, record: UserInterface) => {
         return new Date(record.createdAt).toLocaleString();
       },
@@ -177,6 +187,8 @@ const Users = (): React.ReactElement => {
       title: "Last Login",
       dataIndex: "lastLogin",
       key: "lastLogin",
+      // Responsive, show on bigger devices
+      responsive: ["xl", "xxl"],
       render: (text, record: UserInterface) => {
         return record.lastLogin
           ? new Date(record.lastLogin).toLocaleString()
@@ -187,35 +199,39 @@ const Users = (): React.ReactElement => {
       title: "Action",
       key: "action",
       render: (_, record: UserInterface) => (
-        <Space size="middle">
-          <Button onClick={() => handleEditClick(record)}>
-            <Space>
-              Edit
-              <EditOutlined />
-            </Space>
-          </Button>
-          <Popconfirm
-            title={
-              "Are you sure to delete " +
-              record.firstName +
-              " " +
-              record.lastName +
-              "?"
-            }
-            onConfirm={() => {
-              deleteUser(record, users);
-            }}
-            okText="Yes Delete"
-            cancelText="Cancel"
-          >
-            <Button danger>
+        <Row gutter={[24, 24]}>
+          <Col md={24} xl={12}>
+            <Button onClick={() => handleEditClick(record)}>
               <Space>
-                <DeleteOutlined />
-                Delete
+                Edit
+                <EditOutlined />
               </Space>
             </Button>
-          </Popconfirm>
-        </Space>
+          </Col>
+          <Col md={24} xl={12}>
+            <Popconfirm
+              title={
+                "Are you sure to delete " +
+                record.firstName +
+                " " +
+                record.lastName +
+                "?"
+              }
+              onConfirm={() => {
+                deleteUser(record, users);
+              }}
+              okText="Yes Delete"
+              cancelText="Cancel"
+            >
+              <Button danger>
+                <Space>
+                  <DeleteOutlined />
+                  Delete
+                </Space>
+              </Button>
+            </Popconfirm>
+          </Col>
+        </Row>
       ),
     },
   ];

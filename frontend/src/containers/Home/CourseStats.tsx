@@ -28,7 +28,7 @@ export function CourseStats({
         modalCloserFunction={setActorsListModalVisible}
         setSelectedActor={setSelectedActor}
       />
-      <Row gutter={16}>
+      <Row gutter={[24, 24]}>
         <Col span={24}>
           <Card loading={courseStatsLoading} title={"Course Title"}>
             <Tooltip title={"Course ID: " + courseStats._id}>
@@ -42,23 +42,23 @@ export function CourseStats({
         </Col>
       </Row>
       <br />
-      <Row gutter={16}>
-        <Col span={4}>
+      <Row gutter={[24, 24]}>
+        <Col sm={24} md={24} lg={8} xl={4} span={4}>
           <Card loading={courseStatsLoading} title="Total Records">
             {courseStats?.totalRecords}
           </Card>
         </Col>
-        <Col span={4}>
+        <Col sm={24} md={24} lg={8} xl={4} span={4}>
           <Card loading={courseStatsLoading} title="Total Submissions">
             {courseStats?.totalSubmissions}
           </Card>
         </Col>
-        <Col span={4}>
+        <Col sm={24} md={24} lg={8} xl={4} span={4}>
           <Card loading={courseStatsLoading} title="Exercise Types">
             {courseStats?.exerciseTypes}
           </Card>
         </Col>
-        <Col span={4}>
+        <Col sm={24} md={24} lg={16} xl={8} span={8}>
           <Card
             loading={courseStatsLoading}
             title="Number of times Exercises Passed"
@@ -67,7 +67,7 @@ export function CourseStats({
           </Card>
         </Col>
 
-        <Col span={4}>
+        <Col sm={24} md={24} lg={8} xl={4} span={4}>
           <Card loading={courseStatsLoading} title="Students">
             <Space>
               {courseStats?.totalActorsCount}
@@ -89,7 +89,7 @@ export function CourseStats({
         </Col>
 
         {selectedActor && (
-          <Col span={4}>
+          <Col sm={24} md={24} lg={16} xl={8} span={8}>
             <Card loading={courseStatsLoading} title="Selected Student">
               {"ID: " + selectedActor}
               <Button type="link" onClick={() => setSelectedActor(null)}>

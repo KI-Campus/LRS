@@ -10,9 +10,11 @@ import {
   Col,
   Input,
 } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import notification from "antd/lib/notification";
 import { ReactElement, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { ExercisesInterface } from "src/Interfaces/ExercisesInterface";
 import DownloadModal, {
   DownloadModalProps,
 } from "src/components/DownloadModal";
@@ -110,11 +112,13 @@ export function ExercisesTable(props): ReactElement {
     setExerciseTypesFilter([]);
   }, [props.courseId, props.consumerId]);
 
-  const columns = [
+  const columns: ColumnsType<ExercisesInterface> = [
     {
       title: "Title",
       dataIndex: "title",
       key: "title",
+      // Responsive, show title on all devices
+      responsive: ["xs", "sm", "md", "lg", "xl"],
       render: (text, record) =>
         record._id.search("subContentId") > -1 ? (
           <Link
@@ -144,6 +148,8 @@ export function ExercisesTable(props): ReactElement {
       title: "Type",
       dataIndex: "type",
       key: "type",
+      // Responsive, show type on bigger devices
+      responsive: ["md", "lg", "xl"],
       render: (text) => {
         if (!text) return "N/A";
         if (!text[0]) return "N/A";
@@ -202,6 +208,8 @@ export function ExercisesTable(props): ReactElement {
       title: "Total Submissions",
       dataIndex: "totalSubmissions",
       key: "totalSubmissions",
+      // Responsive, show total submissions on bigger devices
+      responsive: ["xl", "xxl"],
       render: (text, record) => {
         return record.totalSubmissions > 0 ? text : "0";
       },
@@ -210,6 +218,8 @@ export function ExercisesTable(props): ReactElement {
       title: "Average Score",
       dataIndex: "averageScore",
       key: "averageScore",
+      // Responsive, show on bigger devices
+      responsive: ["xl", "xxl"],
       render: (text, record) => {
         return record?.averageScore?.toFixed(2) ?? "N/A";
       },
@@ -218,10 +228,14 @@ export function ExercisesTable(props): ReactElement {
       title: "Exercise ID",
       dataIndex: "_id",
       key: "_id",
+      // Responsive, show on bigger devices
+      responsive: ["xl", "xxl"],
     },
     {
       title: "Actions",
       key: "actions",
+      // Responsive, show actions on all devices
+      responsive: ["xs", "sm", "md", "lg", "xl"],
       render: (text: any, record: any) => (
         <Space size="middle">
           <Button
