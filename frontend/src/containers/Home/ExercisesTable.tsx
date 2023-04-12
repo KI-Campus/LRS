@@ -277,7 +277,7 @@ export function ExercisesTable(props): ReactElement {
       {!searchText && (
         <>
           <Row gutter={20}>
-            <Col>
+            <Col span={24}>
               <Input.Search
                 placeholder="Search by exercise title or ID"
                 onSearch={(value) => {
