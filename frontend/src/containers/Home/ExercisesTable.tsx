@@ -215,13 +215,18 @@ export function ExercisesTable(props): ReactElement {
       },
     },
     {
-      title: "Average Score (out of 1)",
+      title: "Average Score (max 1.0)",
       dataIndex: "averageScore",
       key: "averageScore",
       // Responsive, show on bigger devices
       responsive: ["xl", "xxl"],
       render: (text, record) => {
-        return record?.averageScore?.toFixed(2) ?? "N/A"
+        return (
+          (record?.averageScore?.toFixed(2) ?? "N/A") +
+          (record?.averageScore
+            ? " out of " + (record?.averageScoreOutOf ?? "N/A")
+            : "")
+        );
       },
     },
     {

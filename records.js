@@ -729,8 +729,12 @@ async function getExercises(req, res, next) {
     for (let i = 0; i < exercises.length; i++) {
       let exercise = exercises[i];
       let exerciseId = exercise._id;
-      let averageScore = await helperGetAverageScore(req, exerciseId);
+      let [averageScore, averageScoreOutOf] = await helperGetAverageScore(
+        req,
+        exerciseId
+      );
       exercise.averageScore = averageScore;
+      exercise.averageScoreOutOf = averageScoreOutOf;
     }
 
     res
@@ -860,8 +864,12 @@ async function getExerciseDetails(req, res, next) {
     if (exercise[0]) exercise[0].totalInteractions = totalInteractions;
 
     // Get exercise average score
-    let averageScore = await helperGetAverageScore(req, exerciseId);
+    let [averageScore, averageScoreOutOf] = await helperGetAverageScore(
+      req,
+      exerciseId
+    );
     if (exercise[0]) exercise[0].averageScore = averageScore;
+    if (exercise[0]) exercise[0].averageScoreOutOf = averageScoreOutOf;
 
     // Get exercise attempted
     let attempted = await helperGetAttempted(req, exerciseId);
@@ -1787,6 +1795,7 @@ async function helperGetAverageScore(req, exerciseId) {
       $group: {
         _id: "$xAPI.verb.id",
         avg: { $avg: "$xAPI.result.score.scaled" },
+        count: { $sum: 1 },
       },
     },
     {
@@ -1797,16 +1806,16 @@ async function helperGetAverageScore(req, exerciseId) {
   // Add filter parameters to the pipeline
   addFiltersToPipeline(pipeline, req.query.filters);
 
-  let averageScore = await m_client
-
+  let pipelineResult = await m_client
     .db()
     .collection(process.env.MONGO_XAPI_COLLECTION)
     .aggregate(pipeline)
     .toArray();
 
-  averageScore = averageScore[0]?.avg;
+  let averageScore = pipelineResult[0]?.avg;
+  let count = pipelineResult[0]?.count;
 
-  return averageScore;
+  return [averageScore, count];
 }
 
 async function helperGetAttempted(req, exerciseId) {

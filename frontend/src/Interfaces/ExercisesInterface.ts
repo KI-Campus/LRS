@@ -7,4 +7,5 @@ export interface ExercisesInterface {
   type?: any;
   totalSubmissions?: number;
   averageScore?: number;
+  averageScoreOutOf?: number;
 }

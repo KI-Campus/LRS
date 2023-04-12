@@ -364,8 +364,8 @@ const Exercise = (): ReactElement => {
 
               {exercise?.averageScore && (
                 <Col sm={24} lg={8} span={8}>
-                  <Card loading={exerciseLoading} title="Average Score">
-                    {(exercise?.averageScore?.toFixed(2) ?? "N/A") + " out of 1.0"}
+                  <Card loading={exerciseLoading} title="Average Score (max 1.0)">
+                    {(exercise?.averageScore?.toFixed(2) ?? "N/A") + " out of " + exercise?.averageScoreOutOf}
                   </Card>
                 </Col>
               )}
