@@ -30,7 +30,7 @@ export function CourseStats({
       />
       <Row gutter={[24, 24]}>
         <Col span={24}>
-          <Card loading={courseStatsLoading} title={"Course Title"}>
+          <Card size="small" loading={courseStatsLoading} title={"Course Title"}>
             <Tooltip title={"Course ID: " + courseStats._id}>
               <Space>
                 {courseStats?.title || ""}
@@ -44,22 +44,23 @@ export function CourseStats({
       <br />
       <Row gutter={[24, 24]}>
         <Col sm={24} md={24} lg={8} xl={4} span={4}>
-          <Card loading={courseStatsLoading} title="Total Records">
+          <Card size="small" loading={courseStatsLoading} title="Total Records">
             {courseStats?.totalRecords}
           </Card>
         </Col>
         <Col sm={24} md={24} lg={8} xl={4} span={4}>
-          <Card loading={courseStatsLoading} title="Total Submissions">
+          <Card size="small" loading={courseStatsLoading} title="Total Submissions">
             {courseStats?.totalSubmissions}
           </Card>
         </Col>
         <Col sm={24} md={24} lg={8} xl={4} span={4}>
-          <Card loading={courseStatsLoading} title="Exercise Types">
+          <Card size="small" loading={courseStatsLoading} title="Exercise Types">
             {courseStats?.exerciseTypes}
           </Card>
         </Col>
         <Col sm={24} md={24} lg={16} xl={8} span={8}>
           <Card
+          size="small"
             loading={courseStatsLoading}
             title="Number of times Exercises Passed"
           >
@@ -68,7 +69,7 @@ export function CourseStats({
         </Col>
 
         <Col sm={24} md={24} lg={8} xl={4} span={4}>
-          <Card loading={courseStatsLoading} title="Students">
+          <Card size="small" loading={courseStatsLoading} title="Students">
             <Space>
               {courseStats?.totalActorsCount}
               <Tooltip title={TEXT_ACTORS_COUNT_MISINFORMATION}>
@@ -90,7 +91,7 @@ export function CourseStats({
 
         {selectedActor && (
           <Col sm={24} md={24} lg={16} xl={8} span={8}>
-            <Card loading={courseStatsLoading} title="Selected Student">
+            <Card size="small" loading={courseStatsLoading} title="Selected Student">
               {"ID: " + selectedActor}
               <Button type="link" onClick={() => setSelectedActor(null)}>
                 {"Reset"}
