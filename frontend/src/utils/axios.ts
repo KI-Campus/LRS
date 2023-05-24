@@ -17,7 +17,7 @@ export class APIError extends Error {
 
 const axiosApi: AxiosInstance = Axios.create({
   baseURL: API_ENDPOINT,
-  timeout: 10000,
+  timeout: 60000,     // 60 seconds
 });
 
 axiosApi.interceptors.response.use(
