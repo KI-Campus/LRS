@@ -8,6 +8,7 @@
         "url": "https://github.com/KI-Campus/LRS.git"
     },
     "scripts": {
+        "build": "cd frontend && npm run build",
         "start": "node ./app.js",
         "start:dev": "nodemon ./app.js"
     },

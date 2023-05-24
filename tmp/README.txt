@@ -1,0 +1,1 @@
+This folder is here to contain temporary download files

@@ -1,52 +1,55 @@
 {
-  "name": "windmill-dashboard",
-  "version": "1.0.2",
-  "description": "A multi theme, completely accessible, with components and pages examples, ready for production dashboard.",
+  "name": "react-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@reduxjs/toolkit": "^1.6.1",
+    "@types/jest": "^26.0.15",
+    "@types/node": "^12.0.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "antd": "^4.15.1",
+    "axios": "^0.21.4",
+    "chart.js": "^3.9.1",
+    "dayjs": "^1.10.4",
+    "react": "^17.0.2",
+    "react-chartjs-2": "^4.3.1",
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.5",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "4.0.3",
+    "sass": "^1.54.9",
+    "typescript": "^4.1.2"
+  },
+  "resolutions": {
+    "react-error-overlay": "6.0.9"
+  },
   "scripts": {
-    "tailwind": "tailwindcss build public/assets/css/tailwind.css -o public/assets/css/tailwind.output.css",
-    "build": "set NODE_ENV=production postcss public/assets/css/tailwind.css -o public/assets/css/tailwind.output.css",
-    "cz": "git-cz",
-    "release": "release-it"
+    "dev": "export NODE_ENV=dev && react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
-  "author": "Estevan Maito <ejmaito@gmail.com>",
-  "license": "MIT",
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
   "devDependencies": {
-    "@release-it/conventional-changelog": "1.1.4",
-    "@tailwindcss/custom-forms": "0.2.1",
-    "autoprefixer": "9.8.0",
-    "color": "3.1.2",
-    "commitizen": "4.1.2",
-    "cssnano": "4.1.10",
-    "cz-conventional-changelog": "3.2.0",
-    "postcss-cli": "7.1.1",
-    "release-it": "13.6.4",
-    "tailwindcss": "1.4.6",
-    "tailwindcss-multi-theme": "1.0.3"
-  },
-  "keywords": [
-    "tailwind",
-    "windmill",
-    "dashboard",
-    "template",
-    "admin"
-  ],
-  "release-it": {
-    "github": {
-      "release": true
-    },
-    "npm": {
-      "publish": false
-    },
-    "plugins": {
-      "@release-it/conventional-changelog": {
-        "preset": "angular",
-        "infile": "CHANGELOG.md"
-      }
-    }
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
+    "@types/react-router-dom": "^5.3.0",
+    "babel-plugin-inline-react-svg": "^2.0.1"
   }
 }

@@ -1,0 +1,64 @@
+.ant-layout-sider {
+  scrollbar-color: $base-color;
+  .ant-layout-sider-children {
+    padding: 24px 8px 0px 16px;
+    box-shadow: inset 0px 4px 25px -10px rgba(180, 181, 193, 0.25);
+    .ant-layout-sider-zero-width-trigger {
+      background: #ffffff;
+      box-shadow: 0px 0px 10px rgba(44, 57, 236, 0.1);
+      border-radius: 50%;
+      right:-15px;
+      height: 25px;
+      width: 25px;
+      top: 81px;
+      line-height: 22px;
+      transform: rotate(180deg);
+      &:hover {
+        background: $base-color;
+        svg {
+          path {
+            stroke: #ffffff;
+          }
+        }
+      }
+    }
+    .ant-layout-sider-zero-width-trigger-left{
+      border-radius: 50px 0px 0px 50px;
+      position: absolute;
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0px 0px 10px rgba(44, 57, 236, 0.1);
+      right:-25px;
+      top: 81px;
+      height: 25px;
+      width:25px;
+      transform: rotate(180deg);
+      &:hover {
+        background: $base-color;
+        svg {
+          path {
+            stroke: #ffffff;
+          }
+        }
+      }
+    }
+    h1 {
+      color: red;
+    }
+    .sider-bottom-gradient{
+      position: absolute;
+      bottom: 0;
+      z-index: 100;
+      background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0) 74.58%);
+      height: 100px;
+      width: 100%;
+      margin-left: -16px;
+      opacity: 0.4;
+      transform: rotate(180deg);
+    }
+  }
+}
+

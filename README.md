@@ -5,15 +5,15 @@ Learning Record Store
 This LRS saves all of the information to the MongoDB.
 For more information please refer to [xAPI.com](https://xapi.com/learning-record-store/)
 
-## Installing / Getting started
+The repository contains backend and frontend. The backend features Express app. Frontend is composed of React app.
+
+### LRS Endpoint
+
+LRS accepts JSON data at `/lrs` post route.
+
+## Getting started
 
 _Make sure to install MongoDB._
-
-Then install node modules with
-
-```sh
-npm install
-```
 
 Add the following to env file
 
@@ -25,16 +25,48 @@ MONGO_XAPI_COLLECTION={{mongo-collection-name-for-xAPI-records}}
 SECRET={{secret-for-jwt-tokens}}
 ```
 
-If your Mongo installation has a username and authentication, _please embed it in MONGO_URL_
+If your Mongo installation has a username and authentication, please embed it in MONGO_URL
 
-### Running
+### Installing Node Modules
 
-To run LRS simply use node
+Install node modules with
 
 ```sh
-node app.js
+npm install
 ```
 
-### LRS Endpoint
+Additionally, you would want to install node modules for frontend as well.
 
-LRS accepts JSON data at `/lrs` post route
+```sh
+cd frontend
+npm install
+```
+
+## Development
+
+To run the app locally, please use
+
+```sh
+npm run start:dev
+```
+
+This will start nodemon (be sure to install it globally via npm install nodemon -g)
+
+To run the frontend seperate for debugging please use
+
+```sh
+cd frontend && npm run dev
+```
+
+This will start the Create React App for local development on a different port
+
+## Deployment
+
+To deploy LRS on the server, install node modules on the root folder and in the frontend folder. Then build the frontend app and finally serve the frontend with ExpressJS backend app. Use the following steps
+
+```sh
+npm run install
+cd frontend && npm run install && npm run build
+cd ..
+npm run start
+```
