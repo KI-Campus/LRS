@@ -83,17 +83,6 @@ export function GlobalStats({
         </Col>
       </Row>
       <br />
-
-      {!globalStatsLoading && (
-        <Popconfirm
-          title="Loading global stats will take a while. Are you sure?"
-          onConfirm={fetchGlobalStats}
-          okText="Yes"
-          cancelText="Cancel"
-        >
-          <Button>Load Stats</Button>
-        </Popconfirm>
-      )}
     </div>
   );
 }

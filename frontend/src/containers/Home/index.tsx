@@ -10,7 +10,7 @@ import { useParams, useHistory, useLocation } from "react-router-dom";
 import Select from "antd/lib/select";
 import Row from "antd/lib/row";
 import Col from "antd/lib/col";
-import { Button, Divider, Space, Spin } from "antd";
+import { Button, Divider, Popconfirm, Space, Spin } from "antd";
 
 import { ConsumerInterface } from "src/Interfaces/ConsumerInterface";
 import { CourseInterface } from "src/Interfaces/CourseInterface";
@@ -54,7 +54,9 @@ const Home = (): ReactElement => {
   const [coursesLoading, setCoursesLoading] = useState(true);
   const [courses, setCourses] = useState<CourseInterface[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<string>(null);
+  const [showCourseStats, setShowCourseStats] = useState<boolean>(false);
   const [selectedCourseDetails, setSelectedCourseDetails] = useState<any>({});
+
   const [selectedCourseDetailsLoading, setSelectedCourseDetailsLoading] =
     useState(true);
 
@@ -237,6 +239,7 @@ const Home = (): ReactElement => {
     setCourses([]);
     setSelectedCourse(null);
     setSelectedActor(null);
+    setShowCourseStats(false);
     if (selectedConsumer) {
       // Get all courses for selected consumer
       fetchCourses();
@@ -246,9 +249,10 @@ const Home = (): ReactElement => {
   // When selected course changes
   useEffect(() => {
     if (selectedCourse) {
-      fetchCourse();
-      fetchCourseSubmissionsOverTime();
-      fetchCourseExerciseTypesCount();
+      setShowCourseStats(false);
+      //fetchCourse();
+      //fetchCourseSubmissionsOverTime();
+      //fetchCourseExerciseTypesCount();
     }
   }, [selectedCourse, selectedActor]);
 
@@ -273,11 +277,23 @@ const Home = (): ReactElement => {
         isCurrentUser={true}
       />
       <h2>Welcome to openLRS Dashboard</h2>
-      <GlobalStats
-        globalStatsLoading={globalStatsLoading}
-        globalStats={globalStats}
-        fetchGlobalStats={fetchGlobalStats}
-      />
+      {(Object.keys(globalStats).length > 0 || globalStatsLoading) && (
+        <GlobalStats
+          globalStatsLoading={globalStatsLoading}
+          globalStats={globalStats}
+          fetchGlobalStats={fetchGlobalStats}
+        />
+      )}
+      {!Object.keys(globalStats).length && (
+        <Popconfirm
+          title="Loading global stats will take a while. Are you sure?"
+          onConfirm={fetchGlobalStats}
+          okText="Yes"
+          cancelText="Cancel"
+        >
+          <Button>Load Global Stats</Button>
+        </Popconfirm>
+      )}
       <DownloadModal
         {...downloadOptions}
         isOpen={downloadModalOpen}
@@ -426,18 +442,35 @@ const Home = (): ReactElement => {
         </Col>
       </Row>
       <Divider></Divider>
-      {selectedCourse && (
-        <CourseStats
-          consumer={selectedConsumer}
-          courseStatsLoading={selectedCourseDetailsLoading}
-          courseStats={selectedCourseDetails}
-          selectedActor={selectedActor}
-          setSelectedActor={setSelectedActor}
-        />
+
+      {selectedCourse && !showCourseStats && (
+        <Popconfirm
+          title="Loading course stats will take a while. Are you sure?"
+          onConfirm={() => {
+            fetchCourse();
+            fetchCourseSubmissionsOverTime();
+            fetchCourseExerciseTypesCount();
+            setShowCourseStats(true);
+          }}
+          okText="Yes"
+          cancelText="Cancel"
+        >
+          <Button>Load Course Stats</Button>
+        </Popconfirm>
       )}
-      <Divider></Divider>
-      {selectedCourse && (
+
+      {selectedCourse && showCourseStats && (
         <>
+          <CourseStats
+            consumer={selectedConsumer}
+            courseStatsLoading={selectedCourseDetailsLoading}
+            courseStats={selectedCourseDetails}
+            selectedActor={selectedActor}
+            setSelectedActor={setSelectedActor}
+          />
+
+          <Divider></Divider>
+
           <Row gutter={[24, 24]}>
             <Col md={24} lg={24} xl={12} span={12}>
               <div className="shadow-bordered">
@@ -465,20 +498,22 @@ const Home = (): ReactElement => {
               </div>
             </Col>
           </Row>
-          <Divider></Divider>
-          <Row>
-            <Col span={24}>
-              {selectedConsumer && selectedCourse && (
-                <ExercisesTable
-                  types={courseRootExerciseTypes}
-                  courseId={selectedCourse}
-                  consumerId={selectedConsumer}
-                  actor={selectedActor}
-                />
-              )}
-            </Col>
-          </Row>
         </>
+      )}
+      <Divider></Divider>
+      {selectedCourse && (
+        <Row>
+          <Col span={24}>
+            {selectedConsumer && selectedCourse && (
+              <ExercisesTable
+                types={courseRootExerciseTypes}
+                courseId={selectedCourse}
+                consumerId={selectedConsumer}
+                actor={selectedActor}
+              />
+            )}
+          </Col>
+        </Row>
       )}
     </div>
   );
