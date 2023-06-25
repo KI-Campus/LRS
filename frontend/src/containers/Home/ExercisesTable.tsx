@@ -204,31 +204,35 @@ export function ExercisesTable(props): ReactElement {
         </div>
       ),
     },
-    {
-      title: "Total Submissions",
-      dataIndex: "totalSubmissions",
-      key: "totalSubmissions",
-      // Responsive, show total submissions on bigger devices
-      responsive: ["xl", "xxl"],
-      render: (text, record) => {
-        return record.totalSubmissions > 0 ? text : "0";
-      },
-    },
-    {
-      title: "Average Score (max 1.0)",
-      dataIndex: "averageScore",
-      key: "averageScore",
-      // Responsive, show on bigger devices
-      responsive: ["xl", "xxl"],
-      render: (text, record) => {
-        return (
-          (record?.averageScore?.toFixed(2) ?? "N/A") +
-          (record?.averageScore
-            ? " out of " + (record?.averageScoreOutOf ?? "N/A")
-            : "")
-        );
-      },
-    },
+
+    // DISABLING TOTAL SUBMISSIONS TO OPTIMIZE PERFORMANCE
+    // {
+    //   title: "Total Submissions",
+    //   dataIndex: "totalSubmissions",
+    //   key: "totalSubmissions",
+    //   // Responsive, show total submissions on bigger devices
+    //   responsive: ["xl", "xxl"],
+    //   render: (text, record) => {
+    //     return record.totalSubmissions > 0 ? text : "0";
+    //   },
+    // },
+
+    // DISABLING AVERAGE SCORE TO OPTIMIZE PERFORMANCE
+    // {
+    //   title: "Average Score (max 1.0)",
+    //   dataIndex: "averageScore",
+    //   key: "averageScore",
+    //   // Responsive, show on bigger devices
+    //   responsive: ["xl", "xxl"],
+    //   render: (text, record) => {
+    //     return (
+    //       (record?.averageScore?.toFixed(2) ?? "N/A") +
+    //       (record?.averageScore
+    //         ? " out of " + (record?.averageScoreOutOf ?? "N/A")
+    //         : "")
+    //     );
+    //   },
+    // },
     {
       title: "Exercise ID",
       dataIndex: "_id",

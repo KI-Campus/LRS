@@ -718,24 +718,27 @@ async function getExercises(req, res, next) {
       .toArray();
 
     // Loop through each exercise and get the total submissions
-    for (let i = 0; i < exercises.length; i++) {
-      let exercise = exercises[i];
-      let exerciseId = exercise._id;
-      let totalSubmissions = await helperGetTotalSubmissions(req, exerciseId);
-      exercise.totalSubmissions = totalSubmissions;
-    }
+
+    // DISABLING TOTAL SUBMISSIONS FOR NOW TO OPTIMIZE PERFORMANCE
+    // for (let i = 0; i < exercises.length; i++) {
+    //   let exercise = exercises[i];
+    //   let exerciseId = exercise._id;
+    //   let totalSubmissions = await helperGetTotalSubmissions(req, exerciseId);
+    //   exercise.totalSubmissions = totalSubmissions;
+    // }
 
     // Loop through each exercise and get average score
-    for (let i = 0; i < exercises.length; i++) {
-      let exercise = exercises[i];
-      let exerciseId = exercise._id;
-      let [averageScore, averageScoreOutOf] = await helperGetAverageScore(
-        req,
-        exerciseId
-      );
-      exercise.averageScore = averageScore;
-      exercise.averageScoreOutOf = averageScoreOutOf;
-    }
+    // DISABLING AVERAGE SCORE FOR NOW TO OPTIMIZE PERFORMANCE
+    // for (let i = 0; i < exercises.length; i++) {
+    //   let exercise = exercises[i];
+    //   let exerciseId = exercise._id;
+    //   let [averageScore, averageScoreOutOf] = await helperGetAverageScore(
+    //     req,
+    //     exerciseId
+    //   );
+    //   exercise.averageScore = averageScore;
+    //   exercise.averageScoreOutOf = averageScoreOutOf;
+    // }
 
     res
       .status(200)
