@@ -786,7 +786,8 @@ async function getExerciseDetails(req, res, next) {
           _id: "$xAPI.object.id",
           title: { $last: "$xAPI.object.definition.name.en-US" },
           type: { $last: "$xAPI.context.contextActivities.category.id" },
-          totalRecords: { $sum: 1 },
+          // DISABLING TOTAL RECORDS FOR NOW TO OPTIMIZE PERFORMANCE
+          // totalRecords: { $sum: 1 },
         },
       },
       {
@@ -850,8 +851,9 @@ async function getExerciseDetails(req, res, next) {
     if (exercise[0]) exercise[0].averageScoreOutOf = averageScoreOutOf;
 
     // Get exercise attempted
-    let attempted = await helperGetAttempted(req, exerciseId);
-    if (exercise[0]) exercise[0].attempted = attempted;
+    // DISABLING ATTEMPTED FOR NOW TO OPTIMIZE PERFORMANCE
+    // let attempted = await helperGetAttempted(req, exerciseId);
+    // if (exercise[0]) exercise[0].attempted = attempted;
 
     // Get total actors count
     let totalActorsCount = await helperGetTotalActorsCount(req, exerciseId);
