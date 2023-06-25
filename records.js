@@ -1485,9 +1485,19 @@ async function download(req, res, next) {
       .toArray();
 
     let myResponse = [];
-    // Loop through all records and delete session object and do some magic
+    // Loop through all records and delete session object and simplify the data as required
+    // Also encrypt actor name if already not encrypted and remove the email
     for (let i = 0; i < records.length; i++) {
       let element = records[i];
+
+      // Encrypt the actor name if it is not already encrypted
+      if (element.xAPI.actor.name && element.xAPI.actor.name.includes("-")) {
+        element.xAPI.actor.name = require("crypto").createHash("sha256").update(element.xAPI.actor.name).digest("hex")
+      }
+      // Remove the email from the actor name
+      delete element.xAPI.actor.mbox;
+
+      // Remove the session object
       delete element.metadata.session;
 
       if (includeSimplifyRecords && includeRAWRecords) {
