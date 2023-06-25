@@ -43,7 +43,7 @@ const Home = (): ReactElement => {
 
   // @ts-ignore
   const { consumerId, courseId } = useParams();
-  const [globalStatsLoading, setGlobalStatsLoading] = useState(true);
+  const [globalStatsLoading, setGlobalStatsLoading] = useState(false);
   const [globalStats, setGlobalStats] = useState<any>({});
 
   const [consumersLoading, setConsumersLoading] = useState(true);
@@ -229,7 +229,6 @@ const Home = (): ReactElement => {
   // On load get all consumers, get global stats
   useEffect(() => {
     fetchConsumers();
-    fetchGlobalStats();
   }, []);
 
   // When selected consumer changes
@@ -277,6 +276,7 @@ const Home = (): ReactElement => {
       <GlobalStats
         globalStatsLoading={globalStatsLoading}
         globalStats={globalStats}
+        fetchGlobalStats={fetchGlobalStats}
       />
       <DownloadModal
         {...downloadOptions}
