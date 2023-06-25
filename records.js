@@ -838,31 +838,6 @@ async function getExerciseDetails(req, res, next) {
 
     if (exercise[0]) exercise[0].totalSubmissions = totalSubmissions ?? 0;
 
-    // Get total interactions
-    let totalInteractionsPipeline = [
-      {
-        $match: {
-          "xAPI.object.id": exerciseId,
-        },
-      },
-      {
-        $match: {
-          "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/interacted",
-        },
-      },
-
-      {
-        $count: "totalInteractions",
-      },
-    ];
-    let totalInteractions = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalInteractionsPipeline)
-      .toArray();
-    totalInteractions = totalInteractions[0]?.totalInteractions;
-    if (exercise[0]) exercise[0].totalInteractions = totalInteractions;
-
     // Get exercise average score
     let [averageScore, averageScoreOutOf] = await helperGetAverageScore(
       req,
@@ -1675,12 +1650,12 @@ function helperSimplifyData(element, includexAPIRaw = false) {
   // Assign the subcontent ID is it exists
   if (
     element?.xAPI?.object?.definition?.extensions[
-      "http://h5p.org/x-api/h5p-subContentId"
+    "http://h5p.org/x-api/h5p-subContentId"
     ]
   ) {
     response["Sub Content ID"] =
       element?.xAPI?.object?.definition?.extensions[
-        "http://h5p.org/x-api/h5p-subContentId"
+      "http://h5p.org/x-api/h5p-subContentId"
       ];
   }
 

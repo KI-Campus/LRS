@@ -340,19 +340,14 @@ const Exercise = (): ReactElement => {
                 </Card>
               </Col>
               <Col sm={24} lg={8} span={8}>
-                <Card loading={exerciseLoading} title="Total Interactions">
-                  {exercise?.totalInteractions ?? "0"}
+                <Card loading={exerciseLoading} title="Total Submissions">
+                  {exercise?.totalSubmissions ?? "0"}
                 </Card>
               </Col>
             </Row>
             <br />
 
             <Row gutter={[24, 24]}>
-              <Col sm={24} lg={8} span={8}>
-                <Card loading={exerciseLoading} title="Total Submissions">
-                  {exercise?.totalSubmissions ?? "0"}
-                </Card>
-              </Col>
               <Col sm={24} lg={8} span={8}>
                 <Card
                   loading={exerciseLoading}
@@ -364,8 +359,13 @@ const Exercise = (): ReactElement => {
 
               {exercise?.averageScore && (
                 <Col sm={24} lg={8} span={8}>
-                  <Card loading={exerciseLoading} title="Average Score (max 1.0)">
-                    {(exercise?.averageScore?.toFixed(2) ?? "N/A") + " out of " + exercise?.averageScoreOutOf}
+                  <Card
+                    loading={exerciseLoading}
+                    title="Average Score (max 1.0)"
+                  >
+                    {(exercise?.averageScore?.toFixed(2) ?? "N/A") +
+                      " out of " +
+                      exercise?.averageScoreOutOf}
                   </Card>
                 </Col>
               )}
