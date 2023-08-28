@@ -469,9 +469,7 @@ async function getCourse(req, res, next) {
               {
                 $match: {
                   "xAPI.object.id": {
-                    $not: {
-                      $regex: "subContentId",
-                    },
+                    $regex: "^((?!subContentId).)*$",
                   },
                 },
               },
@@ -1492,7 +1490,10 @@ async function download(req, res, next) {
 
       // Encrypt the actor name if it is not already encrypted
       if (element.xAPI.actor.name && element.xAPI.actor.name.includes("-")) {
-        element.xAPI.actor.name = require("crypto").createHash("sha256").update(element.xAPI.actor.name).digest("hex")
+        element.xAPI.actor.name = require("crypto")
+          .createHash("sha256")
+          .update(element.xAPI.actor.name)
+          .digest("hex");
       }
       // Remove the email from the actor name
       delete element.xAPI.actor.mbox;
@@ -1665,12 +1666,12 @@ function helperSimplifyData(element, includexAPIRaw = false) {
   // Assign the subcontent ID is it exists
   if (
     element?.xAPI?.object?.definition?.extensions[
-    "http://h5p.org/x-api/h5p-subContentId"
+      "http://h5p.org/x-api/h5p-subContentId"
     ]
   ) {
     response["Sub Content ID"] =
       element?.xAPI?.object?.definition?.extensions[
-      "http://h5p.org/x-api/h5p-subContentId"
+        "http://h5p.org/x-api/h5p-subContentId"
       ];
   }
 
