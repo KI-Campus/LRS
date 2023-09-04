@@ -469,9 +469,7 @@ async function getCourse(req, res, next) {
               {
                 $match: {
                   "xAPI.object.id": {
-                    $not: {
-                      $regex: "subContentId",
-                    },
+                    $regex: "^((?!subContentId).)*$",
                   },
                 },
               },
@@ -718,24 +716,27 @@ async function getExercises(req, res, next) {
       .toArray();
 
     // Loop through each exercise and get the total submissions
-    for (let i = 0; i < exercises.length; i++) {
-      let exercise = exercises[i];
-      let exerciseId = exercise._id;
-      let totalSubmissions = await helperGetTotalSubmissions(req, exerciseId);
-      exercise.totalSubmissions = totalSubmissions;
-    }
+
+    // DISABLING TOTAL SUBMISSIONS FOR NOW TO OPTIMIZE PERFORMANCE
+    // for (let i = 0; i < exercises.length; i++) {
+    //   let exercise = exercises[i];
+    //   let exerciseId = exercise._id;
+    //   let totalSubmissions = await helperGetTotalSubmissions(req, exerciseId);
+    //   exercise.totalSubmissions = totalSubmissions;
+    // }
 
     // Loop through each exercise and get average score
-    for (let i = 0; i < exercises.length; i++) {
-      let exercise = exercises[i];
-      let exerciseId = exercise._id;
-      let [averageScore, averageScoreOutOf] = await helperGetAverageScore(
-        req,
-        exerciseId
-      );
-      exercise.averageScore = averageScore;
-      exercise.averageScoreOutOf = averageScoreOutOf;
-    }
+    // DISABLING AVERAGE SCORE FOR NOW TO OPTIMIZE PERFORMANCE
+    // for (let i = 0; i < exercises.length; i++) {
+    //   let exercise = exercises[i];
+    //   let exerciseId = exercise._id;
+    //   let [averageScore, averageScoreOutOf] = await helperGetAverageScore(
+    //     req,
+    //     exerciseId
+    //   );
+    //   exercise.averageScore = averageScore;
+    //   exercise.averageScoreOutOf = averageScoreOutOf;
+    // }
 
     res
       .status(200)
@@ -783,7 +784,8 @@ async function getExerciseDetails(req, res, next) {
           _id: "$xAPI.object.id",
           title: { $last: "$xAPI.object.definition.name.en-US" },
           type: { $last: "$xAPI.context.contextActivities.category.id" },
-          totalRecords: { $sum: 1 },
+          // DISABLING TOTAL RECORDS FOR NOW TO OPTIMIZE PERFORMANCE
+          // totalRecords: { $sum: 1 },
         },
       },
       {
@@ -838,31 +840,6 @@ async function getExerciseDetails(req, res, next) {
 
     if (exercise[0]) exercise[0].totalSubmissions = totalSubmissions ?? 0;
 
-    // Get total interactions
-    let totalInteractionsPipeline = [
-      {
-        $match: {
-          "xAPI.object.id": exerciseId,
-        },
-      },
-      {
-        $match: {
-          "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/interacted",
-        },
-      },
-
-      {
-        $count: "totalInteractions",
-      },
-    ];
-    let totalInteractions = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalInteractionsPipeline)
-      .toArray();
-    totalInteractions = totalInteractions[0]?.totalInteractions;
-    if (exercise[0]) exercise[0].totalInteractions = totalInteractions;
-
     // Get exercise average score
     let [averageScore, averageScoreOutOf] = await helperGetAverageScore(
       req,
@@ -872,8 +849,9 @@ async function getExerciseDetails(req, res, next) {
     if (exercise[0]) exercise[0].averageScoreOutOf = averageScoreOutOf;
 
     // Get exercise attempted
-    let attempted = await helperGetAttempted(req, exerciseId);
-    if (exercise[0]) exercise[0].attempted = attempted;
+    // DISABLING ATTEMPTED FOR NOW TO OPTIMIZE PERFORMANCE
+    // let attempted = await helperGetAttempted(req, exerciseId);
+    // if (exercise[0]) exercise[0].attempted = attempted;
 
     // Get total actors count
     let totalActorsCount = await helperGetTotalActorsCount(req, exerciseId);
@@ -1505,9 +1483,22 @@ async function download(req, res, next) {
       .toArray();
 
     let myResponse = [];
-    // Loop through all records and delete session object and do some magic
+    // Loop through all records and delete session object and simplify the data as required
+    // Also encrypt actor name if already not encrypted and remove the email
     for (let i = 0; i < records.length; i++) {
       let element = records[i];
+
+      // Encrypt the actor name if it is not already encrypted
+      if (element.xAPI.actor.name && element.xAPI.actor.name.includes("-")) {
+        element.xAPI.actor.name = require("crypto")
+          .createHash("sha256")
+          .update(element.xAPI.actor.name)
+          .digest("hex");
+      }
+      // Remove the email from the actor name
+      delete element.xAPI.actor.mbox;
+
+      // Remove the session object
       delete element.metadata.session;
 
       if (includeSimplifyRecords && includeRAWRecords) {
