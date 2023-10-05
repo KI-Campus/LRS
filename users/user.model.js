@@ -23,4 +23,7 @@ schema.set("toJSON", {
   },
 });
 
-module.exports = mongoose.model("User", schema);
+module.exports = mongoose.model(
+  process.env.MONGO_XAPI_COLLECTION + "_" + "User",
+  schema
+);

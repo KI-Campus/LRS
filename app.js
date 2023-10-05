@@ -154,7 +154,7 @@ app.post("/records/aggregate", async (req, res) => {
   // Check in the user collection mongodb if consumerAccess array includes consumer
   await m_client
     .db()
-    .collection("users")
+    .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "users")
     .findOne({ email: req.user.email }, (err, resultUser) => {
       if (err) {
         console.log("Error while getting records", err);
