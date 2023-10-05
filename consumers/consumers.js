@@ -48,7 +48,7 @@ function register(req, res, next) {
     // Find if any record exists with the same id
     m_client
       .db()
-      .collection("consumers")
+      .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "consumers")
       .findOne({ id: req.body.id }, (err, result) => {
         if (err) {
           console.log(err);
@@ -63,7 +63,7 @@ function register(req, res, next) {
         } else {
           m_client
             .db()
-            .collection("consumers")
+            .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "consumers")
             .insertOne(req.body, (err, result) => {
               if (err) {
                 console.log(err);
@@ -88,7 +88,7 @@ function getAll(req, res, next) {
     // Read all consumers
     m_client
       .db()
-      .collection("consumers")
+      .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "consumers")
       .find({})
       .sort({ name: 1 })
       .toArray((err, result) => {
@@ -109,7 +109,7 @@ function getAll(req, res, next) {
     // Get the list of consumersAccess field of current user
     m_client
       .db()
-      .collection("users")
+      .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "users")
       .findOne({ email: req.user.email }, (err, resultUser) => {
         if (err) {
           console.log("Error reading all consumers for user", err);
@@ -120,7 +120,7 @@ function getAll(req, res, next) {
           // Read all consumers
           m_client
             .db()
-            .collection("consumers")
+            .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "consumers")
             .find({ id: { $in: resultUser.consumersAccess } })
             .sort({ name: 1 })
             .toArray((err, result) => {
@@ -150,7 +150,7 @@ function getById(req, res, next) {
   if (req.params.id && req.params.id.length > 0) {
     m_client
       .db()
-      .collection("consumers")
+      .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "consumers")
       .findOne({ id: req.params.id }, (err, result) => {
         if (err) {
           console.log(err);
@@ -185,7 +185,7 @@ function update(req, res, next) {
   if (req.params.id && req.params.id.length > 0) {
     m_client
       .db()
-      .collection("consumers")
+      .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "consumers")
       .updateOne({ id: req.params.id }, { $set: req.body }, (err, result) => {
         if (err) {
           console.log(err);
@@ -212,7 +212,7 @@ function _delete(req, res, next) {
     // Check if consumer id is found in the database
     m_client
       .db()
-      .collection("consumers")
+      .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "consumers")
       .findOne({ id: req.params.id }, (err, result) => {
         if (err) {
           console.log(err);
@@ -224,7 +224,7 @@ function _delete(req, res, next) {
 
           m_client
             .db()
-            .collection("consumers")
+            .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "consumers")
             .deleteOne({ id: req.params.id }, (err, result) => {
               if (err) {
                 console.log(err);

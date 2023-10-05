@@ -72,7 +72,7 @@ async function checkUserAccess(req, res, next) {
   // Check in the user collection mongodb if consumerAccess array includes consumer
   await m_client
     .db()
-    .collection("users")
+    .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "users")
     .findOne({ email: req.user.email }, (err, resultUser) => {
       if (err) {
         console.log("Error while getting records", err);
@@ -80,8 +80,8 @@ async function checkUserAccess(req, res, next) {
         return;
       } else {
         if (
-          resultUser.consumersAccess.includes(consumer) ||
-          resultUser.role == "admin"
+          resultUser?.consumersAccess.includes(consumer) ||
+          resultUser?.role == "admin"
         ) {
           hasConsumerAccess = true;
 
