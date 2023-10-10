@@ -81,9 +81,20 @@ app.use("/records", require("./records.js").router);
 app.post("/lrs", (req, res) => {
   try {
     // Encryption of personal data is moved to LTI Tool
+
+    // Get consumer and course id from the request so that we can store the record in a collection with the same name
+    let consumerId = req?.body?.metadata?.session.custom_consumer ?? "null";
+    let courseId = req?.body?.metadata?.session.context_id ?? "null";
+
     m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumerId +
+          "_courseId_" +
+          courseId
+      )
       .insertOne(req.body, { check_keys: false }, function (err, mong_res) {
         if (err) {
           throw err;
