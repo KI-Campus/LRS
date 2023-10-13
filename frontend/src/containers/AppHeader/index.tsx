@@ -54,7 +54,21 @@ const AppHeader = (): ReactElement => {
       <div className="nav-header-section">
         <div className="app-logo">
           <Link to="/">
-            <h1>openLRS</h1>
+            <div
+              style={{
+                paddingTop: "10px",
+                display: "flex",
+                gap: "1rem",
+                alignItems: "baseline",
+              }}
+            >
+              <img
+                style={{ width: "24px", height: "24px" }}
+                src={"lrs logo.svg"}
+                alt="logo"
+              />
+              <h1>openLRS</h1>
+            </div>
           </Link>
         </div>
       </div>
