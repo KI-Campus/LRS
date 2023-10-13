@@ -218,24 +218,40 @@ async function getStats(req, res, next) {
 
   // Get the total actors count
   let totalActorsCount = 0;
+  let totalActorsList = [];
   for (let i = 0; i < filteredCollections.length; i++) {
     let collection = filteredCollections[i];
-    let count = await m_client
+    let returnedActors = await m_client
       .db()
       .collection(collection.name)
-      .distinct("xAPI.actor.name");
-    totalActorsCount += count.length;
+      .aggregate([
+        {
+          $group: {
+            _id: "$xAPI.actor.name",
+          },
+        },
+      ])
+      .toArray();
+
+    // Loop through returnedActors
+    for (let i = 0; i < returnedActors.length; i++) {
+      if (!totalActorsList.includes(returnedActors[i]._id))
+        totalActorsList.push(returnedActors[i]._id);
+    }
   }
+  totalActorsCount = totalActorsList.length;
 
   // Return the result
   res.status(200).send({
-    totalRecords: totalRecords,
-    totalSubmissions: totalSubmissions,
-    exerciseTypes: exerciseTypes.length,
-    totalConsumers: totalConsumers.length,
-    totalConsumersList: totalConsumersArrayObject,
-    totalPassingExercises: totalPassingExercises,
-    totalActorsCount: totalActorsCount,
+    result: {
+      totalRecords: totalRecords,
+      totalSubmissions: totalSubmissions,
+      exerciseTypes: exerciseTypes.length,
+      totalConsumers: totalConsumers.length,
+      totalConsumersList: totalConsumersArrayObject,
+      totalPassingExercises: totalPassingExercises,
+      totalActorsCount: totalActorsCount,
+    },
   });
 }
 
