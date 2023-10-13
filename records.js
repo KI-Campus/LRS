@@ -99,144 +99,144 @@ async function checkUserAccess(req, res, next) {
 }
 
 async function getStats(req, res, next) {
-  let result = {};
+  // We need to return the following
+  //   {
+  //     "totalRecords": NUMBER,
+  //     "totalSubmissions": NUMBER,
+  //     "exerciseTypes": NUMBER,
+  //     "totalConsumers": NUMBER,
+  //     "totalConsumersList": [
+  //         {
+  //             "_id": null
+  //         },
+  //         {
+  //             "_id": "SOME ID A"
+  //         },
+  //         {
+  //             "_id": "SOME ID B"
+  //         }
+  //     ],
+  //     "totalPassingExercises": NUMBER,
+  //     "totalActorsCount": NUMBER,
+  // }
 
-  try {
-    // Get total records
-    let totalRecordsPipeline = [
-      {
-        $count: "totalRecords",
-      },
-    ];
+  // Fetch all the collections in the database with the following format
+  // process.env.MONGO_XAPI_COLLECTION_consumerId_<consumer>_courseId_*
 
-    let totalRecords = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalRecordsPipeline)
-      .toArray();
-    result.totalRecords = totalRecords[0]?.totalRecords;
+  // Get all the collections
+  let collections = await m_client.db().listCollections().toArray();
 
-    // Get total submissions
-    let totalSubmissionsPipeline = [
-      {
-        $match: {
-          $or: [
-            {
-              "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
-            },
-            {
-              "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
-            },
-          ],
-        },
-      },
+  // Filter out the collections
+  let filteredCollections = collections.filter((collection) => {
+    return collection.name.includes(
+      process.env.MONGO_XAPI_COLLECTION + "_consumerId_"
+    );
+  });
 
-      {
-        $count: "totalSubmissions",
-      },
-    ];
+  // Get the total consumers
+  let totalConsumers = [];
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let consumerId = collection.name.split("_consumerId_")[1].split("_")[0];
 
-    let totalSubmissions = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalSubmissionsPipeline)
-      .toArray();
-    result.totalSubmissions = totalSubmissions[0]?.totalSubmissions;
-
-    // Get total exercise types
-    let totalExerciseTypesPipeline = [
-      {
-        $group: {
-          _id: "$xAPI.context.contextActivities.category.id",
-        },
-      },
-      {
-        $count: "exerciseTypes",
-      },
-    ];
-    let totalExerciseTypes = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalExerciseTypesPipeline)
-      .toArray();
-    result.exerciseTypes = totalExerciseTypes[0]?.exerciseTypes;
-
-    // Get total consumers
-    let totalConsumersPipeline = [
-      {
-        $group: {
-          _id: "$metadata.session.custom_consumer",
-        },
-      },
-      {
-        $sort: { _id: 1 },
-      },
-    ];
-    let totalConsumers = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalConsumersPipeline)
-      .toArray();
-    result.totalConsumers = totalConsumers?.length;
-    result.totalConsumersList = totalConsumers;
-
-    // Get total passing exercises
-    let totalPassingExercisesPipeline = [
-      {
-        $match: {
-          "xAPI.result.success": true,
-          $or: [
-            {
-              "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
-            },
-            {
-              "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
-            },
-          ],
-        },
-      },
-
-      {
-        $group: { _id: "$xAPI.verb.results", count: { $sum: 1 } },
-      },
-
-      {
-        $sort: {
-          _id: 1,
-        },
-      },
-    ];
-
-    let totalPassingExercises = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalPassingExercisesPipeline)
-      .toArray();
-    result.totalPassingExercises = totalPassingExercises[0]?.count;
-
-    // Get total actors
-    let totalActorsPipeline = [
-      {
-        $group: {
-          _id: "$xAPI.actor.name",
-        },
-      },
-      {
-        $count: "totalActorsCount",
-      },
-    ];
-    let totalActorsCount = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalActorsPipeline)
-      .toArray();
-    result.totalActorsCount = totalActorsCount[0]?.totalActorsCount ?? 0;
-
-    res.status(200).send({ result }).end();
-  } catch (err) {
-    console.log("Error while getting stats", err);
-    res.status(500).end();
+    // Only push to collection if not present
+    if (!totalConsumers.includes(consumerId)) totalConsumers.push(consumerId);
   }
+
+  let totalConsumersArrayObject = [];
+  for (let i = 0; i < totalConsumers.length; i++) {
+    totalConsumersArrayObject.push({ _id: totalConsumers[i] });
+  }
+
+  // Get the total records
+  let totalRecords = 0;
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let count = await m_client
+      .db()
+      .collection(collection.name)
+      .countDocuments();
+    totalRecords += count;
+  }
+
+  // Get the total submissions
+  let totalSubmissions = 0;
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let count = await m_client
+      .db()
+      .collection(collection.name)
+      .countDocuments({
+        $or: [
+          {
+            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
+          },
+          {
+            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
+          },
+        ],
+      });
+    totalSubmissions += count;
+  }
+
+  // Get the total exercise types
+  let exerciseTypes = [];
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let types = await m_client
+      .db()
+      .collection(collection.name)
+      .distinct("xAPI.context.contextActivities.category.id");
+    exerciseTypes = exerciseTypes.concat(types);
+  }
+  // Filter out null values
+  exerciseTypes = exerciseTypes.filter((type) => type != null);
+  // Get unique values
+  exerciseTypes = [...new Set(exerciseTypes)];
+
+  // Get the total passing exercises
+  let totalPassingExercises = 0;
+
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let count = await m_client
+      .db()
+      .collection(collection.name)
+      .countDocuments({
+        "xAPI.result.success": true,
+        $or: [
+          {
+            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
+          },
+          {
+            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
+          },
+        ],
+      });
+    totalPassingExercises += count;
+  }
+
+  // Get the total actors count
+  let totalActorsCount = 0;
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let count = await m_client
+      .db()
+      .collection(collection.name)
+      .distinct("xAPI.actor.name");
+    totalActorsCount += count.length;
+  }
+
+  // Return the result
+  res.status(200).send({
+    totalRecords: totalRecords,
+    totalSubmissions: totalSubmissions,
+    exerciseTypes: exerciseTypes.length,
+    totalConsumers: totalConsumers.length,
+    totalConsumersList: totalConsumersArrayObject,
+    totalPassingExercises: totalPassingExercises,
+    totalActorsCount: totalActorsCount,
+  });
 }
 
 async function getCourses(req, res, next) {
