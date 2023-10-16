@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { Link, useHistory } from "react-router-dom";
-// import Logo from "../../assets/img/logo.svg";
+import Logo from "../../assets/img/lrs-logo.svg";
 import Button from "antd/lib/button";
 import Icon from "@ant-design/icons/lib/components/Icon";
 import { useAppDispatch, useAppSelector } from "src/redux/hooks";
@@ -64,7 +64,7 @@ const AppHeader = (): ReactElement => {
             >
               <img
                 style={{ width: "24px", height: "24px" }}
-                src={"lrs logo.svg"}
+                src={Logo}
                 alt="logo"
               />
               <h1>openLRS</h1>
