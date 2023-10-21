@@ -123,7 +123,7 @@ const Home = (): ReactElement => {
         if (courseId && consumerId) {
           setSelectedCourse(courseId);
         } else if (!courseId && consumerId) {
-          setSelectedCourse(res[0]._id);
+          setSelectedCourse(res[0]?._id);
         }
       })
       .catch((err) => {
@@ -250,7 +250,7 @@ const Home = (): ReactElement => {
   useEffect(() => {
     if (selectedCourse) {
       setShowCourseStats(false);
-      //fetchCourse();
+      fetchCourse();
       //fetchCourseSubmissionsOverTime();
       //fetchCourseExerciseTypesCount();
     }
@@ -307,7 +307,7 @@ const Home = (): ReactElement => {
         <Col span={4}>
           <h3>Select a consumer</h3>
         </Col>
-        <Col span={12}>
+        <Col span={18}>
           <Select
             showSearch
             value={selectedConsumer}
@@ -338,27 +338,6 @@ const Home = (): ReactElement => {
               );
             })}
           </Select>
-        </Col>
-        <Col span={6} style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            onClick={() => {
-              setDownloadModalOpen(true);
-              setDownloadOptions({
-                consumer: selectedConsumer,
-                course: null,
-                exercise: null,
-                ignoreSubExercises: 0,
-                includeSimplifyRecords: 0,
-                includeRAWRecords: 1,
-                isConsumerSelected: true,
-                isCourseSelected: false,
-                isExerciseSelected: false,
-                selectedText: "Consumer " + selectedConsumer,
-              });
-            }}
-          >
-            Download
-          </Button>
         </Col>
       </Row>
       <Divider></Divider>
@@ -443,11 +422,25 @@ const Home = (): ReactElement => {
       </Row>
       <Divider></Divider>
 
+      {selectedCourse && (
+        <>
+          <CourseStats
+            consumer={selectedConsumer}
+            courseStatsLoading={selectedCourseDetailsLoading}
+            courseStats={selectedCourseDetails}
+            selectedActor={selectedActor}
+            setSelectedActor={setSelectedActor}
+          />
+
+          <Divider></Divider>
+        </>
+      )}
+
       {selectedCourse && !showCourseStats && (
         <Popconfirm
           title="Loading course stats will take a while. Are you sure?"
           onConfirm={() => {
-            fetchCourse();
+            // fetchCourse();
             fetchCourseSubmissionsOverTime();
             fetchCourseExerciseTypesCount();
             setShowCourseStats(true);
@@ -461,16 +454,6 @@ const Home = (): ReactElement => {
 
       {selectedCourse && showCourseStats && (
         <>
-          <CourseStats
-            consumer={selectedConsumer}
-            courseStatsLoading={selectedCourseDetailsLoading}
-            courseStats={selectedCourseDetails}
-            selectedActor={selectedActor}
-            setSelectedActor={setSelectedActor}
-          />
-
-          <Divider></Divider>
-
           <Row gutter={[24, 24]}>
             <Col md={24} lg={24} xl={12} span={12}>
               <div className="shadow-bordered">
