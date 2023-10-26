@@ -132,8 +132,8 @@ const Consumers = (): React.ReactElement => {
           <Col md={24} xl={12}>
             <Button onClick={() => handleEditClick(record)}>
               <Space>
-                Edit
                 <EditOutlined />
+                Edit
               </Space>
             </Button>
           </Col>
