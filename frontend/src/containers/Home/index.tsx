@@ -1,11 +1,5 @@
 import { GlobalStats } from "./GlobalStats";
-import {
-  ReactComponentElement,
-  ReactElement,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
 import Select from "antd/lib/select";
 import Row from "antd/lib/row";
@@ -277,23 +271,26 @@ const Home = (): ReactElement => {
         isCurrentUser={true}
       />
       <h2>Welcome to openLRS Dashboard</h2>
-      {(Object.keys(globalStats).length > 0 || globalStatsLoading) && (
-        <GlobalStats
-          globalStatsLoading={globalStatsLoading}
-          globalStats={globalStats}
-          fetchGlobalStats={fetchGlobalStats}
-        />
-      )}
-      {!Object.keys(globalStats).length && (
-        <Popconfirm
-          title="Loading global stats will take a while. Are you sure?"
-          onConfirm={fetchGlobalStats}
-          okText="Yes"
-          cancelText="Cancel"
-        >
-          <Button>Load Global Stats</Button>
-        </Popconfirm>
-      )}
+      <div style={{ display: user.role === "admin" ? "block" : "none" }}>
+        {(Object.keys(globalStats).length > 0 || globalStatsLoading) && (
+          <GlobalStats
+            globalStatsLoading={globalStatsLoading}
+            globalStats={globalStats}
+            fetchGlobalStats={fetchGlobalStats}
+          />
+        )}
+        {!Object.keys(globalStats).length && (
+          <Popconfirm
+            title="Loading global stats will take a while. Are you sure?"
+            onConfirm={fetchGlobalStats}
+            okText="Yes"
+            cancelText="Cancel"
+          >
+            <Button>Load Global Stats</Button>
+          </Popconfirm>
+        )}
+      </div>
+
       <DownloadModal
         {...downloadOptions}
         isOpen={downloadModalOpen}

@@ -39,7 +39,7 @@ router.use("/trueFalseChart/:id", checkUserAccess);
 router.use("/trueFalseChart/:id/:subExerciseId", checkUserAccess);
 
 // openLRS routes
-router.get("/stats", getStats);
+router.get("/stats", jwtAuthz(["admin"], jwtScopeOptions), getStats);
 router.get("/courses", getCourses);
 router.get("/course/:id", getCourse);
 
