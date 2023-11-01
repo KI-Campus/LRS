@@ -36,6 +36,11 @@ const Consumers = (): React.ReactElement => {
       .then((res) => {
         // Remove consumer "all" from the list
         res = res.filter((consumer) => consumer.id !== "all");
+        // Add a key to each consumer
+        res = res.map((consumer) => {
+          consumer.key = consumer.id;
+          return consumer;
+        });
         setConsumers(res);
         setLoading(false);
       })
@@ -160,7 +165,7 @@ const Consumers = (): React.ReactElement => {
   ];
 
   return (
-    <div className={editDrawerVisible ? "blur" : ""}>
+    <div>
       <h2>Consumers</h2>
       <Table
         loading={loading}

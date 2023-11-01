@@ -42,6 +42,11 @@ const Users = (): React.ReactElement => {
     let ret = getUsersListService();
     ret
       .then((res) => {
+        // Add a key to each user
+        res = res.map((user) => {
+          user.key = user.id;
+          return user;
+        });
         setUsers(res);
         setUsersLoading(false);
       })
@@ -237,7 +242,7 @@ const Users = (): React.ReactElement => {
   ];
 
   return (
-    <div className={editDrawerVisible ? "blur" : ""}>
+    <div>
       <h2>Users</h2>
       <Table loading={usersLoading} columns={userColumns} dataSource={users} />
       <EditUser
