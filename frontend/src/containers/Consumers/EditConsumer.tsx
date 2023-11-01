@@ -43,7 +43,7 @@ export default function EditConsumer(props) {
       title={"Edit Consumer " + props.editConsumer?.name}
       placement="right"
       onClose={hideEditDrawer}
-      visible={props.editDrawerVisible}
+      open={props.editDrawerVisible}
     >
       {props.editDrawerVisible && (
         <Form

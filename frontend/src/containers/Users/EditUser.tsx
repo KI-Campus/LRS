@@ -68,7 +68,7 @@ export default function EditUser(props): ReactElement {
       }
       placement="right"
       onClose={hideEditDrawer}
-      visible={props.editDrawerVisible}
+      open={props.editDrawerVisible}
     >
       {props.editDrawerVisible && (
         <Form

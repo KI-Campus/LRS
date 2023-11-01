@@ -65,7 +65,7 @@ export default function ActorsListModal(props: ActorsListModalProps) {
     <Modal
       closable={true}
       title={`Total ${total} students`}
-      visible={props.isOpen}
+      open={props.isOpen}
       onCancel={handleCancel}
       footer={null}
     >
