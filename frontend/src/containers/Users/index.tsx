@@ -13,7 +13,9 @@ import { getConsumersListService } from "src/services/consumers";
 import { deleteUserService, getUsersListService } from "src/services/users";
 import CreateUser from "./CreateUser";
 import EditUser from "./EditUser";
-import { Col, Row } from "antd";
+import { Col, Row, Tooltip } from "antd";
+import { getAllCoursesAdminService } from "src/services/courses";
+import { DefaultOptionType } from "antd/lib/select";
 
 const Users = (): React.ReactElement => {
   const [usersLoading, setUsersLoading] = useState(true);
@@ -27,7 +29,34 @@ const Users = (): React.ReactElement => {
 
   const [deleteUserLoading, setDeleteUserLoading] = useState(false);
 
-  // Load the consumers on page load
+  const [courses, setCourses] = useState<Omit<DefaultOptionType, "label">[]>([
+    // { id: "kic", pId: 0, value: "kic", title: "Kic" },
+    // {
+    //   id: "kic_courseId_course1",
+    //   pId: "kic",
+    //   value: "kic_courseId_course1",
+    //   title: "Course 1",
+    //   isLeaf: true,
+    // },
+    // {
+    //   id: "kic_courseId_course2",
+    //   pId: "kic",
+    //   value: "kic_courseId_course2",
+    //   title: "Course 2",
+    //   isLeaf: true,
+    // },
+    // {
+    //   id: "kic_courseId_*",
+    //   pId: "kic",
+    //   value: "kic_courseId_*",
+    //   title: "All courses",
+    //   isLeaf: true,
+    // },
+  ]);
+
+  const [coursesLoading, setCoursesLoading] = useState(true);
+
+  // Load the consumers & courses on page load
   useEffect(() => {
     fetchConsumers();
   }, []);
@@ -35,6 +64,7 @@ const Users = (): React.ReactElement => {
   // Only when consumers are loaded, then load the users
   useEffect(() => {
     fetchUsers();
+    fetchCourses();
   }, [consumers]);
 
   const fetchUsers = () => {
@@ -68,6 +98,75 @@ const Users = (): React.ReactElement => {
         console.log("Error while fetching consumers", err);
         setConsumersLoading(false);
       });
+  };
+
+  const helperFunctionConsumerIDToName = (consumerId: string) => {
+    let consumerName = consumerId;
+    // Loop through consumers array object
+    for (let i = 0; i < consumers.length; i++) {
+      if (consumers[i].id === consumerId) {
+        console.log(
+          "Matched consumer name",
+          consumers[i].name,
+          "for consumerId",
+          consumerId
+        );
+        consumerName = consumers[i].name;
+      }
+    }
+    return consumerName;
+  };
+
+  // This function calls the getAllCoursesAdminService and then creates the courses tree data for the tree select component
+  const fetchCourses = async () => {
+    setCoursesLoading(true);
+    let coursesTreeData = await getAllCoursesAdminService();
+
+    let coursesTreeSelectData = [];
+    // Loop through the courses and add the courses to the tree data
+    coursesTreeData.forEach((item, index) => {
+      let course = {
+        id: `${item.consumer}`,
+        pId: index,
+        value: `${item.consumer}`,
+        // title: `${item.consumer.toUpperCase()}`,
+        title: `${helperFunctionConsumerIDToName(item.consumer)}`,
+        isLeaf: false,
+      };
+      coursesTreeSelectData.push(course);
+
+      // Now add the courses of the consumer
+      item.courses.forEach((courseItem) => {
+        let course = {
+          id: `${item.consumer}_courseId_${courseItem.id}`,
+          pId: `${item.consumer}`,
+          value: `${item.consumer}_courseId_${courseItem.id}`,
+          title: `${
+            helperFunctionConsumerIDToName(item.consumer) + ": " + courseItem.id
+          }`,
+          isLeaf: true,
+        };
+        coursesTreeSelectData.push(course);
+      });
+
+      // Add the all courses option
+      let allCourses = {
+        id: `${item.consumer}_courseId_*`,
+        pId: `${item.consumer}`,
+        value: `${item.consumer}_courseId_*`,
+        title: `${
+          helperFunctionConsumerIDToName(item.consumer) + ": All courses"
+        }`,
+        isLeaf: true,
+      };
+
+      coursesTreeSelectData.push(allCourses);
+    });
+
+    // Finally set the useState
+    setCourses(coursesTreeSelectData);
+
+    setCoursesLoading(false);
   };
 
   const deleteUser = (user: UserInterface, users: UserInterface[]) => {
@@ -153,26 +252,52 @@ const Users = (): React.ReactElement => {
       key: "email",
     },
     {
-      title: "Consumers Access List",
-      dataIndex: "consumerAccess",
-      key: "consumerAccessList",
+      title: "Courses Access List",
+      dataIndex: "coursesAccess",
+      key: "coursesAccessList",
       // Responsive, show on bigger devices
       responsive: ["xxl"],
       render: (text, record: UserInterface) => {
+        let coursesAccess = record.coursesAccess;
+
+        // From coursesAccess array of strings remove "_courseId_" in the middle and replace it with " - "
+        // Also change consumer to its consumer name
+        coursesAccess = coursesAccess?.map((item: string) => {
+          if (item.includes("_courseId_")) {
+            // Get the consumer name
+            let consumerName = item.split("_")[0];
+            let courseId = item.split("_courseId_")[1];
+            consumerName = helperFunctionConsumerIDToName(consumerName);
+            return consumerName + " - " + courseId;
+          } else {
+            return item;
+          }
+        });
+
         if (record.role === "admin") {
-          return <div>Admin has access to all consumers </div>;
+          return <div>Admin has access to all courses </div>;
         } else {
           return (
             <Space size="small">
-              {record.consumersAccess?.map((item: string) => (
-                <Tag color="blue" key={item}>
-                  {
-                    consumers.filter(
-                      (consumer: ConsumerInterface) => consumer.id === item
-                    )[0]?.name
-                  }
-                </Tag>
-              ))}
+              {/* Check if coursesAccess item length is < 2 then render tags, otherwise render only 2 and tooltip to display all */}
+              {coursesAccess?.length < 2 ? (
+                coursesAccess?.map((item: string) => (
+                  <Tag color="blue" key={item}>
+                    {/* {
+                      consumers.filter(
+                        (consumer: ConsumerInterface) => consumer.id === item
+                      )[0]?.name
+                    } */}
+                    {item}
+                  </Tag>
+                ))
+              ) : (
+                <Tooltip title={coursesAccess.join("\n")}>
+                  <Tag color="blue" key={coursesAccess[0]}>
+                    {coursesAccess[0]} and {coursesAccess.length - 1} more
+                  </Tag>
+                </Tooltip>
+              )}
             </Space>
           );
         }
@@ -250,10 +375,15 @@ const Users = (): React.ReactElement => {
         editUser={editUser}
         fetchUsers={fetchUsers}
         consumers={consumers}
+        courses={courses}
         editDrawerVisible={editDrawerVisible}
         setEditDrawerVisible={setEditDrawerVisible}
       />
-      <CreateUser consumers={consumers} fetchUsers={fetchUsers} />
+      <CreateUser
+        consumers={consumers}
+        fetchUsers={fetchUsers}
+        courses={courses}
+      />
     </div>
   );
 };

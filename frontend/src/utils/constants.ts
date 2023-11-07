@@ -33,6 +33,7 @@ export const API_USER = "users";
 export const API_USER_REGISTER = "users/register";
 
 export const API_GET_GLOBAL_STATS = "records/stats";
+export const API_GET_ALL_COURSES_ADMIN = "records/coursesAdmin";
 
 export const API_GET_ACTORS = "records/actors";
 export const GET_ACTORS_PAGE_SIZE = 5;

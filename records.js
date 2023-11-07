@@ -17,8 +17,6 @@ function init(mongoClient) {
 }
 
 // Middleware check for user access
-// router.use("/stats", checkUserAccess);       //Stats are public
-router.use("/courses", checkUserAccess);
 router.use("/course/:id", checkUserAccess);
 
 router.use("/courseSubmissionsOverTime/:id", checkUserAccess);
@@ -63,33 +61,41 @@ router.get("/trueFalseChart/:id/:subExerciseId", getTrueFalseChart);
 
 router.get("/actors", jwtAuthz(["admin"], jwtScopeOptions), getActors);
 
+router.get(
+  "/coursesAdmin",
+  jwtAuthz(["admin"], jwtScopeOptions),
+  getAllCoursesAdmin
+);
+
 async function checkUserAccess(req, res, next) {
-  let consumer;
-  let courseId;
-  req.query.consumer ? (consumer = req.query.consumer) : (consumer = "all");
-  req.query.courseId ? (courseId = req.query.courseId) : (courseId = "all");
-  let hasConsumerAccess = false;
-  // Check in the user collection mongodb if consumerAccess array includes consumer
+  let consumer = req.query.consumer;
+  let courseId = req.query.course ?? req.params.id;
+
+  let hasAccess = false;
+  // Fetch the user from the database
   await m_client
     .db()
     .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "users")
     .findOne({ email: req.user.email }, (err, resultUser) => {
       if (err) {
-        console.log("Error while getting records", err);
+        console.log("Error while getting user records", err);
         res.status(500).end();
         return;
       } else {
         if (
-          resultUser?.consumersAccess.includes(consumer) ||
+          resultUser?.coursesAccess?.includes(
+            consumer + "_courseId_" + courseId
+          ) ||
+          resultUser?.coursesAccess?.includes(consumer + "_courseId_*") ||
           resultUser?.role == "admin"
         ) {
-          hasConsumerAccess = true;
+          hasAccess = true;
 
           next();
         } else {
           console.log(
-            "User " + req.user.email + " does not have access to consumer: ",
-            req.body.consumer
+            "User " + req.user.email + " does not have access to: ",
+            req.body.consumer + "_courseId_" + req.body.courseId
           );
           res.status(403).end();
           return;
@@ -267,48 +273,29 @@ async function getCourses(req, res, next) {
       );
     });
 
-    req.filteredCollections = filteredCollections;
+    filteredCollections;
 
     let consumer = req.query.consumer ? req.query.consumer : "all";
-    // let pipeline = [
-    //   {
-    //     $group: {
-    //       _id: "$metadata.session.context_id",
-    //       title: { $last: "$metadata.session.context_title" },
-    //       consumer: { $last: "$metadata.session.custom_consumer" },
-    //     },
-    //   },
-    //   {
-    //     $sort: { title: 1 },
-    //   },
-    // ];
 
-    // req.filteredCollections has list of consumers like this format
+    // filteredCollections has list of consumers like this format
     // [ 'process.env.MONGO_XAPI_COLLECTION_consumerId_<consumer>_courseId_123', 'process.env.MONGO_XAPI_COLLECTION_consumerId_<consumer>_courseId_456' ]
 
     // Extract courseIds from the req.totalConsumers
     // Create array of arrays. Each consumer has an array of courseIds
     let totalConsumers = {};
-    for (let i = 0; i < req.filteredCollections.length; i++) {
-      let collection = req.filteredCollections[i];
+    for (let i = 0; i < filteredCollections.length; i++) {
+      let collection = filteredCollections[i];
       let consumerId = collection.name.split("_consumerId_")[1].split("_")[0];
       let courseId = collection.name.split("_courseId_")[1];
       if (!totalConsumers[consumerId]) totalConsumers[consumerId] = [];
       totalConsumers[consumerId].push(courseId);
     }
 
-    // Create totalCoursesObject to send back
-    let totalCoursesObject = [];
-    for (let consumerId in totalConsumers) {
-      let courses = totalConsumers[consumerId];
-      for (let i = 0; i < courses.length; i++) {
-        totalCoursesObject.push({
-          _id: courses[i],
-          title: courses[i],
-          consumer: consumerId,
-        });
-      }
-    }
+    // Fetch current user
+    let user = await m_client
+      .db()
+      .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "users")
+      .findOne({ email: req.user.email });
 
     let collectionNamesToFetch = [];
 
@@ -317,13 +304,18 @@ async function getCourses(req, res, next) {
       let courseIds = totalConsumers[consumer];
       // Loop through courseIds and push to collectionNamesToFetch
       for (let i = 0; i < courseIds?.length; i++) {
-        collectionNamesToFetch.push(
-          process.env.MONGO_XAPI_COLLECTION +
-            "_consumerId_" +
-            consumer +
-            "_courseId_" +
-            courseIds[i]
-        );
+        if (
+          user.coursesAccess.includes(consumer + "_courseId_" + courseIds[i]) ||
+          user.role == "admin"
+        ) {
+          collectionNamesToFetch.push(
+            process.env.MONGO_XAPI_COLLECTION +
+              "_consumerId_" +
+              consumer +
+              "_courseId_" +
+              courseIds[i]
+          );
+        }
       }
     } else {
       // Fetch all the courseId's for all consumers
@@ -331,13 +323,20 @@ async function getCourses(req, res, next) {
         let courseIds = totalConsumers[consumerId];
         // Loop through courseIds and push to collectionNamesToFetch
         for (let i = 0; i < courseIds.length; i++) {
-          collectionNamesToFetch.push(
-            process.env.MONGO_XAPI_COLLECTION +
-              "_consumerId_" +
-              consumerId +
-              "_courseId_" +
-              courseIds[i]
-          );
+          if (
+            user.coursesAccess.includes(
+              consumerId + "_courseId_" + courseIds[i]
+            ) ||
+            user.role == "admin"
+          ) {
+            collectionNamesToFetch.push(
+              process.env.MONGO_XAPI_COLLECTION +
+                "_consumerId_" +
+                consumerId +
+                "_courseId_" +
+                courseIds[i]
+            );
+          }
         }
       }
     }
@@ -2408,4 +2407,68 @@ async function getConsumerIdFromCourseId(courseId) {
   }
 
   return consumerId;
+}
+
+async function getAllCoursesAdmin(req, res, next) {
+  // Return all courses from all consumers
+  // Get all the collections
+  let collections = await m_client.db().listCollections().toArray();
+
+  // Filter out the collections
+  let filteredCollections = collections.filter((collection) => {
+    return collection.name.includes(
+      process.env.MONGO_XAPI_COLLECTION + "_consumerId_"
+    );
+  });
+
+  // Create a tree structure like
+  // [
+  //   {
+  //     consumer: "consumer1",
+  //     courses: [
+  //       {
+  //         id: "course1",
+  //        }
+  //     ]
+  //   }
+  // ]
+
+  let courses = [];
+  // Loop through filteredCollections and find the collection that has the courseId
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let collectionName = collection.name;
+
+    let consumerId = collectionName.split("_consumerId_")[1].split("_")[0];
+    let courseId = collectionName.split("_courseId_")[1];
+
+    // For now do not add consumerId with null
+    if (consumerId === "null") continue;
+
+    // Check if the consumer already exists in the courses array
+    let consumer = courses.find((s) => s.consumer === consumerId);
+
+    if (consumer) {
+      // Consumer already exists in the courses array
+      // Check if the course already exists in the consumer
+      let course = consumer.courses.find((s) => s.id === courseId);
+      if (!course) {
+        // Course does not exist in the consumer, so add it
+        consumer.courses.push({ id: courseId });
+      }
+    } else {
+      // Consumer does not exist in the courses array, so add it
+      courses.push({
+        consumer: consumerId,
+        courses: [{ id: courseId }],
+      });
+    }
+  }
+
+  try {
+    res.status(200).send({ result: courses }).end();
+  } catch (e) {
+    console.log("Error in getAllCoursesAdmin", e);
+    res.status(500).end();
+  }
 }

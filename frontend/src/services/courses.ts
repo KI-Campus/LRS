@@ -4,6 +4,7 @@ import {
   API_GET_COURSE,
   API_GET_COURSE_SUBMISSIONS_BY_TIME,
   API_GET_COURSE_EXERCISE_TYPES_COUNTS,
+  API_GET_ALL_COURSES_ADMIN,
 } from "src/utils/constants";
 
 export const getCoursesListService = async (consumer: string) => {
@@ -62,5 +63,11 @@ export const getCourseExerciseTypesCountsService = async (
     `${API_GET_COURSE_EXERCISE_TYPES_COUNTS}${queryString}`
   );
 
+  return response.data.result;
+};
+
+// Get All courses Admin endpoint
+export const getAllCoursesAdminService = async () => {
+  const response = await axios.get(`${API_GET_ALL_COURSES_ADMIN}`);
   return response.data.result;
 };
