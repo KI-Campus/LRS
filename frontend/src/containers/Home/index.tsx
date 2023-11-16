@@ -116,8 +116,6 @@ const Home = (): ReactElement => {
         // Select the first course
         if (courseId && consumerId) {
           setSelectedCourse(courseId);
-        } else if (!courseId && consumerId) {
-          setSelectedCourse(res[0]?._id);
         }
       })
       .catch((err) => {

@@ -25,7 +25,7 @@
     "react-error-overlay": "6.0.9"
   },
   "scripts": {
-    "dev": "export NODE_ENV=dev && react-scripts start",
+    "dev": "react-scripts --openssl-legacy-provider start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
