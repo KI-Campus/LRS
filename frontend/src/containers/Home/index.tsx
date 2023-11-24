@@ -243,6 +243,14 @@ const Home = (): ReactElement => {
     if (selectedCourse) {
       setShowCourseStats(false);
       fetchCourse();
+
+      if (selectedConsumer === "all") {
+        // Extract consumer from courses array
+        let consumer = courses.filter((c) => c._id === selectedCourse)[0]
+          .consumer;
+        setSelectedConsumer(consumer);
+      }
+
       //fetchCourseSubmissionsOverTime();
       //fetchCourseExerciseTypesCount();
     }
@@ -358,7 +366,7 @@ const Home = (): ReactElement => {
             {courses.map((course) => {
               return (
                 <Option
-                  key={course._id}
+                  key={course.consumer + "_" + course._id}
                   value={course._id ? course._id : "all"}
                   label={
                     course.title
