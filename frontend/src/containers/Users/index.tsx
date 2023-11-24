@@ -155,7 +155,8 @@ const Users = (): React.ReactElement => {
         pId: `${item.consumer}`,
         value: `${item.consumer}_courseId_*`,
         title: `${
-          helperFunctionConsumerIDToName(item.consumer) + ": All courses"
+          helperFunctionConsumerIDToName(item.consumer) +
+          ": All current and future courses"
         }`,
         isLeaf: true,
       };
