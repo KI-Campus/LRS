@@ -1199,8 +1199,18 @@ async function getExerciseSubmissionsOverTime(req, res, next) {
       },
     },
     {
+      $project: {
+        date: {
+          $dateFromString: {
+            dateString: "$_id",
+          },
+        },
+        submissions: 1,
+      },
+    },
+    {
       $sort: {
-        _id: 1,
+        date: 1,
       },
     },
   ];
@@ -1279,9 +1289,20 @@ async function getCourseSubmissionsOverTime(req, res, next) {
         },
       },
     },
+
+    {
+      $project: {
+        date: {
+          $dateFromString: {
+            dateString: "$_id",
+          },
+        },
+        submissions: 1,
+      },
+    },
     {
       $sort: {
-        _id: 1,
+        date: 1,
       },
     },
   ];
