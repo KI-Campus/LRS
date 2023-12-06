@@ -86,6 +86,10 @@ app.post("/lrs", (req, res) => {
     let consumerId = req?.body?.metadata?.session.custom_consumer ?? "null";
     let courseId = req?.body?.metadata?.session.context_id ?? "null";
 
+    // Trim the consumerId and courseId
+    consumerId = consumerId?.trim() ?? consumerId;
+    courseId = courseId?.trim() ?? courseId;
+
     m_client
       .db()
       .collection(
