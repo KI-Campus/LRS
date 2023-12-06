@@ -66,18 +66,7 @@
     }
 
     .register {
-      .terms-and-conditions {
-        font-family: Inter;
-        font-style: normal;
-        font-weight: normal;
-        font-size: 12px;
-        line-height: 15px;
-        margin-bottom: 25px;
-        color: #5c5e78;
-        a {
-          margin: 0px 3px;
-        }
-      }
+     
       .login-redirect {
         text-align: center !important;
         font-family: Inter;
@@ -137,31 +126,7 @@
         }
       }
     }
-    .create-org {
-      width: 400px;
-      .forget-pass {
-        text-align: right;
-        a {
-          margin: 0px 3px;
-        }
-      }
-      .upload-icon {
-        font-size: 20px;
-        color: #116af4;
-      }
-    }
-
-    .login-with-google {
-      background: #ffffff;
-      box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.084),
-        0px 1px 1px rgba(0, 0, 0, 0.168);
-
-      .google-icon {
-        width: 24px;
-        // position: absolute;
-        // bottom: 241 px;
-      }
-    }
+    
   }
 
   .link {
@@ -232,17 +197,6 @@
   }
 }
 
-.avatar-uploader {
-  background-position: top;
-  background-size: 10px 1px;
-  background-repeat: repeat-x;
-  border-color: #6da3f8;
-  color: #116af4;
-  border-radius: 6px;
-  border-width: 1px;
-  border-style: dashed;
-}
-
 .ant-upload.ant-upload-select-picture-card {
   border-width: 0px !important;
   background-color: #f5f5fd !important;
@@ -250,66 +204,4 @@
 
 .ant-upload.ant-upload-select-picture-card {
   height: 50px;
-}
-
-.img-logo {
-  padding: 5px;
-  // background-color: yellow;
-  height: 40px;
-  margin-top: 7px;
-}
-
-.org-row {
-  width: 395px;
-  background: #fdfdfd;
-  border-radius: 8px;
-  // padding: 15px 15px 15px 15px;
-  padding: 12px 12px;
-  font-family: Inter;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 17px;
-  line-height: 22px;
-  color: #04072f;
-  cursor: pointer;
-  margin-top: 15px;
-}
-
-.org-row-logo {
-  height: 45px;
-  margin-right: 25px;
-  margin-left: 10px;
-}
-
-.create-org-btn {
-  align-items: center;
-  padding: 10px 10px 10px 16px;
-  width: 395px;
-  height: 44px;
-  background: #fdfdfd;
-  border-radius: 8px;
-  p {
-    font-family: Inter;
-    font-style: normal;
-    font-weight: 500;
-    font-size: 18px;
-    line-height: 22px;
-    text-align: center;
-    color: #116af4;
-  }
-  cursor: pointer;
-}
-.span-or {
-  font-family: Inter;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 18px;
-  line-height: 22px;
-  /* identical to box height */
-
-  text-align: center;
-
-  /* Text/Tertiary */
-
-  color: #8e8fa1;
 }

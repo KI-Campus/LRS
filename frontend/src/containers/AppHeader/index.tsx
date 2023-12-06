@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { Link, useHistory } from "react-router-dom";
-// import Logo from "../../assets/img/logo.svg";
+import Logo from "../../assets/img/lrs-logo.svg";
 import Button from "antd/lib/button";
 import Icon from "@ant-design/icons/lib/components/Icon";
 import { useAppDispatch, useAppSelector } from "src/redux/hooks";
@@ -54,7 +54,21 @@ const AppHeader = (): ReactElement => {
       <div className="nav-header-section">
         <div className="app-logo">
           <Link to="/">
-            <h1>openLRS</h1>
+            <div
+              style={{
+                paddingTop: "10px",
+                display: "flex",
+                gap: "1rem",
+                alignItems: "baseline",
+              }}
+            >
+              <img
+                style={{ width: "24px", height: "24px" }}
+                src={Logo}
+                alt="logo"
+              />
+              <h1>openLRS</h1>
+            </div>
           </Link>
         </div>
       </div>

@@ -107,7 +107,9 @@ export function ExercisesTable(props): ReactElement {
     props.actor,
   ]);
 
+  // Reset the page number, search when consumer or course changes
   useEffect(() => {
+    setPage(1);
     setSearchText(undefined);
     setExerciseTypesFilter([]);
   }, [props.courseId, props.consumerId]);

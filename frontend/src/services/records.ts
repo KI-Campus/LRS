@@ -75,13 +75,14 @@ export const downloadService = async (
 
 export const getExerciseDetailsService = async (
   consumer: string,
+  courseId: string,
   exerciseId: string,
   subExerciseId: string,
   actor?: string
 ) => {
   let query = `${API_GET_EXERCISE_DETAILS}/${exerciseId}`;
   if (subExerciseId) query += `/${subExerciseId}`;
-  query += `?consumer=${consumer}`;
+  query += `?consumer=${consumer}&course=${courseId}`;
   if (actor) {
     query += `&filters[xAPI.actor.name]=${actor}`;
   }
@@ -92,15 +93,16 @@ export const getExerciseDetailsService = async (
 // Get Exercise Submissions By Time Service
 export const getExerciseSubmissionsOverTimeService = async (
   consumer: string,
+  courseId: string,
   exerciseId: string,
-  subExerciseId: string,
+  subExerciseId?: string,
   actor?: string
 ) => {
   let query = `${API_GET_EXERCISE_SUBMISSIONS_BY_TIME}/${exerciseId}`;
   if (subExerciseId) {
     query += `/${subExerciseId}`;
   }
-  query += `?consumer=${consumer}`;
+  query += `?consumer=${consumer}&course=${courseId}`;
   if (actor) {
     query += `&filters[xAPI.actor.name]=${actor}`;
   }
@@ -112,6 +114,7 @@ export const getExerciseSubmissionsOverTimeService = async (
 // Get Exercise Submissions By Time Service
 export const getMCQChartService = async (
   consumer: string,
+  courseId: string,
   exerciseId: string,
   subExerciseId: string,
   actor?: string
@@ -120,7 +123,7 @@ export const getMCQChartService = async (
   if (subExerciseId) {
     query += `/${subExerciseId}`;
   }
-  query += `?consumer=${consumer}`;
+  query += `?consumer=${consumer}&course=${courseId}`;
   if (actor) {
     query += `&filters[xAPI.actor.name]=${actor}`;
   }
@@ -132,6 +135,7 @@ export const getMCQChartService = async (
 // Get True False
 export const getTrueFalseChartService = async (
   consumer: string,
+  courseId: string,
   exerciseId: string,
   subExerciseId: string,
   actor?: string
@@ -140,7 +144,7 @@ export const getTrueFalseChartService = async (
   if (subExerciseId) {
     query += `/${subExerciseId}`;
   }
-  query += `?consumer=${consumer}`;
+  query += `?consumer=${consumer}&course=${courseId}`;
   if (actor) {
     query += `&filters[xAPI.actor.name]=${actor}`;
   }

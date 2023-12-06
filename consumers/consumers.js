@@ -121,7 +121,7 @@ function getAll(req, res, next) {
           m_client
             .db()
             .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "consumers")
-            .find({ id: { $in: resultUser.consumersAccess } })
+            .find()
             .sort({ name: 1 })
             .toArray((err, result) => {
               if (err) {
@@ -131,9 +131,15 @@ function getAll(req, res, next) {
                   message: "Error while getting consumers",
                 });
               } else {
-                if (resultUser.consumersAccess.indexOf("all") > -1) {
-                  result.push({ id: "all", name: "All" });
-                }
+                // Get coursesAccess field of current user which is an array of course ids like ["consumer1_courseId_course123"]
+                // Extract the consumer id from each element of the array, and then check if that consumer id is present in the coursesAccess field of current user
+                let consumersAccess = resultUser.coursesAccess.map((item) => {
+                  return item.split("_")[0];
+                });
+                // Filter the consumers array based on the consumersAccess array
+                result = result.filter((item) => {
+                  return consumersAccess.includes(item.id);
+                });
                 res.status(200).send({ success: true, result: result });
               }
             });

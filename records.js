@@ -17,8 +17,6 @@ function init(mongoClient) {
 }
 
 // Middleware check for user access
-// router.use("/stats", checkUserAccess);       //Stats are public
-router.use("/courses", checkUserAccess);
 router.use("/course/:id", checkUserAccess);
 
 router.use("/courseSubmissionsOverTime/:id", checkUserAccess);
@@ -39,7 +37,7 @@ router.use("/trueFalseChart/:id", checkUserAccess);
 router.use("/trueFalseChart/:id/:subExerciseId", checkUserAccess);
 
 // openLRS routes
-router.get("/stats", getStats);
+router.get("/stats", jwtAuthz(["admin"], jwtScopeOptions), getStats);
 router.get("/courses", getCourses);
 router.get("/course/:id", getCourse);
 
@@ -63,33 +61,41 @@ router.get("/trueFalseChart/:id/:subExerciseId", getTrueFalseChart);
 
 router.get("/actors", jwtAuthz(["admin"], jwtScopeOptions), getActors);
 
+router.get(
+  "/coursesAdmin",
+  jwtAuthz(["admin"], jwtScopeOptions),
+  getAllCoursesAdmin
+);
+
 async function checkUserAccess(req, res, next) {
-  let consumer;
-  let courseId;
-  req.query.consumer ? (consumer = req.query.consumer) : (consumer = "all");
-  req.query.courseId ? (courseId = req.query.courseId) : (courseId = "all");
-  let hasConsumerAccess = false;
-  // Check in the user collection mongodb if consumerAccess array includes consumer
+  let consumer = req.query.consumer;
+  let courseId = req.query.course ?? req.params.id;
+
+  let hasAccess = false;
+  // Fetch the user from the database
   await m_client
     .db()
     .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "users")
     .findOne({ email: req.user.email }, (err, resultUser) => {
       if (err) {
-        console.log("Error while getting records", err);
+        console.log("Error while getting user records", err);
         res.status(500).end();
         return;
       } else {
         if (
-          resultUser?.consumersAccess.includes(consumer) ||
+          resultUser?.coursesAccess?.includes(
+            consumer + "_courseId_" + courseId
+          ) ||
+          resultUser?.coursesAccess?.includes(consumer + "_courseId_*") ||
           resultUser?.role == "admin"
         ) {
-          hasConsumerAccess = true;
+          hasAccess = true;
 
           next();
         } else {
           console.log(
-            "User " + req.user.email + " does not have access to consumer: ",
-            req.body.consumer
+            "User " + req.user.email + " does not have access to: ",
+            req.body.consumer + "_courseId_" + req.body.courseId
           );
           res.status(403).end();
           return;
@@ -99,201 +105,296 @@ async function checkUserAccess(req, res, next) {
 }
 
 async function getStats(req, res, next) {
-  let result = {};
+  // We need to return the following
+  //   {
+  //     "totalRecords": NUMBER,
+  //     "totalSubmissions": NUMBER,
+  //     "exerciseTypes": NUMBER,
+  //     "totalConsumers": NUMBER,
+  //     "totalConsumersList": [
+  //         {
+  //             "_id": null
+  //         },
+  //         {
+  //             "_id": "SOME ID A"
+  //         },
+  //         {
+  //             "_id": "SOME ID B"
+  //         }
+  //     ],
+  //     "totalPassingExercises": NUMBER,
+  //     "totalActorsCount": NUMBER,
+  // }
 
-  try {
-    // Get total records
-    let totalRecordsPipeline = [
-      {
-        $count: "totalRecords",
-      },
-    ];
+  // Fetch all the collections in the database with the following format
+  // process.env.MONGO_XAPI_COLLECTION_consumerId_<consumer>_courseId_*
 
-    let totalRecords = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalRecordsPipeline)
-      .toArray();
-    result.totalRecords = totalRecords[0]?.totalRecords;
+  // Get all the collections
+  let collections = await m_client.db().listCollections().toArray();
 
-    // Get total submissions
-    let totalSubmissionsPipeline = [
-      {
-        $match: {
-          $or: [
-            {
-              "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
-            },
-            {
-              "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
-            },
-          ],
-        },
-      },
+  // Filter out the collections
+  let filteredCollections = collections.filter((collection) => {
+    return collection.name.includes(
+      process.env.MONGO_XAPI_COLLECTION + "_consumerId_"
+    );
+  });
 
-      {
-        $count: "totalSubmissions",
-      },
-    ];
+  // Get the total consumers
+  let totalConsumers = [];
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let consumerId = collection.name.split("_consumerId_")[1].split("_")[0];
 
-    let totalSubmissions = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalSubmissionsPipeline)
-      .toArray();
-    result.totalSubmissions = totalSubmissions[0]?.totalSubmissions;
-
-    // Get total exercise types
-    let totalExerciseTypesPipeline = [
-      {
-        $group: {
-          _id: "$xAPI.context.contextActivities.category.id",
-        },
-      },
-      {
-        $count: "exerciseTypes",
-      },
-    ];
-    let totalExerciseTypes = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalExerciseTypesPipeline)
-      .toArray();
-    result.exerciseTypes = totalExerciseTypes[0]?.exerciseTypes;
-
-    // Get total consumers
-    let totalConsumersPipeline = [
-      {
-        $group: {
-          _id: "$metadata.session.custom_consumer",
-        },
-      },
-      {
-        $sort: { _id: 1 },
-      },
-    ];
-    let totalConsumers = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalConsumersPipeline)
-      .toArray();
-    result.totalConsumers = totalConsumers?.length;
-    result.totalConsumersList = totalConsumers;
-
-    // Get total passing exercises
-    let totalPassingExercisesPipeline = [
-      {
-        $match: {
-          "xAPI.result.success": true,
-          $or: [
-            {
-              "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
-            },
-            {
-              "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
-            },
-          ],
-        },
-      },
-
-      {
-        $group: { _id: "$xAPI.verb.results", count: { $sum: 1 } },
-      },
-
-      {
-        $sort: {
-          _id: 1,
-        },
-      },
-    ];
-
-    let totalPassingExercises = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalPassingExercisesPipeline)
-      .toArray();
-    result.totalPassingExercises = totalPassingExercises[0]?.count;
-
-    // Get total actors
-    let totalActorsPipeline = [
-      {
-        $group: {
-          _id: "$xAPI.actor.name",
-        },
-      },
-      {
-        $count: "totalActorsCount",
-      },
-    ];
-    let totalActorsCount = await m_client
-      .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(totalActorsPipeline)
-      .toArray();
-    result.totalActorsCount = totalActorsCount[0]?.totalActorsCount ?? 0;
-
-    res.status(200).send({ result }).end();
-  } catch (err) {
-    console.log("Error while getting stats", err);
-    res.status(500).end();
+    // Only push to collection if not present
+    if (!totalConsumers.includes(consumerId)) totalConsumers.push(consumerId);
   }
+
+  let totalConsumersArrayObject = [];
+  for (let i = 0; i < totalConsumers.length; i++) {
+    totalConsumersArrayObject.push({ _id: totalConsumers[i] });
+  }
+
+  // Get the total records
+  let totalRecords = 0;
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let count = await m_client
+      .db()
+      .collection(collection.name)
+      .countDocuments();
+    totalRecords += count;
+  }
+
+  // Get the total submissions
+  let totalSubmissions = 0;
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let count = await m_client
+      .db()
+      .collection(collection.name)
+      .countDocuments({
+        $or: [
+          {
+            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
+          },
+          {
+            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
+          },
+        ],
+      });
+    totalSubmissions += count;
+  }
+
+  // Get the total exercise types
+  let exerciseTypes = [];
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let types = await m_client
+      .db()
+      .collection(collection.name)
+      .distinct("xAPI.context.contextActivities.category.id");
+    exerciseTypes = exerciseTypes.concat(types);
+  }
+  // Filter out null values
+  exerciseTypes = exerciseTypes.filter((type) => type != null);
+  // Get unique values
+  exerciseTypes = [...new Set(exerciseTypes)];
+
+  // Get the total passing exercises
+  let totalPassingExercises = 0;
+
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let count = await m_client
+      .db()
+      .collection(collection.name)
+      .countDocuments({
+        "xAPI.result.success": true,
+        $or: [
+          {
+            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/completed",
+          },
+          {
+            "xAPI.verb.id": "http://adlnet.gov/expapi/verbs/answered",
+          },
+        ],
+      });
+    totalPassingExercises += count;
+  }
+
+  // Get the total actors count
+  let totalActorsCount = 0;
+  let totalActorsList = [];
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let returnedActors = await m_client
+      .db()
+      .collection(collection.name)
+      .aggregate([
+        {
+          $group: {
+            _id: "$xAPI.actor.name",
+          },
+        },
+      ])
+      .toArray();
+
+    // Loop through returnedActors
+    for (let i = 0; i < returnedActors.length; i++) {
+      if (!totalActorsList.includes(returnedActors[i]._id))
+        totalActorsList.push(returnedActors[i]._id);
+    }
+  }
+  totalActorsCount = totalActorsList.length;
+
+  // Return the result
+  res.status(200).send({
+    result: {
+      totalRecords: totalRecords,
+      totalSubmissions: totalSubmissions,
+      exerciseTypes: exerciseTypes.length,
+      totalConsumers: totalConsumers.length,
+      totalConsumersList: totalConsumersArrayObject,
+      totalPassingExercises: totalPassingExercises,
+      totalActorsCount: totalActorsCount,
+    },
+  });
 }
 
 async function getCourses(req, res, next) {
-  let pipeline = [
-    {
-      $group: {
-        _id: "$metadata.session.context_id",
-        title: { $last: "$metadata.session.context_title" },
-        consumer: { $last: "$metadata.session.custom_consumer" },
-      },
-    },
-    {
-      $sort: { title: 1 },
-    },
-  ];
-  let courseId = req.query.courseId ? req.query.courseId : "all";
-  let consumer = req.query.consumer ? req.query.consumer : "all";
-  if (courseId != "all") {
-    pipeline.unshift({
-      $match: {
-        "metadata.session.context_id": courseId,
-      },
-    });
-  }
-  if (consumer != "all") {
-    pipeline.unshift({
-      $match: {
-        "metadata.session.custom_consumer": consumer,
-      },
-    });
-  }
-
   try {
-    m_client
+    // Get all the collections
+    let collections = await m_client.db().listCollections().toArray();
+
+    // Filter out the collections
+    let filteredCollections = collections.filter((collection) => {
+      return collection.name.includes(
+        process.env.MONGO_XAPI_COLLECTION + "_consumerId_"
+      );
+    });
+
+    filteredCollections;
+
+    let consumer = req.query.consumer ? req.query.consumer : "all";
+
+    // filteredCollections has list of consumers like this format
+    // [ 'process.env.MONGO_XAPI_COLLECTION_consumerId_<consumer>_courseId_123', 'process.env.MONGO_XAPI_COLLECTION_consumerId_<consumer>_courseId_456' ]
+
+    // Extract courseIds from the req.totalConsumers
+    // Create array of arrays. Each consumer has an array of courseIds
+    let totalConsumers = {};
+    for (let i = 0; i < filteredCollections.length; i++) {
+      let collection = filteredCollections[i];
+      let consumerId = collection.name.split("_consumerId_")[1].split("_")[0];
+      let courseId = collection.name.split("_courseId_")[1];
+      if (!totalConsumers[consumerId]) totalConsumers[consumerId] = [];
+      totalConsumers[consumerId].push(courseId);
+    }
+
+    // Fetch current user
+    let user = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
-      .aggregate(pipeline)
-      .toArray(function (err, result) {
-        if (err) {
-          console.log("Error while Aggregating: ", err);
-          console.log("Pipeline: ", pipeline);
-          res.status(500).end();
-        } else {
-          // Filter out null values
-          result = result.filter((course) => course._id != null);
-          res.status(200).send({ result }).end();
+      .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "users")
+      .findOne({ email: req.user.email });
+
+    let collectionNamesToFetch = [];
+
+    if (consumer != "all") {
+      // Fetch all the courseId's for the consumer
+      let courseIds = totalConsumers[consumer];
+      // Loop through courseIds and push to collectionNamesToFetch
+      for (let i = 0; i < courseIds?.length; i++) {
+        if (
+          user.coursesAccess.includes(consumer + "_courseId_" + courseIds[i]) ||
+          user.role == "admin"
+        ) {
+          collectionNamesToFetch.push(
+            process.env.MONGO_XAPI_COLLECTION +
+              "_consumerId_" +
+              consumer +
+              "_courseId_" +
+              courseIds[i]
+          );
         }
+      }
+    } else {
+      // Fetch all the courseId's for all consumers
+      for (let consumerId in totalConsumers) {
+        let courseIds = totalConsumers[consumerId];
+        // Loop through courseIds and push to collectionNamesToFetch
+        for (let i = 0; i < courseIds.length; i++) {
+          if (
+            user.coursesAccess.includes(
+              consumerId + "_courseId_" + courseIds[i]
+            ) ||
+            user.role == "admin"
+          ) {
+            collectionNamesToFetch.push(
+              process.env.MONGO_XAPI_COLLECTION +
+                "_consumerId_" +
+                consumerId +
+                "_courseId_" +
+                courseIds[i]
+            );
+          }
+        }
+      }
+    }
+
+    // For each collectionNamesToFetch, fetch the title and consumer
+    let outputCourses = [];
+
+    // Populate outputCourses like this from collectionNamesToFetch
+    // [
+    //   {
+    //     _id: '123',
+    //     title: '123',
+    //     consumer: 'consumerId'
+    //   },
+    //   ... etc
+    // ]
+
+    for (let i = 0; i < collectionNamesToFetch.length; i++) {
+      let collectionName = collectionNamesToFetch[i];
+      let course = await m_client
+        .db()
+        .collection(collectionName)
+        .find({})
+        .sort({ _id: -1 })
+        .limit(1)
+        .toArray();
+
+      let courseTitle = course[0]?.metadata?.session?.context_title ?? null;
+      let courseConsumer =
+        course[0]?.metadata?.session?.custom_consumer ?? null;
+
+      outputCourses.push({
+        _id: collectionName.split("_courseId_")[1],
+        title: courseTitle,
+        consumer: courseConsumer,
       });
+    }
+
+    // Sort the outputCourses by title
+    outputCourses.sort((a, b) => {
+      return a?.title?.localeCompare(b.title);
+    });
+
+    res.send({ result: outputCourses }).end();
   } catch (err) {
-    console.log("Error while aggregating records", err);
-    console.log("Pipeline was: ", pipeline);
+    console.log("Error while getting courses", err);
     res.status(500).end();
   }
 }
 
 async function getCourse(req, res, next) {
-  let courseId = req.params.id ? req.params.id : undefined;
+  let courseId = req.params.id;
+  let consumerId = await getConsumerIdFromCourseId(courseId);
+
+  if (!consumerId) {
+    res.status(400).send({ error: "Invalid consumerId" }).end();
+    return;
+  }
 
   if (!courseId) {
     res.status(400).send({ error: "Invalid courseId" }).end();
@@ -321,7 +422,13 @@ async function getCourse(req, res, next) {
   try {
     m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumerId +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(pipeline)
       .toArray(async function (err, result) {
         if (err) {
@@ -344,12 +451,18 @@ async function getCourse(req, res, next) {
             ];
             let totalRecords = await m_client
               .db()
-              .collection(process.env.MONGO_XAPI_COLLECTION)
+              .collection(
+                process.env.MONGO_XAPI_COLLECTION +
+                  "_consumerId_" +
+                  consumerId +
+                  "_courseId_" +
+                  courseId
+              )
               .aggregate(totalRecordsPipleline)
               .toArray();
             totalRecords = totalRecords[0]?.totalRecords ?? 0;
             // Push it into result
-            result[0].totalRecords = totalRecords;
+            if (result[0]) result[0].totalRecords = totalRecords;
 
             // Get exercise types in course
             let exerciseTypesPipeline = [
@@ -369,16 +482,23 @@ async function getCourse(req, res, next) {
             ];
             let exerciseTypes = await m_client
               .db()
-              .collection(process.env.MONGO_XAPI_COLLECTION)
+              .collection(
+                process.env.MONGO_XAPI_COLLECTION +
+                  "_consumerId_" +
+                  consumerId +
+                  "_courseId_" +
+                  courseId
+              )
               .aggregate(exerciseTypesPipeline)
               .toArray();
 
             // Push it into result
-            result[0].exerciseTypes = exerciseTypes.length;
+            if (result[0]) result[0].exerciseTypes = exerciseTypes.length;
             // Loop through exercise types and get only the id
-            result[0].exerciseTypesList = exerciseTypes.map(
-              (exerciseType) => exerciseType?._id
-            );
+            if (result[0])
+              result[0].exerciseTypesList = exerciseTypes.map(
+                (exerciseType) => exerciseType?._id
+              );
 
             // Get root exercise types in course
             let rootExerciseTypesPipeline = [
@@ -405,16 +525,24 @@ async function getCourse(req, res, next) {
             ];
             let rootExerciseTypes = await m_client
               .db()
-              .collection(process.env.MONGO_XAPI_COLLECTION)
+              .collection(
+                process.env.MONGO_XAPI_COLLECTION +
+                  "_consumerId_" +
+                  consumerId +
+                  "_courseId_" +
+                  courseId
+              )
               .aggregate(rootExerciseTypesPipeline)
               .toArray();
 
             // Push it into result
-            result[0].rootExerciseTypes = rootExerciseTypes.length;
+            if (result[0])
+              result[0].rootExerciseTypes = rootExerciseTypes.length;
             // Loop through exercise types and get only the id
-            result[0].rootExerciseTypesList = rootExerciseTypes.map(
-              (exerciseType) => exerciseType?._id
-            );
+            if (result[0])
+              result[0].rootExerciseTypesList = rootExerciseTypes.map(
+                (exerciseType) => exerciseType?._id
+              );
 
             // Get total submissions in course
             let totalSubmissionsPipeline = [
@@ -452,12 +580,18 @@ async function getCourse(req, res, next) {
 
             let totalSubmissions = await m_client
               .db()
-              .collection(process.env.MONGO_XAPI_COLLECTION)
+              .collection(
+                process.env.MONGO_XAPI_COLLECTION +
+                  "_consumerId_" +
+                  consumerId +
+                  "_courseId_" +
+                  courseId
+              )
               .aggregate(totalSubmissionsPipeline)
               .toArray();
             totalSubmissions = totalSubmissions[0]?.totalSubmissions ?? 0;
             // Push it into result
-            result[0].totalSubmissions = totalSubmissions;
+            if (result[0]) result[0].totalSubmissions = totalSubmissions;
 
             // Get total sum of exercises
             let totalExercisesPipeline = [
@@ -491,12 +625,18 @@ async function getCourse(req, res, next) {
 
             let totalExercises = await m_client
               .db()
-              .collection(process.env.MONGO_XAPI_COLLECTION)
+              .collection(
+                process.env.MONGO_XAPI_COLLECTION +
+                  "_consumerId_" +
+                  consumerId +
+                  "_courseId_" +
+                  courseId
+              )
               .aggregate(totalExercisesPipeline)
               .toArray();
             totalExercises = totalExercises[0]?.totalExercises ?? 0;
             // Push it into result
-            result[0].totalExercises = totalExercises;
+            if (result[0]) result[0].totalExercises = totalExercises;
 
             // Get total passing exercises
             let passingExercisesPipeline = [
@@ -526,13 +666,19 @@ async function getCourse(req, res, next) {
 
             let passingExercises = await m_client
               .db()
-              .collection(process.env.MONGO_XAPI_COLLECTION)
+              .collection(
+                process.env.MONGO_XAPI_COLLECTION +
+                  "_consumerId_" +
+                  consumerId +
+                  "_courseId_" +
+                  courseId
+              )
               .aggregate(passingExercisesPipeline)
               .toArray();
             passingExercises = passingExercises[0]?.count ?? 0;
             // Push it into result
 
-            result[0].totalPassingExercises = passingExercises;
+            if (result[0]) result[0].totalPassingExercises = passingExercises;
 
             // Get total actors in course
             let totalActorsCountPipeline = [
@@ -553,11 +699,18 @@ async function getCourse(req, res, next) {
 
             let totalActorsCount = await m_client
               .db()
-              .collection(process.env.MONGO_XAPI_COLLECTION)
+              .collection(
+                process.env.MONGO_XAPI_COLLECTION +
+                  "_consumerId_" +
+                  consumerId +
+                  "_courseId_" +
+                  courseId
+              )
               .aggregate(totalActorsCountPipeline)
               .toArray();
-            result[0].totalActorsCount =
-              totalActorsCount[0]?.totalActorsCount ?? 0;
+            if (result[0])
+              result[0].totalActorsCount =
+                totalActorsCount[0]?.totalActorsCount ?? 0;
 
             res.status(200).send({ result }).end();
           } catch (err) {
@@ -567,15 +720,22 @@ async function getCourse(req, res, next) {
         }
       });
   } catch (err) {
-    console.log("Error while aggregating records", err);
-    console.log("Pipeline was: ", pipeline);
+    console.log("Error while getting course details", err);
     res.status(500).end();
   }
 }
 
 async function getExercises(req, res, next) {
-  let consumer = req.query.consumer ? req.query.consumer : "all";
   let courseId = req.query.course ? req.query.course : undefined;
+
+  if (!courseId) {
+    res.status(400).send({ error: "Invalid course ID" }).end();
+    return;
+  }
+
+  let consumer = req.query.consumer
+    ? req.query.consumer
+    : await getConsumerIdFromCourseId(courseId);
 
   let search = req.query.search ? req.query.search : undefined;
   let exerciseTypeFilters = req.query.exerciseTypeFilters
@@ -698,7 +858,13 @@ async function getExercises(req, res, next) {
 
     let count = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(pipeline)
       .toArray();
 
@@ -709,7 +875,13 @@ async function getExercises(req, res, next) {
 
     let exercises = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(pipeline)
       .skip(skip)
       .limit(limit)
@@ -721,7 +893,7 @@ async function getExercises(req, res, next) {
     // for (let i = 0; i < exercises.length; i++) {
     //   let exercise = exercises[i];
     //   let exerciseId = exercise._id;
-    //   let totalSubmissions = await helperGetTotalSubmissions(req, exerciseId);
+    //   let totalSubmissions = await helperGetTotalSubmissions(req, exerciseId, consumer, courseId);
     //   exercise.totalSubmissions = totalSubmissions;
     // }
 
@@ -758,10 +930,19 @@ async function getExercises(req, res, next) {
 }
 
 async function getExerciseDetails(req, res, next) {
+  let courseId = req.query.course ? req.query.course : undefined;
   let exerciseId = req.params.id ? req.params.id : undefined;
+  let consumer = req.query.consumer
+    ? req.query.consumer
+    : await getConsumerIdFromCourseId(courseId);
 
   if (!exerciseId) {
     res.status(400).send({ error: "Invalid exerciseId" }).end();
+    return;
+  }
+
+  if (!courseId) {
+    res.status(400).send({ error: "Invalid courseId" }).end();
     return;
   }
 
@@ -798,7 +979,13 @@ async function getExerciseDetails(req, res, next) {
 
     let exercise = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(pipeline)
       .toArray();
 
@@ -827,7 +1014,13 @@ async function getExerciseDetails(req, res, next) {
 
     let passingEvents = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(passingEventsPipeline)
       .toArray();
 
@@ -836,41 +1029,55 @@ async function getExerciseDetails(req, res, next) {
     if (exercise[0]) exercise[0].totalPassingEvents = passingEvents;
 
     // Get total submissions
-    let totalSubmissions = await helperGetTotalSubmissions(req, exerciseId);
+    let totalSubmissions = await helperGetTotalSubmissions(
+      req,
+      exerciseId,
+      consumer,
+      courseId
+    );
 
     if (exercise[0]) exercise[0].totalSubmissions = totalSubmissions ?? 0;
 
     // Get exercise average score
     let [averageScore, averageScoreOutOf] = await helperGetAverageScore(
       req,
-      exerciseId
+      exerciseId,
+      consumer,
+      courseId
     );
     if (exercise[0]) exercise[0].averageScore = averageScore;
     if (exercise[0]) exercise[0].averageScoreOutOf = averageScoreOutOf;
 
     // Get exercise attempted
     // DISABLING ATTEMPTED FOR NOW TO OPTIMIZE PERFORMANCE
-    // let attempted = await helperGetAttempted(req, exerciseId);
+    // let attempted = await helperGetAttempted(req, exerciseId, consumer, courseId);
     // if (exercise[0]) exercise[0].attempted = attempted;
 
     // Get total actors count
-    let totalActorsCount = await helperGetTotalActorsCount(req, exerciseId);
+    let totalActorsCount = await helperGetTotalActorsCount(
+      req,
+      exerciseId,
+      consumer,
+      courseId
+    );
     if (exercise[0]) exercise[0].totalActorsCount = totalActorsCount;
 
     // Get total actors completed count
     let totalActorsCompletedCount = await helperGetTotalActorsCompletedCount(
       req,
-      exerciseId
+      exerciseId,
+      consumer,
+      courseId
     );
     if (exercise[0])
       exercise[0].totalActorsCompletedCount = totalActorsCompletedCount;
 
     // Try to get exercise question or more info (for example MCQ question)
-    let question = await helperGetQuestion(req, exerciseId);
+    let question = await helperGetQuestion(req, exerciseId, consumer, courseId);
     if (exercise[0]) exercise[0].question = question;
 
     // Try to get exercise choices (for MCQs)
-    let choices = await helperGetChoices(req, exerciseId);
+    let choices = await helperGetChoices(req, exerciseId, consumer, courseId);
     if (exercise[0]) exercise[0].choices = choices;
 
     // For each distinct verbs get the number of events
@@ -894,7 +1101,13 @@ async function getExerciseDetails(req, res, next) {
     ];
     let verbCount = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(verbCountPipeline)
       .toArray();
     verbCount = verbCount.map((verb) => {
@@ -906,7 +1119,12 @@ async function getExerciseDetails(req, res, next) {
     if (exercise[0]) exercise[0].eventTypes = verbCount;
 
     // Get the child exercises if any
-    let childExercises = await helperGetChildExercises(req, exerciseId);
+    let childExercises = await helperGetChildExercises(
+      req,
+      exerciseId,
+      consumer,
+      courseId
+    );
     if (exercise[0]) exercise[0].childExercises = childExercises;
 
     res.status(200).send({ result: exercise[0] }).end();
@@ -918,10 +1136,19 @@ async function getExerciseDetails(req, res, next) {
 }
 
 async function getExerciseSubmissionsOverTime(req, res, next) {
+  let courseId = req.query.course ? req.query.course : undefined;
   let exerciseId = req.params.id ? req.params.id : undefined;
+  let consumer = req.query.consumer
+    ? req.query.consumer
+    : await getConsumerIdFromCourseId(courseId);
 
   if (!exerciseId) {
     res.status(400).send({ error: "Invalid exerciseId" }).end();
+    return;
+  }
+
+  if (!courseId) {
+    res.status(400).send({ error: "Invalid courseId" }).end();
     return;
   }
 
@@ -972,8 +1199,18 @@ async function getExerciseSubmissionsOverTime(req, res, next) {
       },
     },
     {
+      $project: {
+        date: {
+          $dateFromString: {
+            dateString: "$_id",
+          },
+        },
+        submissions: 1,
+      },
+    },
+    {
       $sort: {
-        _id: 1,
+        date: 1,
       },
     },
   ];
@@ -984,7 +1221,13 @@ async function getExerciseSubmissionsOverTime(req, res, next) {
   try {
     let submissions = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(pipeline)
       .toArray();
     res.status(200).send({ result: submissions }).end();
@@ -997,6 +1240,10 @@ async function getExerciseSubmissionsOverTime(req, res, next) {
 
 async function getCourseSubmissionsOverTime(req, res, next) {
   let courseId = req.params.id ? req.params.id : undefined;
+
+  let consumer = req.query.consumer
+    ? req.query.consumer
+    : await getConsumerIdFromCourseId(courseId);
 
   if (!courseId) {
     res.status(400).send({ error: "Invalid courseId" }).end();
@@ -1042,9 +1289,20 @@ async function getCourseSubmissionsOverTime(req, res, next) {
         },
       },
     },
+
+    {
+      $project: {
+        date: {
+          $dateFromString: {
+            dateString: "$_id",
+          },
+        },
+        submissions: 1,
+      },
+    },
     {
       $sort: {
-        _id: 1,
+        date: 1,
       },
     },
   ];
@@ -1055,7 +1313,13 @@ async function getCourseSubmissionsOverTime(req, res, next) {
   try {
     let submissions = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(pipeline)
       .toArray();
     res.status(200).send({ result: submissions }).end();
@@ -1068,6 +1332,10 @@ async function getCourseSubmissionsOverTime(req, res, next) {
 
 async function getCourseExerciseTypesAndCount(req, res, next) {
   let courseId = req.params.id ? req.params.id : undefined;
+
+  let consumer = req.query.consumer
+    ? req.query.consumer
+    : await getConsumerIdFromCourseId(courseId);
 
   if (!courseId) {
     res.status(400).send({ error: "Invalid courseId" }).end();
@@ -1101,7 +1369,13 @@ async function getCourseExerciseTypesAndCount(req, res, next) {
   try {
     let exerciseTypesAndCount = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(pipeline)
       .toArray();
 
@@ -1119,11 +1393,21 @@ async function getCourseExerciseTypesAndCount(req, res, next) {
 }
 
 async function getMCQChart(req, res, next) {
+  let courseId = req.query.course ? req.query.course : undefined;
   let exerciseId = req.params.id ? req.params.id : undefined;
+  let consumer = req.query.consumer
+    ? req.query.consumer
+    : await getConsumerIdFromCourseId(courseId);
+
   // let subExerciseId
 
   if (!exerciseId) {
     res.status(400).send({ error: "Invalid exerciseId" }).end();
+    return;
+  }
+
+  if (!courseId) {
+    res.status(400).send({ error: "Invalid courseId" }).end();
     return;
   }
 
@@ -1135,7 +1419,7 @@ async function getMCQChart(req, res, next) {
   }
 
   // Try to get exercise choices (for MCQs)
-  let choices = await helperGetChoices(exerciseId);
+  let choices = await helperGetChoices(req, exerciseId, consumer, courseId);
   // if (exercise[0]) exercise[0].choices = choices;
 
   // Get the number of counts per choice
@@ -1165,7 +1449,13 @@ async function getMCQChart(req, res, next) {
 
   let countsPerChoices = await m_client
     .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .collection(
+      process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
+    )
     .aggregate(countsPerChoicepipeline)
     .toArray();
 
@@ -1237,7 +1527,13 @@ async function getMCQChart(req, res, next) {
 
   let correctResponsesPatternQuery = await m_client
     .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .collection(
+      process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
+    )
     .aggregate(correctResponsePipeline)
     .toArray();
 
@@ -1249,11 +1545,20 @@ async function getMCQChart(req, res, next) {
 }
 
 async function getTrueFalseChart(req, res, next) {
+  let courseId = req.query.course ? req.query.course : undefined;
   let exerciseId = req.params.id ? req.params.id : undefined;
+  let consumer = req.query.consumer
+    ? req.query.consumer
+    : await getConsumerIdFromCourseId(courseId);
   // let subExerciseId
 
   if (!exerciseId) {
     res.status(400).send({ error: "Invalid exerciseId" }).end();
+    return;
+  }
+
+  if (!courseId) {
+    res.status(400).send({ error: "Invalid courseId" }).end();
     return;
   }
 
@@ -1293,7 +1598,13 @@ async function getTrueFalseChart(req, res, next) {
 
   let correctResponsesPatternQuery = await m_client
     .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .collection(
+      process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
+    )
     .aggregate(correctResponsePipeline)
     .toArray();
 
@@ -1381,7 +1692,13 @@ async function getActors(req, res, next) {
 
     let count = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(pipeline)
       .toArray();
 
@@ -1392,7 +1709,13 @@ async function getActors(req, res, next) {
 
     let actors = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(pipeline)
       .skip(skip)
       .limit(limit)
@@ -1418,8 +1741,12 @@ async function getActors(req, res, next) {
 }
 
 async function download(req, res, next) {
-  let consumer = req.query.consumer ? req.query.consumer : "all";
   let courseId = req.query.course ? req.query.course : undefined;
+
+  let consumer = req.query.consumer
+    ? req.query.consumer
+    : await getConsumerIdFromCourseId(courseId);
+
   let exerciseId = req.query.exercise ? req.query.exercise : undefined;
   let ignoreSubExercises = req.query.ignoreSubExercises
     ? req.query.ignoreSubExercises
@@ -1435,6 +1762,11 @@ async function download(req, res, next) {
 
   if (courseId === "") courseId = undefined;
   if (exerciseId === "") exerciseId = undefined;
+
+  if (!courseId) {
+    res.status(400).send({ error: "Invalid courseId" }).end();
+    return;
+  }
 
   let pipeline = [];
 
@@ -1478,7 +1810,13 @@ async function download(req, res, next) {
   try {
     let records = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(pipeline)
       .toArray();
 
@@ -1681,7 +2019,12 @@ function helperSimplifyData(element, includexAPIRaw = false) {
   return response;
 }
 
-async function helperGetTotalSubmissions(req, exerciseId) {
+async function helperGetTotalSubmissions(
+  req,
+  exerciseId,
+  consumer = null,
+  courseId = null
+) {
   let pipeline = [
     {
       $match: {
@@ -1703,14 +2046,25 @@ async function helperGetTotalSubmissions(req, exerciseId) {
 
   let totalSubmissions = await m_client
     .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .collection(
+      process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
+    )
     .aggregate(pipeline)
     .toArray();
   totalSubmissions = totalSubmissions[0]?.totalSubmissions;
   return totalSubmissions;
 }
 
-async function helperGetTotalActorsCount(req, exerciseId) {
+async function helperGetTotalActorsCount(
+  req,
+  exerciseId,
+  consumer = null,
+  courseId = null
+) {
   let pipeline = [
     {
       $match: {
@@ -1730,14 +2084,25 @@ async function helperGetTotalActorsCount(req, exerciseId) {
 
   let totalActorsCount = await m_client
     .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .collection(
+      process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
+    )
     .aggregate(pipeline)
     .toArray();
   totalActorsCount = totalActorsCount[0]?.totalActorsCount;
   return totalActorsCount;
 }
 
-async function helperGetTotalActorsCompletedCount(req, exerciseId) {
+async function helperGetTotalActorsCompletedCount(
+  req,
+  exerciseId,
+  consumer = null,
+  courseId = null
+) {
   let pipeline = [
     {
       $match: {
@@ -1762,7 +2127,13 @@ async function helperGetTotalActorsCompletedCount(req, exerciseId) {
 
   let totalActorsCompletedCount = await m_client
     .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .collection(
+      process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
+    )
     .aggregate(pipeline)
     .toArray();
   totalActorsCompletedCount =
@@ -1770,7 +2141,12 @@ async function helperGetTotalActorsCompletedCount(req, exerciseId) {
   return totalActorsCompletedCount;
 }
 
-async function helperGetAverageScore(req, exerciseId) {
+async function helperGetAverageScore(
+  req,
+  exerciseId,
+  consumer = null,
+  courseId = null
+) {
   let pipeline = [
     {
       $match: {
@@ -1799,7 +2175,13 @@ async function helperGetAverageScore(req, exerciseId) {
 
   let pipelineResult = await m_client
     .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .collection(
+      process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
+    )
     .aggregate(pipeline)
     .toArray();
 
@@ -1809,7 +2191,7 @@ async function helperGetAverageScore(req, exerciseId) {
   return [averageScore, count];
 }
 
-async function helperGetAttempted(req, exerciseId) {
+async function helperGetAttempted(req, exerciseId, consumer = null, courseId) {
   let pipeline = [
     {
       $match: {
@@ -1831,13 +2213,19 @@ async function helperGetAttempted(req, exerciseId) {
 
   let attempted = await m_client
     .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .collection(
+      process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
+    )
     .aggregate(pipeline)
     .toArray();
   attempted = attempted[0]?.attempted;
   return attempted;
 }
-async function helperGetQuestion(req, exerciseId) {
+async function helperGetQuestion(req, exerciseId, consumer = null, courseId) {
   let pipeline = [
     {
       $match: {
@@ -1853,7 +2241,13 @@ async function helperGetQuestion(req, exerciseId) {
   ];
   let question = await m_client
     .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .collection(
+      process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
+    )
     .aggregate(pipeline)
     .toArray();
   // Filter out null values
@@ -1862,7 +2256,12 @@ async function helperGetQuestion(req, exerciseId) {
   return question;
 }
 
-async function helperGetChoices(req, exerciseId) {
+async function helperGetChoices(
+  req,
+  exerciseId,
+  consumer = null,
+  courseId = null
+) {
   let pipeline = [
     {
       $match: {
@@ -1888,14 +2287,25 @@ async function helperGetChoices(req, exerciseId) {
   ];
   let choices = await m_client
     .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .collection(
+      process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
+    )
     .aggregate(pipeline)
     .toArray();
 
   return choices;
 }
 
-async function helperGetChildExercises(req, exerciseId) {
+async function helperGetChildExercises(
+  req,
+  exerciseId,
+  consumer = null,
+  courseId = null
+) {
   let pipeline = [
     {
       $match: {
@@ -1920,7 +2330,13 @@ async function helperGetChildExercises(req, exerciseId) {
 
   let childExercises = await m_client
     .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION)
+    .collection(
+      process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
+    )
     .aggregate(pipeline)
     .toArray();
 
@@ -1956,7 +2372,13 @@ async function helperGetChildExercises(req, exerciseId) {
 
     let info = await m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
       .aggregate(pipeline)
       .toArray();
 
@@ -1979,5 +2401,95 @@ async function addFiltersToPipeline(pipeline, filters) {
 
       pipeline.unshift({ $match: { [key]: value } });
     }
+  }
+}
+
+async function getConsumerIdFromCourseId(courseId) {
+  // Find consumerId by searching through the collections
+  let consumerId = null;
+  // Get all the collections
+  let collections = await m_client.db().listCollections().toArray();
+
+  // Filter out the collections
+  let filteredCollections = collections.filter((collection) => {
+    return collection.name.includes(
+      process.env.MONGO_XAPI_COLLECTION + "_consumerId_"
+    );
+  });
+
+  // Loop through filteredCollections and find the collection that has the courseId
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let collectionName = collection.name;
+    if (collectionName.includes("_courseId_" + courseId)) {
+      consumerId = collectionName.split("_consumerId_")[1].split("_")[0];
+      break;
+    }
+  }
+
+  return consumerId;
+}
+
+async function getAllCoursesAdmin(req, res, next) {
+  // Return all courses from all consumers
+  // Get all the collections
+  let collections = await m_client.db().listCollections().toArray();
+
+  // Filter out the collections
+  let filteredCollections = collections.filter((collection) => {
+    return collection.name.includes(
+      process.env.MONGO_XAPI_COLLECTION + "_consumerId_"
+    );
+  });
+
+  // Create a tree structure like
+  // [
+  //   {
+  //     consumer: "consumer1",
+  //     courses: [
+  //       {
+  //         id: "course1",
+  //        }
+  //     ]
+  //   }
+  // ]
+
+  let courses = [];
+  // Loop through filteredCollections and find the collection that has the courseId
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let collectionName = collection.name;
+
+    let consumerId = collectionName.split("_consumerId_")[1].split("_")[0];
+    let courseId = collectionName.split("_courseId_")[1];
+
+    // For now do not add consumerId with null
+    if (consumerId === "null") continue;
+
+    // Check if the consumer already exists in the courses array
+    let consumer = courses.find((s) => s.consumer === consumerId);
+
+    if (consumer) {
+      // Consumer already exists in the courses array
+      // Check if the course already exists in the consumer
+      let course = consumer.courses.find((s) => s.id === courseId);
+      if (!course) {
+        // Course does not exist in the consumer, so add it
+        consumer.courses.push({ id: courseId });
+      }
+    } else {
+      // Consumer does not exist in the courses array, so add it
+      courses.push({
+        consumer: consumerId,
+        courses: [{ id: courseId }],
+      });
+    }
+  }
+
+  try {
+    res.status(200).send({ result: courses }).end();
+  } catch (e) {
+    console.log("Error in getAllCoursesAdmin", e);
+    res.status(500).end();
   }
 }
