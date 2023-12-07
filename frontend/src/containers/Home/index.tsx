@@ -457,6 +457,16 @@ const Home = (): ReactElement => {
 
       {selectedCourse && showCourseStats && (
         <>
+          <CourseStats
+            consumer={selectedConsumer}
+            courseStatsLoading={selectedCourseDetailsLoading}
+            courseStats={selectedCourseDetails}
+            selectedActor={selectedActor}
+            setSelectedActor={setSelectedActor}
+          />
+
+          <Divider></Divider>
+
           <Row gutter={[24, 24]}>
             <Col md={24} lg={24} xl={12} span={12}>
               <div className="shadow-bordered">

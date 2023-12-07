@@ -94,10 +94,10 @@ app.post("/lrs", (req, res) => {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumerId +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumerId +
+        "_courseId_" +
+        courseId
       )
       .insertOne(req.body, { check_keys: false }, function (err, mong_res) {
         if (err) {

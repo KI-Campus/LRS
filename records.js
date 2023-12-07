@@ -310,10 +310,10 @@ async function getCourses(req, res, next) {
         ) {
           collectionNamesToFetch.push(
             process.env.MONGO_XAPI_COLLECTION +
-              "_consumerId_" +
-              consumer +
-              "_courseId_" +
-              courseIds[i]
+            "_consumerId_" +
+            consumer +
+            "_courseId_" +
+            courseIds[i]
           );
         }
       }
@@ -331,10 +331,10 @@ async function getCourses(req, res, next) {
           ) {
             collectionNamesToFetch.push(
               process.env.MONGO_XAPI_COLLECTION +
-                "_consumerId_" +
-                consumerId +
-                "_courseId_" +
-                courseIds[i]
+              "_consumerId_" +
+              consumerId +
+              "_courseId_" +
+              courseIds[i]
             );
           }
         }
@@ -424,10 +424,10 @@ async function getCourse(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumerId +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumerId +
+        "_courseId_" +
+        courseId
       )
       .aggregate(pipeline)
       .toArray(async function (err, result) {
@@ -453,10 +453,10 @@ async function getCourse(req, res, next) {
               .db()
               .collection(
                 process.env.MONGO_XAPI_COLLECTION +
-                  "_consumerId_" +
-                  consumerId +
-                  "_courseId_" +
-                  courseId
+                "_consumerId_" +
+                consumerId +
+                "_courseId_" +
+                courseId
               )
               .aggregate(totalRecordsPipleline)
               .toArray();
@@ -484,10 +484,10 @@ async function getCourse(req, res, next) {
               .db()
               .collection(
                 process.env.MONGO_XAPI_COLLECTION +
-                  "_consumerId_" +
-                  consumerId +
-                  "_courseId_" +
-                  courseId
+                "_consumerId_" +
+                consumerId +
+                "_courseId_" +
+                courseId
               )
               .aggregate(exerciseTypesPipeline)
               .toArray();
@@ -527,10 +527,10 @@ async function getCourse(req, res, next) {
               .db()
               .collection(
                 process.env.MONGO_XAPI_COLLECTION +
-                  "_consumerId_" +
-                  consumerId +
-                  "_courseId_" +
-                  courseId
+                "_consumerId_" +
+                consumerId +
+                "_courseId_" +
+                courseId
               )
               .aggregate(rootExerciseTypesPipeline)
               .toArray();
@@ -582,10 +582,10 @@ async function getCourse(req, res, next) {
               .db()
               .collection(
                 process.env.MONGO_XAPI_COLLECTION +
-                  "_consumerId_" +
-                  consumerId +
-                  "_courseId_" +
-                  courseId
+                "_consumerId_" +
+                consumerId +
+                "_courseId_" +
+                courseId
               )
               .aggregate(totalSubmissionsPipeline)
               .toArray();
@@ -627,10 +627,10 @@ async function getCourse(req, res, next) {
               .db()
               .collection(
                 process.env.MONGO_XAPI_COLLECTION +
-                  "_consumerId_" +
-                  consumerId +
-                  "_courseId_" +
-                  courseId
+                "_consumerId_" +
+                consumerId +
+                "_courseId_" +
+                courseId
               )
               .aggregate(totalExercisesPipeline)
               .toArray();
@@ -668,10 +668,10 @@ async function getCourse(req, res, next) {
               .db()
               .collection(
                 process.env.MONGO_XAPI_COLLECTION +
-                  "_consumerId_" +
-                  consumerId +
-                  "_courseId_" +
-                  courseId
+                "_consumerId_" +
+                consumerId +
+                "_courseId_" +
+                courseId
               )
               .aggregate(passingExercisesPipeline)
               .toArray();
@@ -701,10 +701,10 @@ async function getCourse(req, res, next) {
               .db()
               .collection(
                 process.env.MONGO_XAPI_COLLECTION +
-                  "_consumerId_" +
-                  consumerId +
-                  "_courseId_" +
-                  courseId
+                "_consumerId_" +
+                consumerId +
+                "_courseId_" +
+                courseId
               )
               .aggregate(totalActorsCountPipeline)
               .toArray();
@@ -860,10 +860,10 @@ async function getExercises(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(pipeline)
       .toArray();
@@ -877,10 +877,10 @@ async function getExercises(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(pipeline)
       .skip(skip)
@@ -981,10 +981,10 @@ async function getExerciseDetails(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(pipeline)
       .toArray();
@@ -1016,10 +1016,10 @@ async function getExerciseDetails(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(passingEventsPipeline)
       .toArray();
@@ -1103,10 +1103,10 @@ async function getExerciseDetails(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(verbCountPipeline)
       .toArray();
@@ -1223,10 +1223,10 @@ async function getExerciseSubmissionsOverTime(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(pipeline)
       .toArray();
@@ -1315,10 +1315,10 @@ async function getCourseSubmissionsOverTime(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(pipeline)
       .toArray();
@@ -1371,10 +1371,10 @@ async function getCourseExerciseTypesAndCount(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(pipeline)
       .toArray();
@@ -1451,10 +1451,10 @@ async function getMCQChart(req, res, next) {
     .db()
     .collection(
       process.env.MONGO_XAPI_COLLECTION +
-        "_consumerId_" +
-        consumer +
-        "_courseId_" +
-        courseId
+      "_consumerId_" +
+      consumer +
+      "_courseId_" +
+      courseId
     )
     .aggregate(countsPerChoicepipeline)
     .toArray();
@@ -1529,10 +1529,10 @@ async function getMCQChart(req, res, next) {
     .db()
     .collection(
       process.env.MONGO_XAPI_COLLECTION +
-        "_consumerId_" +
-        consumer +
-        "_courseId_" +
-        courseId
+      "_consumerId_" +
+      consumer +
+      "_courseId_" +
+      courseId
     )
     .aggregate(correctResponsePipeline)
     .toArray();
@@ -1600,10 +1600,10 @@ async function getTrueFalseChart(req, res, next) {
     .db()
     .collection(
       process.env.MONGO_XAPI_COLLECTION +
-        "_consumerId_" +
-        consumer +
-        "_courseId_" +
-        courseId
+      "_consumerId_" +
+      consumer +
+      "_courseId_" +
+      courseId
     )
     .aggregate(correctResponsePipeline)
     .toArray();
@@ -1694,10 +1694,10 @@ async function getActors(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(pipeline)
       .toArray();
@@ -1711,10 +1711,10 @@ async function getActors(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(pipeline)
       .skip(skip)
@@ -1812,10 +1812,10 @@ async function download(req, res, next) {
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(pipeline)
       .toArray();
@@ -2004,12 +2004,12 @@ function helperSimplifyData(element, includexAPIRaw = false) {
   // Assign the subcontent ID is it exists
   if (
     element?.xAPI?.object?.definition?.extensions[
-      "http://h5p.org/x-api/h5p-subContentId"
+    "http://h5p.org/x-api/h5p-subContentId"
     ]
   ) {
     response["Sub Content ID"] =
       element?.xAPI?.object?.definition?.extensions[
-        "http://h5p.org/x-api/h5p-subContentId"
+      "http://h5p.org/x-api/h5p-subContentId"
       ];
   }
 
@@ -2048,10 +2048,10 @@ async function helperGetTotalSubmissions(
     .db()
     .collection(
       process.env.MONGO_XAPI_COLLECTION +
-        "_consumerId_" +
-        consumer +
-        "_courseId_" +
-        courseId
+      "_consumerId_" +
+      consumer +
+      "_courseId_" +
+      courseId
     )
     .aggregate(pipeline)
     .toArray();
@@ -2086,10 +2086,10 @@ async function helperGetTotalActorsCount(
     .db()
     .collection(
       process.env.MONGO_XAPI_COLLECTION +
-        "_consumerId_" +
-        consumer +
-        "_courseId_" +
-        courseId
+      "_consumerId_" +
+      consumer +
+      "_courseId_" +
+      courseId
     )
     .aggregate(pipeline)
     .toArray();
@@ -2129,10 +2129,10 @@ async function helperGetTotalActorsCompletedCount(
     .db()
     .collection(
       process.env.MONGO_XAPI_COLLECTION +
-        "_consumerId_" +
-        consumer +
-        "_courseId_" +
-        courseId
+      "_consumerId_" +
+      consumer +
+      "_courseId_" +
+      courseId
     )
     .aggregate(pipeline)
     .toArray();
@@ -2177,10 +2177,10 @@ async function helperGetAverageScore(
     .db()
     .collection(
       process.env.MONGO_XAPI_COLLECTION +
-        "_consumerId_" +
-        consumer +
-        "_courseId_" +
-        courseId
+      "_consumerId_" +
+      consumer +
+      "_courseId_" +
+      courseId
     )
     .aggregate(pipeline)
     .toArray();
@@ -2215,10 +2215,10 @@ async function helperGetAttempted(req, exerciseId, consumer = null, courseId) {
     .db()
     .collection(
       process.env.MONGO_XAPI_COLLECTION +
-        "_consumerId_" +
-        consumer +
-        "_courseId_" +
-        courseId
+      "_consumerId_" +
+      consumer +
+      "_courseId_" +
+      courseId
     )
     .aggregate(pipeline)
     .toArray();
@@ -2243,10 +2243,10 @@ async function helperGetQuestion(req, exerciseId, consumer = null, courseId) {
     .db()
     .collection(
       process.env.MONGO_XAPI_COLLECTION +
-        "_consumerId_" +
-        consumer +
-        "_courseId_" +
-        courseId
+      "_consumerId_" +
+      consumer +
+      "_courseId_" +
+      courseId
     )
     .aggregate(pipeline)
     .toArray();
@@ -2289,10 +2289,10 @@ async function helperGetChoices(
     .db()
     .collection(
       process.env.MONGO_XAPI_COLLECTION +
-        "_consumerId_" +
-        consumer +
-        "_courseId_" +
-        courseId
+      "_consumerId_" +
+      consumer +
+      "_courseId_" +
+      courseId
     )
     .aggregate(pipeline)
     .toArray();
@@ -2332,10 +2332,10 @@ async function helperGetChildExercises(
     .db()
     .collection(
       process.env.MONGO_XAPI_COLLECTION +
-        "_consumerId_" +
-        consumer +
-        "_courseId_" +
-        courseId
+      "_consumerId_" +
+      consumer +
+      "_courseId_" +
+      courseId
     )
     .aggregate(pipeline)
     .toArray();
@@ -2374,10 +2374,10 @@ async function helperGetChildExercises(
       .db()
       .collection(
         process.env.MONGO_XAPI_COLLECTION +
-          "_consumerId_" +
-          consumer +
-          "_courseId_" +
-          courseId
+        "_consumerId_" +
+        consumer +
+        "_courseId_" +
+        courseId
       )
       .aggregate(pipeline)
       .toArray();
