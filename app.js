@@ -81,9 +81,24 @@ app.use("/records", require("./records.js").router);
 app.post("/lrs", (req, res) => {
   try {
     // Encryption of personal data is moved to LTI Tool
+
+    // Get consumer and course id from the request so that we can store the record in a collection with the same name
+    let consumerId = req?.body?.metadata?.session.custom_consumer ?? "null";
+    let courseId = req?.body?.metadata?.session.context_id ?? "null";
+
+    // Trim the consumerId and courseId
+    consumerId = consumerId?.trim() ?? consumerId;
+    courseId = courseId?.trim() ?? courseId;
+
     m_client
       .db()
-      .collection(process.env.MONGO_XAPI_COLLECTION)
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+        "_consumerId_" +
+        consumerId +
+        "_courseId_" +
+        courseId
+      )
       .insertOne(req.body, { check_keys: false }, function (err, mong_res) {
         if (err) {
           throw err;
@@ -140,85 +155,6 @@ app.post("/records/get", (req, res) => {
     console.log("Skip: ", skip);
     res.status(500).end();
   }
-});
-
-// Get records with aggregation
-app.post("/records/aggregate", async (req, res) => {
-  let pipeline;
-  let consumer;
-  let courseId;
-  req.body.consumer ? (consumer = req.body.consumer) : (consumer = "all");
-  req.body.courseId ? (courseId = req.body.courseId) : (courseId = "all");
-
-  let hasConsumerAccess = false;
-  // Check in the user collection mongodb if consumerAccess array includes consumer
-  await m_client
-    .db()
-    .collection(process.env.MONGO_XAPI_COLLECTION + "_" + "users")
-    .findOne({ email: req.user.email }, (err, resultUser) => {
-      if (err) {
-        console.log("Error while getting records", err);
-        res.status(500).end();
-        return;
-      } else {
-        if (
-          resultUser.consumersAccess.includes(req.body.consumer) ||
-          resultUser.role == "admin"
-        ) {
-          hasConsumerAccess = true;
-
-          // Fetch code here
-
-          try {
-            req.body.pipeline
-              ? (pipeline = req.body.pipeline)
-              : (pipeline = []);
-            if (courseId != "all") {
-              pipeline.unshift({
-                $match: {
-                  "metadata.session.context_id": courseId,
-                },
-              });
-            }
-            if (consumer != "all") {
-              pipeline.unshift({
-                $match: {
-                  "metadata.session.custom_consumer": consumer,
-                },
-              });
-            }
-
-            m_client
-              .db()
-              .collection(process.env.MONGO_XAPI_COLLECTION)
-              .aggregate(pipeline)
-              .toArray(function (err, results) {
-                if (err) {
-                  console.log("Error while Aggregating: ", err);
-                  console.log("Pipeline: ", pipeline);
-                  res.status(500).end();
-                } else {
-                  //console.log("Aggregate Records request received", JSON.stringify(req.body));
-                  res.status(200).send({ results }).end();
-                }
-              });
-          } catch (err) {
-            console.log("Error while aggregating records", err);
-            console.log("Pipeline was: ", pipeline);
-            res.status(500).end();
-          }
-
-          // Fetch code end here
-        } else {
-          console.log(
-            "User " + req.user.email + " does not have access to consumer: ",
-            req.body.consumer
-          );
-          res.status(403).end();
-          return;
-        }
-      }
-    });
 });
 
 // Start the Server

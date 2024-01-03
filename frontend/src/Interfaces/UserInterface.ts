@@ -1,6 +1,6 @@
 export interface UserInterface {
   role: string;
-  consumersAccess: string[];
+  coursesAccess: string[];
   lastName: string;
   firstName: string;
   email: string;

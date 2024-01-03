@@ -1,11 +1,5 @@
 import { GlobalStats } from "./GlobalStats";
-import {
-  ReactComponentElement,
-  ReactElement,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
 import Select from "antd/lib/select";
 import Row from "antd/lib/row";
@@ -122,8 +116,6 @@ const Home = (): ReactElement => {
         // Select the first course
         if (courseId && consumerId) {
           setSelectedCourse(courseId);
-        } else if (!courseId && consumerId) {
-          setSelectedCourse(res[0]._id);
         }
       })
       .catch((err) => {
@@ -250,7 +242,15 @@ const Home = (): ReactElement => {
   useEffect(() => {
     if (selectedCourse) {
       setShowCourseStats(false);
-      //fetchCourse();
+      fetchCourse();
+
+      if (selectedConsumer === "all") {
+        // Extract consumer from courses array
+        let consumer = courses.filter((c) => c._id === selectedCourse)[0]
+          .consumer;
+        setSelectedConsumer(consumer);
+      }
+
       //fetchCourseSubmissionsOverTime();
       //fetchCourseExerciseTypesCount();
     }
@@ -277,23 +277,26 @@ const Home = (): ReactElement => {
         isCurrentUser={true}
       />
       <h2>Welcome to openLRS Dashboard</h2>
-      {(Object.keys(globalStats).length > 0 || globalStatsLoading) && (
-        <GlobalStats
-          globalStatsLoading={globalStatsLoading}
-          globalStats={globalStats}
-          fetchGlobalStats={fetchGlobalStats}
-        />
-      )}
-      {!Object.keys(globalStats).length && (
-        <Popconfirm
-          title="Loading global stats will take a while. Are you sure?"
-          onConfirm={fetchGlobalStats}
-          okText="Yes"
-          cancelText="Cancel"
-        >
-          <Button>Load Global Stats</Button>
-        </Popconfirm>
-      )}
+      <div style={{ display: user.role === "admin" ? "block" : "none" }}>
+        {(Object.keys(globalStats).length > 0 || globalStatsLoading) && (
+          <GlobalStats
+            globalStatsLoading={globalStatsLoading}
+            globalStats={globalStats}
+            fetchGlobalStats={fetchGlobalStats}
+          />
+        )}
+        {!Object.keys(globalStats).length && (
+          <Popconfirm
+            title="Loading global stats will take a while. Are you sure?"
+            onConfirm={fetchGlobalStats}
+            okText="Yes"
+            cancelText="Cancel"
+          >
+            <Button>Load Global Stats</Button>
+          </Popconfirm>
+        )}
+      </div>
+
       <DownloadModal
         {...downloadOptions}
         isOpen={downloadModalOpen}
@@ -307,7 +310,7 @@ const Home = (): ReactElement => {
         <Col span={4}>
           <h3>Select a consumer</h3>
         </Col>
-        <Col span={12}>
+        <Col span={18}>
           <Select
             showSearch
             value={selectedConsumer}
@@ -339,27 +342,6 @@ const Home = (): ReactElement => {
             })}
           </Select>
         </Col>
-        <Col span={6} style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            onClick={() => {
-              setDownloadModalOpen(true);
-              setDownloadOptions({
-                consumer: selectedConsumer,
-                course: null,
-                exercise: null,
-                ignoreSubExercises: 0,
-                includeSimplifyRecords: 0,
-                includeRAWRecords: 1,
-                isConsumerSelected: true,
-                isCourseSelected: false,
-                isExerciseSelected: false,
-                selectedText: "Consumer " + selectedConsumer,
-              });
-            }}
-          >
-            Download
-          </Button>
-        </Col>
       </Row>
       <Divider></Divider>
       <Row align="bottom">
@@ -384,7 +366,7 @@ const Home = (): ReactElement => {
             {courses.map((course) => {
               return (
                 <Option
-                  key={course._id}
+                  key={course.consumer + "_" + course._id}
                   value={course._id ? course._id : "all"}
                   label={
                     course.title
@@ -443,11 +425,25 @@ const Home = (): ReactElement => {
       </Row>
       <Divider></Divider>
 
+      {selectedCourse && (
+        <>
+          <CourseStats
+            consumer={selectedConsumer}
+            courseStatsLoading={selectedCourseDetailsLoading}
+            courseStats={selectedCourseDetails}
+            selectedActor={selectedActor}
+            setSelectedActor={setSelectedActor}
+          />
+
+          <Divider></Divider>
+        </>
+      )}
+
       {selectedCourse && !showCourseStats && (
         <Popconfirm
           title="Loading course stats will take a while. Are you sure?"
           onConfirm={() => {
-            fetchCourse();
+            // fetchCourse();
             fetchCourseSubmissionsOverTime();
             fetchCourseExerciseTypesCount();
             setShowCourseStats(true);

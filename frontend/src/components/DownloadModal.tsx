@@ -134,7 +134,7 @@ export default function DownloadModal(props: DownloadModalProps) {
       <Modal
         title={"Download: " + props.selectedText}
         closable={true}
-        visible={props.isOpen}
+        open={props.isOpen}
         onOk={handleOk}
         onCancel={handleCancel}
         okText="Download JSON"

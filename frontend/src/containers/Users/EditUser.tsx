@@ -10,13 +10,14 @@ import { updateUserService } from "src/services/users";
 import { useAppDispatch } from "src/redux/hooks";
 import { checkLoginStatus } from "src/redux/auth";
 import { useHistory } from "react-router-dom";
+import { TreeSelect } from "antd";
 
 export default function EditUser(props): ReactElement {
   let dispatch = useAppDispatch();
   const history = useHistory();
   const [updateUserLoading, setUpdateUserLoading] = useState(false);
   const formRef = useRef(null);
-  const [consumersAccessListDisabled, setConsumersAccessListDisabled] =
+  const [coursesAccessListDisabled, setCoursesAccessListDisabled] =
     useState(false);
 
   const hideEditDrawer = () => {
@@ -53,9 +54,30 @@ export default function EditUser(props): ReactElement {
   useEffect(() => {
     if (!props.editUser) return;
     if (props.editUser.role === "admin") {
-      setConsumersAccessListDisabled(true);
+      setCoursesAccessListDisabled(true);
     }
   }, [props.editUser]);
+
+  const onCourseAccessChange = (value, label, extra) => {
+    // Check if the user has selected a course which has value of courseId_*
+    // If yes, then select all the courses of that consumer (parent)
+
+    // Check in value array if there is a value which a string containing _courseId_*
+
+    for (let i = 0; i < value.length; i++) {
+      if (value[i].includes("_courseId_*")) {
+        // Select all the courses of the consumer
+        let consumerId = value[i].split("_")[0];
+        let coursesOfConsumer = props.courses.filter(
+          (item) => item.pId === consumerId && item.isLeaf === true
+        );
+        let coursesOfConsumerIds = coursesOfConsumer.map((item) => item.value);
+        formRef.current.setFieldsValue({
+          coursesAccess: coursesOfConsumerIds,
+        });
+      }
+    }
+  };
 
   return (
     <Drawer
@@ -68,7 +90,7 @@ export default function EditUser(props): ReactElement {
       }
       placement="right"
       onClose={hideEditDrawer}
-      visible={props.editDrawerVisible}
+      open={props.editDrawerVisible}
     >
       {props.editDrawerVisible && (
         <Form
@@ -145,12 +167,12 @@ export default function EditUser(props): ReactElement {
               disabled={props.isCurrentUser}
               onChange={(value) => {
                 if (value === "admin") {
-                  setConsumersAccessListDisabled(true);
+                  setCoursesAccessListDisabled(true);
                   formRef.current.setFieldsValue({
                     consumersAccess: ["all"],
                   });
                 } else {
-                  setConsumersAccessListDisabled(false);
+                  setCoursesAccessListDisabled(false);
                 }
               }}
             >
@@ -160,25 +182,29 @@ export default function EditUser(props): ReactElement {
           </Form.Item>
 
           <Form.Item
-            label="Consumer Access List"
-            name="consumersAccess"
+            label="Course Access List"
+            name="coursesAccess"
             rules={[
               {
                 required: false,
-                message: "Please specify the consumers access list",
+                message: "Please specify the courses access list",
               },
             ]}
           >
-            <Select
-              mode="multiple"
-              disabled={consumersAccessListDisabled || props.isCurrentUser}
-            >
-              {props.consumers.map((item) => (
-                <Select.Option value={item.id} key={item.id}>
-                  {item.name}
-                </Select.Option>
-              ))}
-            </Select>
+            <TreeSelect
+              disabled={coursesAccessListDisabled}
+              allowClear
+              treeDataSimpleMode
+              style={{ width: "100%" }}
+              dropdownStyle={{ maxHeight: "auto", overflow: "scroll" }}
+              placeholder={coursesAccessListDisabled ? "All" : "Please select"}
+              treeCheckable={true}
+              multiple={true}
+              showSearch={true}
+              showCheckedStrategy={"SHOW_CHILD"}
+              onChange={onCourseAccessChange}
+              treeData={props.courses}
+            />
           </Form.Item>
 
           <Form.Item>

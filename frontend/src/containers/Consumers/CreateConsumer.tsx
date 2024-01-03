@@ -40,6 +40,7 @@ export default function CreateConsumer(props) {
     <div>
       <p>To create a new consumer click on the following button</p>
       <Button
+        type="primary"
         onClick={() => {
           setCreateConsumerDrawerVisible(true);
         }}
@@ -53,7 +54,7 @@ export default function CreateConsumer(props) {
         size={"large"}
         title={"Create a new consumer"}
         placement="right"
-        visible={createConsumerDrawerVisible}
+        open={createConsumerDrawerVisible}
         onClose={() => {
           setCreateConsumerDrawerVisible(false);
         }}

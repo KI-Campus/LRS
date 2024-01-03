@@ -71,7 +71,13 @@ const Exercise = (): ReactElement => {
 
   const fetchExercise = async (id: string, subId = null, actor = null) => {
     setExerciseLoading(true);
-    let result = getExerciseDetailsService(consumerId, id, subId, actor);
+    let result = getExerciseDetailsService(
+      consumerId,
+      courseId,
+      id,
+      subId,
+      actor
+    );
     result
       .then((res) => {
         setExercise(res);
@@ -91,6 +97,7 @@ const Exercise = (): ReactElement => {
     setExerciseSubmissionsOverTimeLoading(true);
     let result = getExerciseSubmissionsOverTimeService(
       consumerId,
+      courseId,
       id,
       subId,
       actor
@@ -108,7 +115,7 @@ const Exercise = (): ReactElement => {
 
   const fetchMCQChartData = (id: string, subId = null, actor = null) => {
     setMcqChartLoading(true);
-    let result = getMCQChartService(consumerId, id, subId, actor);
+    let result = getMCQChartService(consumerId, courseId, id, subId, actor);
     result
       .then((res) => {
         setMcqChartData(res);
@@ -123,7 +130,13 @@ const Exercise = (): ReactElement => {
 
   const fetchTrueFalseChartData = (id: string, subId = null, actor = null) => {
     setTrueFalseChartDataLoading(true);
-    let result = getTrueFalseChartService(consumerId, id, subId, actor);
+    let result = getTrueFalseChartService(
+      consumerId,
+      courseId,
+      id,
+      subId,
+      actor
+    );
     result
       .then((res) => {
         setTrueFalseChartDataLoading(false);

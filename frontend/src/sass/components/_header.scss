@@ -121,71 +121,8 @@
         }
       }
     }
-    .user-settings {
-      display: flex;
-      cursor: pointer;
-      padding-left: 20px;
-      span {
-        padding-right: 30px;
-        font-family: "Inter";
-        position: relative;
-        line-height: 17px;
-        font-weight: 400;
-        color: #5c5e78;
-        font-size: 14px;
-        bottom: 8px;
-        left: 10px;
-      }
-      .sort-down {
-        width: 10px;
-        height: 20px;
-        color: #116af4;
-        position: relative;
-        bottom: 8px;
-      }
-    }
+   
   }
 
  
-}
-
-.org-icon {
-  width: auto;
-  height: 30px;
-}
-.user-profile-dropdown {
-  padding: 10px 29px 10px 10px;
-  width: 300px;
-  margin: 15px 30px;
-  border-radius: 10px;
-  .ant-dropdown-menu-item {
-    font-family: $base-font;
-  }
-  .menu-divider {
-    margin: 15px;
-  }
-  .menu-items {
-    color: black;
-    font-family: $base-font;
-    font-weight: $base-font-weight;
-    font-size: 15px;
-    padding: 8px 8px;
-    .menu-avatar {
-      font-weight: 600;
-      color: black;
-      font-size: 19px;
-      font-family: $base-font;
-      margin-right: 5px;
-    }
-  }
-  .menu-sign-out {
-    color: $base-color;
-    font-size: 15px;
-    font-family: $base-font;
-  }
-}
-
-.header-user-icon {
-  width: 40px;
-  padding-right: 10px;
 }

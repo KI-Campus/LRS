@@ -1,4 +1,4 @@
-import { ReactElement, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import Button from "antd/lib/button";
 import Drawer from "antd/lib/drawer";
 import Form from "antd/lib/form";
@@ -6,14 +6,17 @@ import Input from "antd/lib/input";
 import notification from "antd/lib/notification";
 import { UserAddOutlined } from "@ant-design/icons";
 import Select from "antd/lib/select";
+import type { DefaultOptionType } from "antd/es/select";
 import Space from "antd/lib/space";
+import { TreeSelect } from "antd";
 import { createUserService } from "src/services/users";
+import { getAllCoursesAdminService } from "src/services/courses";
 
 export default function CreateUser(props): ReactElement {
   const [createUserDrawerVisible, setCreateUserDrawerVisible] = useState(false);
   const [createUserloading, setCreateUserLoading] = useState(false);
   const formRef = useRef(null);
-  const [consumersAccessListDisabled, setConsumersAccessListDisabled] =
+  const [coursesAccessListDisabled, setCoursesAccessListDisabled] =
     useState(false);
 
   const onCreateUserFinish = (values: any) => {
@@ -38,10 +41,32 @@ export default function CreateUser(props): ReactElement {
       });
   };
 
+  const onCourseAccessChange = (value, label, extra) => {
+    // Check if the user has selected a course which has value of courseId_*
+    // If yes, then select all the courses of that consumer (parent)
+
+    // Check in value array if there is a value which a string containing _courseId_*
+
+    for (let i = 0; i < value.length; i++) {
+      if (value[i].includes("_courseId_*")) {
+        // Select all the courses of the consumer
+        let consumerId = value[i].split("_")[0];
+        let coursesOfConsumer = props.courses.filter(
+          (item) => item.pId === consumerId && item.isLeaf === true
+        );
+        let coursesOfConsumerIds = coursesOfConsumer.map((item) => item.value);
+        formRef.current.setFieldsValue({
+          coursesAccess: coursesOfConsumerIds,
+        });
+      }
+    }
+  };
+
   return (
     <div>
       <p>To create a new user click on the following button</p>
       <Button
+        type="primary"
         onClick={() => {
           setCreateUserDrawerVisible(true);
         }}
@@ -55,7 +80,7 @@ export default function CreateUser(props): ReactElement {
         size={"large"}
         title={"Create a new user"}
         placement="right"
-        visible={createUserDrawerVisible}
+        open={createUserDrawerVisible}
         onClose={() => {
           setCreateUserDrawerVisible(false);
         }}
@@ -151,12 +176,13 @@ export default function CreateUser(props): ReactElement {
             <Select
               onChange={(value) => {
                 if (value === "admin") {
-                  setConsumersAccessListDisabled(true);
+                  setCoursesAccessListDisabled(true);
                   formRef.current.setFieldsValue({
-                    consumersAccess: ["all"],
+                    // Empty the courses access list
+                    coursesAccess: [],
                   });
                 } else {
-                  setConsumersAccessListDisabled(false);
+                  setCoursesAccessListDisabled(false);
                 }
               }}
             >
@@ -166,22 +192,29 @@ export default function CreateUser(props): ReactElement {
           </Form.Item>
 
           <Form.Item
-            label="Consumer Access List"
-            name="consumersAccess"
+            label="Course Access List"
+            name="coursesAccess"
             rules={[
               {
                 required: false,
-                message: "Please specify the consumers access list",
+                message: "Please specify the courses access list",
               },
             ]}
           >
-            <Select mode="multiple" disabled={consumersAccessListDisabled}>
-              {props.consumers.map((item) => (
-                <Select.Option value={item.id} key={item.id}>
-                  {item.name}
-                </Select.Option>
-              ))}
-            </Select>
+            <TreeSelect
+              disabled={coursesAccessListDisabled}
+              allowClear
+              treeDataSimpleMode
+              style={{ width: "100%" }}
+              dropdownStyle={{ maxHeight: "auto", overflow: "scroll" }}
+              placeholder={coursesAccessListDisabled ? "All" : "Please select"}
+              treeCheckable={true}
+              multiple={true}
+              showSearch={true}
+              showCheckedStrategy={"SHOW_CHILD"}
+              onChange={onCourseAccessChange}
+              treeData={props.courses}
+            />
           </Form.Item>
 
           <Form.Item>
