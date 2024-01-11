@@ -43,14 +43,22 @@ export default auth_modal.reducer;
 export const { setIsLoggedIn, setLoading, setGlobalLoading, setUser } =
   auth_modal.actions;
 
-export function login({ email, password }) {
+export function login({ email = "", password = "", magicToken = "" }) {
   return async (dispatch) => {
     dispatch(setLoading(true));
 
     try {
+      let result;
       // login logic
-      let result = await Authentication.login(email, password);
-      setHeader(result.data?.token);
+      if (!magicToken) {
+        console.log("Logging with username and password");
+        result = await Authentication.login(email, password);
+        setHeader(result.data?.token);
+      } else {
+        console.log("Logging with magic token", magicToken);
+        result = await Authentication.loginWithMagicToken(magicToken);
+        setHeader(result.data?.token);
+      }
 
       let resultUser = await Authentication.getUser(result.data?.token);
       dispatch(setUser(resultUser?.data));

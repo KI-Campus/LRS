@@ -16,6 +16,7 @@ import EditUser from "./EditUser";
 import { Col, Row, Tooltip } from "antd";
 import { getAllCoursesAdminService } from "src/services/courses";
 import { DefaultOptionType } from "antd/lib/select";
+import { QuestionCircleTwoTone } from "@ant-design/icons";
 
 const Users = (): React.ReactElement => {
   const [usersLoading, setUsersLoading] = useState(true);
@@ -132,6 +133,7 @@ const Users = (): React.ReactElement => {
         // title: `${item.consumer.toUpperCase()}`,
         title: `${helperFunctionConsumerIDToName(item.consumer)}`,
         isLeaf: false,
+        checkable: false,
       };
       coursesTreeSelectData.push(course);
 
@@ -145,6 +147,7 @@ const Users = (): React.ReactElement => {
             helperFunctionConsumerIDToName(item.consumer) + ": " + courseItem.id
           }`,
           isLeaf: true,
+          checkable: true,
         };
         coursesTreeSelectData.push(course);
       });
@@ -219,7 +222,7 @@ const Users = (): React.ReactElement => {
       key: "no",
       // Responsive, show on bigger devices
       responsive: ["xxl"],
-      render: (text, record, index) => index + 1,
+      render: (text, record: UserInterface, index) => index + 1,
     },
     {
       title: "Name",
@@ -231,7 +234,10 @@ const Users = (): React.ReactElement => {
             handleEditClick(record);
           }}
         >
-          {record.firstName + " " + record.lastName}
+          {/* If temp user then show email limited to 10 characters  */}
+          {record.tempUser
+            ? record.email.substring(0, 10) + "..."
+            : record.firstName + " " + record.lastName}
         </a>
       ),
     },
@@ -242,15 +248,45 @@ const Users = (): React.ReactElement => {
       // Responsive, don't show on devices smaller than xl
       responsive: ["xl", "xxl"],
       render: (text, record: UserInterface) => (
-        <Tag color={record.role === "admin" ? "volcano" : "geekblue"}>
-          {record.role?.toUpperCase()}
-        </Tag>
+        <Tooltip
+          title={
+            record.tempUser
+              ? "Expires: " + new Date(record.expireAt).toLocaleString()
+              : ""
+          }
+        >
+          <Tag
+            color={
+              record.role === "admin"
+                ? "volcano"
+                : record.tempUser
+                ? "lime"
+                : "geekblue"
+            }
+          >
+            {record.tempUser ? (
+              <h5>
+                Temporary User <QuestionCircleTwoTone />
+              </h5>
+            ) : (
+              record.role?.toUpperCase()
+            )}
+          </Tag>
+        </Tooltip>
       ),
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      render: (text, record: UserInterface) => {
+        // If temp user then show email limited to 10 characters
+        if (record.tempUser) {
+          return record.email.substring(0, 10) + "...";
+        } else {
+          return record.email;
+        }
+      },
     },
     {
       title: "Courses Access List",

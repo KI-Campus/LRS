@@ -180,6 +180,18 @@ export const routeConstants = [
   },
   {
     showInSidebar: false,
+    title: "Login",
+    route: {
+      path: "/login-magic-token/:token",
+      exact: true,
+    },
+    layoutType: "auth",
+    authType: "only-unauthenticated",
+    component: Login,
+    menuItem: false,
+  },
+  {
+    showInSidebar: false,
     title: "Register",
     route: {
       path: "/register",

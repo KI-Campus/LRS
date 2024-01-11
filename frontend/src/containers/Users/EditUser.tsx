@@ -58,27 +58,6 @@ export default function EditUser(props): ReactElement {
     }
   }, [props.editUser]);
 
-  const onCourseAccessChange = (value, label, extra) => {
-    // Check if the user has selected a course which has value of courseId_*
-    // If yes, then select all the courses of that consumer (parent)
-
-    // Check in value array if there is a value which a string containing _courseId_*
-
-    for (let i = 0; i < value.length; i++) {
-      if (value[i].includes("_courseId_*")) {
-        // Select all the courses of the consumer
-        let consumerId = value[i].split("_")[0];
-        let coursesOfConsumer = props.courses.filter(
-          (item) => item.pId === consumerId && item.isLeaf === true
-        );
-        let coursesOfConsumerIds = coursesOfConsumer.map((item) => item.value);
-        formRef.current.setFieldsValue({
-          coursesAccess: coursesOfConsumerIds,
-        });
-      }
-    }
-  };
-
   return (
     <Drawer
       size={"large"}
@@ -199,10 +178,9 @@ export default function EditUser(props): ReactElement {
               dropdownStyle={{ maxHeight: "auto", overflow: "scroll" }}
               placeholder={coursesAccessListDisabled ? "All" : "Please select"}
               treeCheckable={true}
+              treeCheckStrictly={true}
               multiple={true}
               showSearch={true}
-              showCheckedStrategy={"SHOW_CHILD"}
-              onChange={onCourseAccessChange}
               treeData={props.courses}
             />
           </Form.Item>

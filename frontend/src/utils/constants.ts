@@ -4,6 +4,7 @@ export const APP_VERSION = "v2";
 export const API_ENDPOINT =
   process.env.NODE_ENV === "development" ? "http://localhost:4000/" : "/";
 export const API_USER_LOGIN = "users/authenticate";
+export const API_USER_LOGIN_MAGIC_TOKEN = "users/authenticateWithMagicToken";
 export const API_USER_CURRENT = "users/current";
 
 export const API_GET_CONSUMERS = "consumers/getall";

@@ -10,6 +10,7 @@ module.exports = {
   create,
   update,
   delete: _delete,
+  authenticateWithMagicToken,
 };
 
 async function authenticate({ email, password }) {
@@ -29,6 +30,28 @@ async function authenticate({ email, password }) {
       token,
     };
   }
+}
+
+async function authenticateWithMagicToken({ magicToken }) {
+  const user = await User.findOne({ magicLoginToken: magicToken });
+  // If no user is found, return token not found
+  if (!user) {
+    throw "Magic token not found. Please create a new magic token.";
+  }
+
+  const token = jwt.sign(
+    { email: user.email, sub: user.id, role: user.role },
+    process.env.SECRET,
+    {
+      expiresIn: "7d",
+    }
+  );
+  user.lastLogin = Date.now();
+  await user.save();
+  return {
+    ...user.toJSON(),
+    token,
+  };
 }
 
 async function getAll(req) {
@@ -53,7 +76,9 @@ async function create(userParam, admin = false) {
   }
 
   // If create an admin argument is there, then add a field role as an admin
-  if (admin) { user.role = "admin"; }
+  if (admin) {
+    user.role = "admin";
+  }
 
   // Save the user to the database
   await user.save();
