@@ -40,6 +40,7 @@ app.use("/consumers", express.static("frontend/build"));
 app.use("/users", express.static("frontend/build"));
 app.use("/login", express.static("frontend/build"));
 app.use("/register", express.static("frontend/build"));
+app.use("/login-magic-token/:token", express.static("frontend/build"));
 
 // Use JWT auth to secure the API
 app.use(jwt());
