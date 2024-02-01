@@ -372,7 +372,7 @@ const Exercise = (): ReactElement => {
                 </Card>
               </Col>
 
-              {exercise?.averageScore && (
+              {exercise?.averageScore ? (
                 <Col sm={24} lg={8} span={8}>
                   <Card
                     loading={exerciseLoading}
@@ -383,6 +383,8 @@ const Exercise = (): ReactElement => {
                       exercise?.averageScoreOutOf}
                   </Card>
                 </Col>
+              ) : (
+                ""
               )}
             </Row>
             <br />
