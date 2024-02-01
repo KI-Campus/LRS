@@ -199,7 +199,7 @@ app.post("/lrs/create_temp_user", async (req, res) => {
       firstName: "Temp User",
       lastName: userId,
       role: "user",
-      coursesAccess: [consumerId + "_" + courseId],
+      coursesAccess: [consumerId + "_courseId_" + courseId],
       // Random MD5 hash
       magicLoginToken: require("crypto")
         .createHash("md5")
