@@ -28,6 +28,16 @@ export default function EditUser(props): ReactElement {
   const updateUser = (userId: string, values: UserInterface) => {
     setUpdateUserLoading(true);
     if (props.isCurrentUser) userId = "current";
+
+    // The coursesAccess field is an array of objects with the following structure
+    // { value: string, label: string } but the backend expects an array of strings
+    // so we need to convert the values before sending them to the backend
+    let coursesAccess = values.coursesAccess.map((course) => {
+      // @ts-ignore
+      return course.value;
+    });
+    values.coursesAccess = coursesAccess;
+
     let ret = updateUserService(userId, values);
     ret
       .then((res) => {

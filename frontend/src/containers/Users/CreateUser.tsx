@@ -23,6 +23,14 @@ export default function CreateUser(props): ReactElement {
     // Clear the form values
     formRef.current.resetFields();
 
+    // The coursesAccess field is an array of objects with the following structure
+    // { value: string, label: string } but the backend expects an array of strings
+    // so we need to convert the values before sending them to the backend
+    let coursesAccess = values.coursesAccess.map((course) => {
+      return course.value;
+    });
+    values.coursesAccess = coursesAccess;
+
     setCreateUserLoading(true);
     let ret = createUserService(values);
     ret
