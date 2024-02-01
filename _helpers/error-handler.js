@@ -12,10 +12,6 @@ function errorHandler(err, req, res, next) {
   }
 
   if (err.name === "UnauthorizedError") {
-    // Console log
-    console.log("UnauthorizedError: " + err.message);
-    console.log("Error object: " + JSON.stringify(err));
-
     // JWT authentication error
     return res.status(401).json({
       success: false,
