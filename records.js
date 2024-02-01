@@ -316,6 +316,16 @@ async function getCourses(req, res, next) {
             courseIds[i]
           );
         }
+         // If user has string of * then fetch all courses for that consumer
+         if (user.coursesAccess.includes(consumer + "_courseId_*")) {
+          collectionNamesToFetch.push(
+            process.env.MONGO_XAPI_COLLECTION +
+              "_consumerId_" +
+              consumer +
+              "_courseId_" +
+              courseIds[i]
+          );
+        }
       }
     } else {
       // Fetch all the courseId's for all consumers
