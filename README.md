@@ -23,7 +23,7 @@ MONGO_URL=mongodb://{{mongo-host}}:{{mongo-port}}
 MONGO_DB={{mongo-db-name}}
 MONGO_XAPI_COLLECTION={{mongo-collection-name-for-xAPI-records}}
 SECRET={{secret-for-jwt-tokens}}
-LRS_SHARED_KEY={{secret-shared-key-for-communication-from-H5P}}
+LRS_SHARED_SECRET_KEY={{secret-shared-key-for-communication-from-H5P}}
 ```
 
 If your Mongo installation has a username and authentication, please embed it in MONGO_URL

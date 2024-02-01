@@ -95,6 +95,29 @@ app.post("/lrs", (req, res) => {
     consumerId = consumerId?.trim() ?? consumerId;
     courseId = courseId?.trim() ?? courseId;
 
+    // Check for the shared secret key
+    const receivedSignature = req.headers["x-signature"];
+    const message = JSON.stringify(req.body);
+
+    let SHARED_SECRET_KEY =
+      process.env.LRS_SHARED_SECRET_KEY ?? "EasyToReadSharedKey12345";
+
+    const computedSignature = crypto
+      .createHmac("sha1", SHARED_SECRET_KEY)
+      .update(message)
+      .digest("hex");
+
+    if (computedSignature === receivedSignature) {
+      // Continue processing the message
+    } else {
+      console.log("Invalid message signature");
+      res
+        .status(401)
+        .send({ success: false, error: "Invalid message signature" })
+        .end();
+      return;
+    }
+
     m_client
       .db()
       .collection(
@@ -126,7 +149,8 @@ app.post("/lrs/create_temp_user", async (req, res) => {
   const receivedSignature = req.headers["x-signature"];
   const message = JSON.stringify(req.body);
 
-  let SHARED_SECRET_KEY = process.env.LRS_SHARED_KEY;
+  let SHARED_SECRET_KEY =
+    process.env.LRS_SHARED_SECRET_KEY ?? "EasyToReadSharedKey12345";
 
   const computedSignature = crypto
     .createHmac("sha1", SHARED_SECRET_KEY)
@@ -297,20 +321,26 @@ function routineCleanup() {
     const directory = "tmp";
     const now = Date.now();
     fs.readdir(directory, (err, files) => {
-      if (err) throw err;
+      try {
+        for (const file of files) {
+          fs.stat(path.join(directory, file), (err, stat) => {
+            if (err) throw err;
 
-      for (const file of files) {
-        fs.stat(path.join(directory, file), (err, stat) => {
-          if (err) throw err;
-
-          // Delete files created more than 5 minutes ago
-          if (now - stat.birthtimeMs > 5 * 60 * 1000) {
-            fs.unlink(path.join(directory, file), (err) => {
-              if (err) throw err;
-              console.log(`Routine Cleanup: Deleted temp file ${file}`);
-            });
-          }
-        });
+            // Delete files created more than 5 minutes ago
+            if (now - stat.birthtimeMs > 5 * 60 * 1000) {
+              fs.unlink(path.join(directory, file), (err) => {
+                if (err) throw err;
+                console.log(`Routine Cleanup: Deleted temp file ${file}`);
+              });
+            }
+          });
+        }
+      } catch (e) {
+        // Ignore error if tmp folder does not exist
+        // console.log(
+        //   "Routine Cleanup: Error while checking tmp folder files, probably there is no tmp folder",
+        //   e
+        // );
       }
     });
   } catch (e) {
