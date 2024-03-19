@@ -13,7 +13,11 @@ function errorHandler(err, req, res, next) {
 
   if (err.name === "UnauthorizedError") {
     // JWT authentication error
-    return res.status(401).json({ success: false, message: "Invalid Token" });
+    return res.status(401).json({
+      success: false,
+      message:
+        "Invalid login token, logging out. The token may have expired. Please login again.",
+    });
   }
 
   // Default to 500 server error

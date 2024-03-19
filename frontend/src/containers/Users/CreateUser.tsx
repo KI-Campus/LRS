@@ -23,6 +23,14 @@ export default function CreateUser(props): ReactElement {
     // Clear the form values
     formRef.current.resetFields();
 
+    // The coursesAccess field is an array of objects with the following structure
+    // { value: string, label: string } but the backend expects an array of strings
+    // so we need to convert the values before sending them to the backend
+    let coursesAccess = values.coursesAccess.map((course) => {
+      return course.value;
+    });
+    values.coursesAccess = coursesAccess;
+
     setCreateUserLoading(true);
     let ret = createUserService(values);
     ret
@@ -39,27 +47,6 @@ export default function CreateUser(props): ReactElement {
         console.log("Error while creating user", err);
         setCreateUserLoading(false);
       });
-  };
-
-  const onCourseAccessChange = (value, label, extra) => {
-    // Check if the user has selected a course which has value of courseId_*
-    // If yes, then select all the courses of that consumer (parent)
-
-    // Check in value array if there is a value which a string containing _courseId_*
-
-    for (let i = 0; i < value.length; i++) {
-      if (value[i].includes("_courseId_*")) {
-        // Select all the courses of the consumer
-        let consumerId = value[i].split("_")[0];
-        let coursesOfConsumer = props.courses.filter(
-          (item) => item.pId === consumerId && item.isLeaf === true
-        );
-        let coursesOfConsumerIds = coursesOfConsumer.map((item) => item.value);
-        formRef.current.setFieldsValue({
-          coursesAccess: coursesOfConsumerIds,
-        });
-      }
-    }
   };
 
   return (
@@ -209,10 +196,9 @@ export default function CreateUser(props): ReactElement {
               dropdownStyle={{ maxHeight: "auto", overflow: "scroll" }}
               placeholder={coursesAccessListDisabled ? "All" : "Please select"}
               treeCheckable={true}
+              treeCheckStrictly={true}
               multiple={true}
               showSearch={true}
-              showCheckedStrategy={"SHOW_CHILD"}
-              onChange={onCourseAccessChange}
               treeData={props.courses}
             />
           </Form.Item>

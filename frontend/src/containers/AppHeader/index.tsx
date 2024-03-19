@@ -16,6 +16,8 @@ import Tag from "antd/lib/tag";
 import Badge from "antd/lib/badge";
 import Menu from "antd/lib/menu";
 import Dropdown from "antd/lib/dropdown";
+import { Tooltip } from "antd";
+import { QuestionCircleTwoTone } from "@ant-design/icons";
 const AppHeader = (): ReactElement => {
   let dispatch = useAppDispatch();
   let history = useHistory();
@@ -25,6 +27,7 @@ const AppHeader = (): ReactElement => {
   const menu = (
     <Menu>
       <Menu.Item
+        disabled={user.tempUser ? true : false}
         key={"profile"}
         onClick={() => {
           history.push({ pathname: "/", state: { editCurrentUser: true } });
@@ -92,10 +95,36 @@ const AppHeader = (): ReactElement => {
             <Space>
               <UserOutlined style={{ fontSize: 16 }} />
               <Space>
-                <span className="user-name">{user?.email || "User"}</span>
-                <Tag color={user.role === "admin" ? "volcano" : "geekblue"}>
-                  {user.role?.toUpperCase()}
-                </Tag>
+                <span className="user-name">
+                  {user.tempUser
+                    ? user?.email.substring(0, 10) + "..."
+                    : user?.email || "User"}
+                </span>
+                <Tooltip
+                  title={
+                    user.tempUser
+                      ? "Expire: " + new Date(user.expireAt).toLocaleString()
+                      : ""
+                  }
+                >
+                  <Tag
+                    color={
+                      user.role === "admin"
+                        ? "volcano"
+                        : user.tempUser
+                        ? "lime"
+                        : "geekblue"
+                    }
+                  >
+                    {user.tempUser ? (
+                      <>
+                        Temporary User <QuestionCircleTwoTone />
+                      </>
+                    ) : (
+                      user.role?.toUpperCase()
+                    )}
+                  </Tag>
+                </Tooltip>
               </Space>
               <span>
                 <DownOutlined className="icon-drop-down" />

@@ -9,11 +9,13 @@ function jwt() {
     path: [
       // Public routes that don't require JWT authentication
       "/users/authenticate",
-      "/users/register",                       // Do not allow registration
+      "/users/authenticateWithMagicToken",
+      "/users/register", // Do not allow registration
       "/",
       "/favicon.ico",
       "/lrs",
       "/status",
+      "/lrs/create_temp_user",
     ],
   });
 }

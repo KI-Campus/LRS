@@ -10,6 +10,7 @@ let jwtScopeOptions = {
 
 // Public routes
 router.post("/authenticate", authenticate);
+router.post("/authenticateWithMagicToken", authenticateWithMagicToken);
 router.post("/register", register); // For initial deployment, make /register reachable
 
 // User scope private routes
@@ -33,6 +34,20 @@ function authenticate(req, res, next) {
         : res.status(400).json({
             success: false,
             message: "Email or password is incorrect. Please try again",
+          })
+    )
+    .catch((err) => next(err));
+}
+
+function authenticateWithMagicToken(req, res, next) {
+  userService
+    .authenticateWithMagicToken(req.body)
+    .then((user) =>
+      user
+        ? res.json(user)
+        : res.status(400).json({
+            success: false,
+            message: "Incorrect magic token. Please recreate a new one",
           })
     )
     .catch((err) => next(err));

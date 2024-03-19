@@ -8,4 +8,7 @@ export interface UserInterface {
   lastLogin: Date;
   id: string;
   key?: string;
+  expireAt?: Date;
+  magicLoginToken?: string;
+  tempUser?: Boolean;
 }

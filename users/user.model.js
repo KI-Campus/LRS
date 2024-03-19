@@ -11,6 +11,9 @@ const schema = new Schema({
   email: { type: String, unique: true, required: true },
   role: { type: String, unique: false, default: "user" },
   coursesAccess: { type: Array, default: [] },
+  expireAt: { type: Date, default: undefined },
+  magicLoginToken: { type: String, default: undefined },
+  tempUser: { type: Boolean, default: false },
 });
 
 // When returning the user object, don't include the MongoDB _id and password fields
