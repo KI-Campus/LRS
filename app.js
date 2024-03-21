@@ -84,7 +84,7 @@ app.use("/consumers", require("./consumers/consumers.js").router);
 app.use("/records", require("./records.js").router);
 
 // LRS endpoint to accept post data
-app.post("/lrs", (req, res) => {
+app.post("/lrs", async (req, res) => {
   try {
     // Encryption of personal data is moved to LTI Tool
 
@@ -117,6 +117,46 @@ app.post("/lrs", (req, res) => {
         .send({ success: false, error: "Invalid message signature" })
         .end();
       return;
+    }
+
+    // Check if collection exists, if not create it
+    const collectionExists = await m_client
+      .db()
+      .listCollections({
+        name:
+          process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumerId +
+          "_courseId_" +
+          courseId,
+      })
+      .hasNext();
+    if (!collectionExists) {
+      // Create a compressed version of the collection
+      await m_client
+        .db()
+        .createCollection(
+          process.env.MONGO_XAPI_COLLECTION +
+            "_consumerId_" +
+            consumerId +
+            "_courseId_" +
+            courseId,
+          {
+            storageEngine: {
+              wiredTiger: {
+                configString: "block_compressor=zlib",
+              },
+            },
+          }
+        );
+      console.log(
+        "Compressed Collection created: ",
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumerId +
+          "_courseId_" +
+          courseId
+      );
     }
 
     m_client
