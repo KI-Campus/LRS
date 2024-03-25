@@ -44,7 +44,7 @@ export const getExercisesListService = async (
   return response.data;
 };
 
-export const downloadService = async (
+export const prepareDownloadService = async (
   consumerId: string = null,
   courseId: string = null,
   exerciseId: string = null,

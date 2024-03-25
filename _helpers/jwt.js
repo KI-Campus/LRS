@@ -16,6 +16,7 @@ function jwt() {
       "/lrs",
       "/status",
       "/lrs/create_temp_user",
+      "/records/download",
     ],
   });
 }

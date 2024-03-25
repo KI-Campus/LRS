@@ -9,7 +9,7 @@ import {
   Space,
 } from "antd";
 import React, { useEffect, useRef, useState } from "react";
-import { downloadService } from "src/services/records";
+import { prepareDownloadService } from "src/services/records";
 
 export interface DownloadModalProps {
   consumer: string;
@@ -51,9 +51,9 @@ export default function DownloadModal(props: DownloadModalProps) {
   const handleOk = () => {
     setDownloading(true);
 
-    let messageReturn = message.loading({ content: "Downloading..." });
+    let messageReturn = message.loading({ content: "Preparing download..." });
 
-    downloadService(
+    prepareDownloadService(
       props.consumer,
       props.course,
       props.exercise,
@@ -63,33 +63,34 @@ export default function DownloadModal(props: DownloadModalProps) {
       props.actor
     )
       .then((res) => {
-        const file = new Blob([JSON.stringify(res)], {
-          type: "application/json",
-        });
-        const fileURL = URL.createObjectURL(file);
-        const link = document.createElement("a");
-        link.href = fileURL;
-
-        let fileName;
-        if (props.isExerciseSelected && props.actor) {
-          fileName = props.exercise + "_" + props.actor;
-        } else if (props.isExerciseSelected && !props.actor) {
-          fileName = props.exercise;
-        } else if (props.isCourseSelected) {
-          fileName = props.course;
-        } else if (props.isConsumerSelected) {
-          fileName = props.consumer;
-        }
-
-        link.setAttribute("download", fileName + ".json");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
         messageReturn();
-        message.success({
-          content: "Exercise Downloaded Successfully!",
-          duration: 1,
+        messageReturn = message.success({
+          content: (
+            <form method="POST" action="/records/download" id="downloadForm">
+              {/* Get token from localStorage */}
+              <input
+                hidden
+                id="token"
+                name="token"
+                value={localStorage.getItem("token")}
+              />
+              <label>
+                Your JSON file is ready. Click the button below to download.
+              </label>
+              <br />
+
+              {/* Submit button */}
+              <button
+                type="submit"
+                id="downloadSubmitButton"
+                onClick={() => messageReturn()}
+              >
+                Download
+              </button>
+            </form>
+          ),
+
+          duration: 0,
         });
         setDownloading(false);
       })
@@ -97,7 +98,7 @@ export default function DownloadModal(props: DownloadModalProps) {
         console.log("Error while downloading exercise", err);
         message.error({
           content: "Error downloading",
-          duration: 2,
+          duration: 5,
         });
         setDownloading(false);
       });
