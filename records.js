@@ -1867,6 +1867,21 @@ async function prepareDownload(req, res, next) {
       }
     }
 
+    // Check if the tmp folder exists
+    if (!fs.existsSync("tmp")) {
+      try {
+        fs.mkdirSync("tmp");
+      } catch (err) {
+        console.log("Error creating tmp folder", err);
+        res.status(500).send(
+          {
+            result: "Preparing download failed",
+            error: "Error creating tmp folder",
+          }.end()
+        );
+      }
+    }
+
     try {
       fs.writeFileSync(
         `tmp/${req.user.email || ""}_tmp.json`,
