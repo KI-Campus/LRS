@@ -27,7 +27,7 @@ export const API_GET_MCQ_CHART = "records/mcqChart";
 
 export const API_GET_TRUE_FALSE_CHART = "records/trueFalseChart";
 
-export const API_GET_DOWNLOAD = "records/download";
+export const API_GET_DOWNLOAD = "records/prepareDownload";
 
 export const API_GET_USERS = "users/getall";
 export const API_USER = "users";
