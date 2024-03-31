@@ -18,7 +18,10 @@ import { ExercisesInterface } from "src/Interfaces/ExercisesInterface";
 import DownloadModal, {
   DownloadModalProps,
 } from "src/components/DownloadModal";
-import { getExercisesListService, downloadService } from "src/services/records";
+import {
+  getExercisesListService,
+  prepareDownloadService,
+} from "src/services/records";
 
 export function ExercisesTable(props): ReactElement {
   const [data, setData] = useState([]);
