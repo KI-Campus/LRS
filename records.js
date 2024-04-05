@@ -23,7 +23,8 @@ const jwtFull = require("jsonwebtoken");
 router.use("/course/:id", checkUserAccess);
 
 router.use("/courseSubmissionsOverTime/:id", checkUserAccess);
-router.use("/courseExerciseTypesAndCount/:id", checkUserAccess);
+router.use("/courseExerciseTypesAndCountEvents/:id", checkUserAccess);
+router.use("/courseExerciseTypesCount/:id", checkUserAccess);
 
 router.use("/prepareDownload", checkUserAccess);
 
@@ -50,6 +51,8 @@ router.get(
   "/courseExerciseTypesAndCountEvents/:id",
   getCourseExerciseTypesAndCountEvents
 );
+
+router.get("/courseExerciseTypesCount/:id", getCourseExerciseTypesCount);
 
 router.get("/prepareDownload", prepareDownload);
 router.post("/download", download);
@@ -1370,6 +1373,78 @@ async function getCourseExerciseTypesAndCountEvents(req, res, next) {
     {
       $group: {
         _id: "$xAPI.context.contextActivities.category.id",
+        count: {
+          $sum: 1,
+        },
+      },
+    },
+    {
+      $sort: {
+        count: -1,
+      },
+    },
+  ];
+
+  // Add filter parameters to the pipeline
+  addFiltersToPipeline(pipeline, req.query.filters);
+
+  try {
+    let exerciseTypesAndCount = await m_client
+      .db()
+      .collection(
+        process.env.MONGO_XAPI_COLLECTION +
+          "_consumerId_" +
+          consumer +
+          "_courseId_" +
+          courseId
+      )
+      .aggregate(pipeline)
+      .toArray();
+
+    // Filter out the ones which _id is null or undefined
+    exerciseTypesAndCount = exerciseTypesAndCount.filter((exercise) => {
+      return exercise._id;
+    });
+
+    res.status(200).send({ result: exerciseTypesAndCount }).end();
+  } catch (err) {
+    console.log("Error while aggregating records", err);
+    console.log("Pipeline was: ", pipeline);
+    res.status(500).end();
+  }
+}
+
+async function getCourseExerciseTypesCount(req, res, next) {
+  let courseId = req.params.id ? req.params.id : undefined;
+
+  let consumer = req.query.consumer
+    ? req.query.consumer
+    : await getConsumerIdFromCourseId(courseId);
+
+  if (!courseId) {
+    res.status(400).send({ error: "Invalid courseId" }).end();
+    return;
+  }
+
+  let pipeline = [
+    {
+      $match: {
+        "metadata.session.context_id": courseId,
+      },
+    },
+
+    {
+      $group: {
+        _id: "$xAPI.object.id",
+        exerciseType: { $last: "$xAPI.context.contextActivities.category.id" },
+        count: {
+          $sum: 1,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: "$exerciseType",
         count: {
           $sum: 1,
         },
