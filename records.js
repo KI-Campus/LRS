@@ -46,7 +46,10 @@ router.get("/courses", getCourses);
 router.get("/course/:id", getCourse);
 
 router.get("/courseSubmissionsOverTime/:id", getCourseSubmissionsOverTime);
-router.get("/courseExerciseTypesAndCount/:id", getCourseExerciseTypesAndCount);
+router.get(
+  "/courseExerciseTypesAndCountEvents/:id",
+  getCourseExerciseTypesAndCountEvents
+);
 
 router.get("/prepareDownload", prepareDownload);
 router.post("/download", download);
@@ -1346,7 +1349,7 @@ async function getCourseSubmissionsOverTime(req, res, next) {
   }
 }
 
-async function getCourseExerciseTypesAndCount(req, res, next) {
+async function getCourseExerciseTypesAndCountEvents(req, res, next) {
   let courseId = req.params.id ? req.params.id : undefined;
 
   let consumer = req.query.consumer

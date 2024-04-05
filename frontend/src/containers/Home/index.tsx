@@ -11,7 +11,7 @@ import { CourseInterface } from "src/Interfaces/CourseInterface";
 import { getConsumersListService } from "src/services/consumers";
 import {
   getCourseDetailsService,
-  getCourseExerciseTypesCountsService,
+  getCourseExerciseTypesCountsEventsService,
   getCoursesListService,
   getCourseSubmissionsOverTimeService,
 } from "src/services/courses";
@@ -202,7 +202,7 @@ const Home = (): ReactElement => {
 
   const fetchCourseExerciseTypesCount = () => {
     setCourseExerciseTypesCountLoading(true);
-    let result = getCourseExerciseTypesCountsService(
+    let result = getCourseExerciseTypesCountsEventsService(
       selectedConsumer,
       selectedCourse,
       selectedActor
