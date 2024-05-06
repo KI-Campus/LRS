@@ -16,8 +16,11 @@ export const API_GET_COURSE = "records/course";
 export const API_GET_COURSE_SUBMISSIONS_BY_TIME =
   "records/courseSubmissionsOverTime";
 
-export const API_GET_COURSE_EXERCISE_TYPES_COUNTS =
-  "records/courseExerciseTypesAndCount";
+export const API_GET_COURSE_EXERCISE_TYPES_COUNTS_EVENTS =
+  "records/courseExerciseTypesAndCountEvents";
+
+export const API_GET_COURSE_EXERCISE_TYPES_COUNT =
+  "records/courseExerciseTypesCount";
 
 export const API_GET_EXERCISES = "records/exercises";
 export const API_GET_EXERCISE_DETAILS = "records/exerciseDetails";

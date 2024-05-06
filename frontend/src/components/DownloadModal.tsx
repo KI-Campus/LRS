@@ -51,7 +51,10 @@ export default function DownloadModal(props: DownloadModalProps) {
   const handleOk = () => {
     setDownloading(true);
 
-    let messageReturn = message.loading({ content: "Preparing download..." });
+    let messageReturn = message.loading({
+      content: "Preparing download...",
+      duration: 0,
+    });
 
     prepareDownloadService(
       props.consumer,
@@ -95,6 +98,7 @@ export default function DownloadModal(props: DownloadModalProps) {
         setDownloading(false);
       })
       .catch((err) => {
+        messageReturn();
         console.log("Error while downloading exercise", err);
         message.error({
           content: "Error downloading",

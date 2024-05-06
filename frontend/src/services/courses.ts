@@ -3,7 +3,8 @@ import {
   API_GET_COURSES,
   API_GET_COURSE,
   API_GET_COURSE_SUBMISSIONS_BY_TIME,
-  API_GET_COURSE_EXERCISE_TYPES_COUNTS,
+  API_GET_COURSE_EXERCISE_TYPES_COUNTS_EVENTS,
+  API_GET_COURSE_EXERCISE_TYPES_COUNT,
   API_GET_ALL_COURSES_ADMIN,
 } from "src/utils/constants";
 
@@ -48,7 +49,7 @@ export const getCourseSubmissionsOverTimeService = async (
 };
 
 // Get Course Exercise Types and their records/events counts
-export const getCourseExerciseTypesCountsService = async (
+export const getCourseExerciseTypesCountsEventsService = async (
   consumer: string,
   courseId: string,
   actor?: string
@@ -60,7 +61,26 @@ export const getCourseExerciseTypesCountsService = async (
   }
 
   const response = await axios.get(
-    `${API_GET_COURSE_EXERCISE_TYPES_COUNTS}${queryString}`
+    `${API_GET_COURSE_EXERCISE_TYPES_COUNTS_EVENTS}${queryString}`
+  );
+
+  return response.data.result;
+};
+
+// Get Course Exercise Types and their count
+export const getCourseExerciseTypesCountService = async (
+  consumer: string,
+  courseId: string,
+  actor?: string
+) => {
+  // Construct query string
+  let queryString = `/${courseId}?consumer=${consumer}`;
+  if (actor) {
+    queryString += `&filters[xAPI.actor.name]=${actor}`;
+  }
+
+  const response = await axios.get(
+    `${API_GET_COURSE_EXERCISE_TYPES_COUNT}${queryString}`
   );
 
   return response.data.result;

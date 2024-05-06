@@ -11,7 +11,8 @@ import { CourseInterface } from "src/Interfaces/CourseInterface";
 import { getConsumersListService } from "src/services/consumers";
 import {
   getCourseDetailsService,
-  getCourseExerciseTypesCountsService,
+  getCourseExerciseTypesCountsEventsService,
+  getCourseExerciseTypesCountService,
   getCoursesListService,
   getCourseSubmissionsOverTimeService,
 } from "src/services/courses";
@@ -62,6 +63,14 @@ const Home = (): ReactElement => {
     courseSubmissionsOverTimeLoading,
     setCourseSubmissionsOverTimeLoading,
   ] = useState<boolean>(true);
+
+  const [
+    courseExerciseTypesCountEventsLoading,
+    setCourseExerciseTypesCountEventsLoading,
+  ] = useState<boolean>(true);
+
+  const [courseExerciseTypesCountEvents, setCourseExerciseTypesCountEvents] =
+    useState<any>({});
 
   const [courseExerciseTypesCountLoading, setCourseExerciseTypesCountLoading] =
     useState<boolean>(true);
@@ -200,9 +209,29 @@ const Home = (): ReactElement => {
       });
   };
 
+  const fetchCourseExerciseTypesCountEvents = () => {
+    setCourseExerciseTypesCountEventsLoading(true);
+    let result = getCourseExerciseTypesCountsEventsService(
+      selectedConsumer,
+      selectedCourse,
+      selectedActor
+    );
+    result
+      .then((res) => {
+        setCourseExerciseTypesCountEvents(res);
+
+        setCourseExerciseTypesCountEventsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+
+        setCourseExerciseTypesCountEventsLoading(false);
+      });
+  };
+
   const fetchCourseExerciseTypesCount = () => {
     setCourseExerciseTypesCountLoading(true);
-    let result = getCourseExerciseTypesCountsService(
+    let result = getCourseExerciseTypesCountService(
       selectedConsumer,
       selectedCourse,
       selectedActor
@@ -252,6 +281,7 @@ const Home = (): ReactElement => {
       }
 
       //fetchCourseSubmissionsOverTime();
+      //fetchCourseExerciseTypesCountEvents();
       //fetchCourseExerciseTypesCount();
     }
   }, [selectedCourse, selectedActor]);
@@ -445,6 +475,7 @@ const Home = (): ReactElement => {
           onConfirm={() => {
             // fetchCourse();
             fetchCourseSubmissionsOverTime();
+            fetchCourseExerciseTypesCountEvents();
             fetchCourseExerciseTypesCount();
             setShowCourseStats(true);
           }}
@@ -482,11 +513,27 @@ const Home = (): ReactElement => {
             </Col>
             <Col md={24} lg={24} xl={12} span={12}>
               <div className="shadow-bordered">
+                {!courseExerciseTypesCountEventsLoading ? (
+                  <ExerciseTypesGraph
+                    loading={courseExerciseTypesCountEventsLoading}
+                    data={courseExerciseTypesCountEvents}
+                    title={"Exercise types and number of events"}
+                  />
+                ) : (
+                  <Spin />
+                )}
+              </div>
+            </Col>
+          </Row>
+          <Divider></Divider>
+          <Row gutter={[24, 24]}>
+            <Col md={24} lg={24} xl={12} span={12}>
+              <div className="shadow-bordered">
                 {!courseExerciseTypesCountLoading ? (
                   <ExerciseTypesGraph
                     loading={courseExerciseTypesCountLoading}
                     data={courseExerciseTypesCount}
-                    title={"Exercise types and number of events"}
+                    title={"Exercise types and count"}
                   />
                 ) : (
                   <Spin />
