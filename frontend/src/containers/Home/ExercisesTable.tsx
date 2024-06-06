@@ -131,9 +131,11 @@ export function ExercisesTable(props): ReactElement {
               state: { actor: props.actor },
               pathname: `/consumer/${props.consumerId}/course/${
                 props.courseId
-              }/exercise/${record._id.split("?subContentId=")[0]}/sub/${
+              }/exercise/${encodeURIComponent(
+                record._id.split("?subContentId=")[0]
+              )}/sub/${encodeURIComponent(
                 record._id.split("?subContentId=")[1]
-              }`,
+              )}`,
             }}
           >
             {record.title}
@@ -142,7 +144,9 @@ export function ExercisesTable(props): ReactElement {
           <Link
             to={{
               state: { actor: props.actor },
-              pathname: `/consumer/${props.consumerId}/course/${props.courseId}/exercise/${record._id}`,
+              pathname: `/consumer/${props.consumerId}/course/${
+                props.courseId
+              }/exercise/${encodeURIComponent(record._id)}`,
             }}
           >
             {record.title ?? "N/A"}
