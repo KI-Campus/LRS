@@ -89,10 +89,12 @@ app.post("/lrs", async (req, res) => {
     // Encryption of personal data is moved to LTI Tool
 
     // Get consumer and course id from the request so that we can store the record in a collection with the same name
-    let consumerId = req?.body?.metadata?.session.custom_consumer ?? "null";
-    let courseId = req?.body?.metadata?.session.context_id ?? "null";
+    let consumerId =
+      String(req?.body?.metadata?.session?.custom_consumer) ?? "null";
+    let courseId = String(req?.body?.metadata?.session?.context_id) ?? "null";
 
     // Trim the consumerId and courseId
+
     consumerId = consumerId?.trim() ?? consumerId;
     courseId = courseId?.trim() ?? courseId;
 
