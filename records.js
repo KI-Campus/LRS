@@ -431,9 +431,19 @@ async function getCourse(req, res, next) {
         consumer: { $last: "$metadata.session.custom_consumer" },
       },
     },
+
+    // Commenting this old code for now, might be useful later if bug arises
+    // {
+    //   $match: {
+    //     _id: courseId,
+    //   },
+    // },
+
     {
       $match: {
-        _id: courseId,
+        $expr: {
+          $eq: [{ $toString: "$_id" }, courseId],
+        },
       },
     },
   ];
@@ -460,13 +470,17 @@ async function getCourse(req, res, next) {
         } else {
           try {
             // Get total records in course
-            let totalRecordsPipleline = [
+            let totalRecordsPipeline = [
               {
                 $match: {
-                  "metadata.session.context_id": courseId,
+                  $expr: {
+                    $eq: [
+                      { $toString: "$metadata.session.context_id" },
+                      courseId.toString(),
+                    ],
+                  },
                 },
               },
-
               {
                 $count: "totalRecords",
               },
@@ -480,7 +494,7 @@ async function getCourse(req, res, next) {
                   "_courseId_" +
                   courseId
               )
-              .aggregate(totalRecordsPipleline)
+              .aggregate(totalRecordsPipeline)
               .toArray();
             totalRecords = totalRecords[0]?.totalRecords ?? 0;
             // Push it into result
@@ -490,7 +504,12 @@ async function getCourse(req, res, next) {
             let exerciseTypesPipeline = [
               {
                 $match: {
-                  "metadata.session.context_id": courseId,
+                  $expr: {
+                    $eq: [
+                      { $toString: "$metadata.session.context_id" },
+                      courseId.toString(),
+                    ],
+                  },
                 },
               },
               {
@@ -526,7 +545,12 @@ async function getCourse(req, res, next) {
             let rootExerciseTypesPipeline = [
               {
                 $match: {
-                  "metadata.session.context_id": courseId,
+                  $expr: {
+                    $eq: [
+                      { $toString: "$metadata.session.context_id" },
+                      courseId.toString(),
+                    ],
+                  },
                 },
               },
               {
@@ -570,7 +594,12 @@ async function getCourse(req, res, next) {
             let totalSubmissionsPipeline = [
               {
                 $match: {
-                  "metadata.session.context_id": courseId,
+                  $expr: {
+                    $eq: [
+                      { $toString: "$metadata.session.context_id" },
+                      courseId.toString(),
+                    ],
+                  },
                 },
               },
               // // Exclude sub exercises
@@ -619,7 +648,12 @@ async function getCourse(req, res, next) {
             let totalExercisesPipeline = [
               {
                 $match: {
-                  "metadata.session.context_id": courseId,
+                  $expr: {
+                    $eq: [
+                      { $toString: "$metadata.session.context_id" },
+                      courseId.toString(),
+                    ],
+                  },
                 },
               },
               {
@@ -664,7 +698,12 @@ async function getCourse(req, res, next) {
             let passingExercisesPipeline = [
               {
                 $match: {
-                  "metadata.session.context_id": courseId,
+                  $expr: {
+                    $eq: [
+                      { $toString: "$metadata.session.context_id" },
+                      courseId.toString(),
+                    ],
+                  },
                 },
               },
               {
@@ -706,7 +745,12 @@ async function getCourse(req, res, next) {
             let totalActorsCountPipeline = [
               {
                 $match: {
-                  "metadata.session.context_id": courseId,
+                  $expr: {
+                    $eq: [
+                      { $toString: "$metadata.session.context_id" },
+                      courseId.toString(),
+                    ],
+                  },
                 },
               },
               {
@@ -809,7 +853,12 @@ async function getExercises(req, res, next) {
     let pipeline = [
       {
         $match: {
-          "metadata.session.context_id": courseId,
+          $expr: {
+            $eq: [
+              { $toString: "$metadata.session.context_id" },
+              courseId.toString(),
+            ],
+          },
         },
       },
       {
@@ -1275,7 +1324,12 @@ async function getCourseSubmissionsOverTime(req, res, next) {
   let pipeline = [
     {
       $match: {
-        "metadata.session.context_id": courseId,
+        $expr: {
+          $eq: [
+            { $toString: "$metadata.session.context_id" },
+            courseId.toString(),
+          ],
+        },
       },
     },
     {
@@ -1367,7 +1421,12 @@ async function getCourseExerciseTypesAndCountEvents(req, res, next) {
   let pipeline = [
     {
       $match: {
-        "metadata.session.context_id": courseId,
+        $expr: {
+          $eq: [
+            { $toString: "$metadata.session.context_id" },
+            courseId.toString(),
+          ],
+        },
       },
     },
     {
@@ -1429,7 +1488,12 @@ async function getCourseExerciseTypesCount(req, res, next) {
   let pipeline = [
     {
       $match: {
-        "metadata.session.context_id": courseId,
+        $expr: {
+          $eq: [
+            { $toString: "$metadata.session.context_id" },
+            courseId.toString(),
+          ],
+        },
       },
     },
 
@@ -1750,7 +1814,12 @@ async function getActors(req, res, next) {
     pipeline = [
       {
         $match: {
-          "metadata.session.context_id": courseId,
+          $expr: {
+            $eq: [
+              { $toString: "$metadata.session.context_id" },
+              courseId.toString(),
+            ],
+          },
         },
       },
 
@@ -1875,7 +1944,12 @@ async function prepareDownload(req, res, next) {
   if (courseId) {
     pipeline.push({
       $match: {
-        "metadata.session.context_id": courseId,
+        $expr: {
+          $eq: [
+            { $toString: "$metadata.session.context_id" },
+            courseId.toString(),
+          ],
+        },
       },
     });
   }
@@ -2534,10 +2608,21 @@ async function getConsumerIdFromCourseId(courseId) {
   for (let i = 0; i < filteredCollections.length; i++) {
     let collection = filteredCollections[i];
     let collectionName = collection.name;
-    if (collectionName.includes("_courseId_" + courseId)) {
+
+    // We need to extract the courseId from the collection name
+    // Get the current courseId
+    let currentCourseId = collectionName.split("_courseId_")[1];
+
+    if (currentCourseId === courseId) {
       consumerId = collectionName.split("_consumerId_")[1].split("_")[0];
       break;
     }
+
+    // Commenting this old code out for now
+    // if (collectionName.includes("_courseId_" + courseId)) {
+    //   consumerId = collectionName.split("_consumerId_")[1].split("_")[0];
+    //   break;
+    // }
   }
 
   return consumerId;
