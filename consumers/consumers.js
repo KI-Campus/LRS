@@ -42,7 +42,6 @@ function register(req, res, next) {
     req.body.name &&
     req.body.name.length > 0
   ) {
-    req.body.id = req.body.id.toLowerCase();
     req.body.createdAt = new Date();
 
     // Find if any record exists with the same id
