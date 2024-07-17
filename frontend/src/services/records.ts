@@ -1,6 +1,7 @@
 import axios from "src/utils/axios";
 import {
   API_GET_GLOBAL_STATS,
+  API_GET_CONSUMERS_IN_DB,
   API_GET_EXERCISES,
   API_GET_DOWNLOAD,
   API_GET_EXERCISE_DETAILS,
@@ -12,6 +13,11 @@ import {
 
 export const getGlobalStatsService = async () => {
   const response = await axios.get(`${API_GET_GLOBAL_STATS}`);
+  return response.data.result;
+};
+
+export const getConsumersInDbService = async () => {
+  const response = await axios.get(`${API_GET_CONSUMERS_IN_DB}`);
   return response.data.result;
 };
 

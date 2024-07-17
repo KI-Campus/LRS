@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ConsumerInterface } from "src/Interfaces/ConsumerInterface";
 import {
   deleteConsumerService,
   getConsumersListService,
 } from "src/services/consumers";
+import { getConsumersInDbService } from "src/services/records";
 import Space from "antd/lib/space";
 import Button from "antd/lib/button";
 import Popconfirm from "antd/lib/popconfirm";
@@ -13,14 +14,24 @@ import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import EditConsumer from "./EditConsumer";
 import notification from "antd/lib/notification";
 import CreateConsumer from "./CreateConsumer";
-import { Col, Row } from "antd";
+import { Col, Row, Card, Alert } from "antd";
+import { ApiOutlined } from "@ant-design/icons";
 
 const Consumers = (): React.ReactElement => {
   const [loading, setLoading] = useState(true);
   const [consumers, setConsumers] = useState<ConsumerInterface[]>([]);
 
-  const [editConsumer, setEditConsumer] = useState<ConsumerInterface>();
+  const consumersInDb = useRef<string[]>([]);
+
+  const [consumersDiff, setConsumersDiff] = useState<string[]>([]);
+
+  const editConsumer = useRef<ConsumerInterface>();
+  const createConsumer = useRef<ConsumerInterface>();
+
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
+
+  const [createConsumerDrawerVisible, setCreateConsumerDrawerVisible] =
+    useState(false);
 
   const [deleteConsumerLoading, setDeleteConsumerLoading] = useState(false);
 
@@ -29,29 +40,50 @@ const Consumers = (): React.ReactElement => {
     fetchConsumers();
   }, []);
 
-  const fetchConsumers = () => {
-    setLoading(true);
-    let ret = getConsumersListService();
-    ret
-      .then((res) => {
-        // Remove consumer "all" from the list
-        res = res.filter((consumer) => consumer.id !== "all");
-        // Add a key to each consumer
-        res = res.map((consumer) => {
-          consumer.key = consumer.id;
-          return consumer;
-        });
-        setConsumers(res);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log("Error while fetching consumers", err);
-        setLoading(false);
+  const fetchConsumers = async () => {
+    try {
+      setLoading(true);
+      let resConsumersList = await getConsumersListService();
+
+      // Remove consumer "all" from the list
+      resConsumersList = resConsumersList.filter(
+        (consumer) => consumer.id !== "all"
+      );
+
+      // Add a key to each consumer
+      resConsumersList = resConsumersList.map((consumer) => ({
+        ...consumer,
+        key: consumer.id,
+      }));
+
+      // Sort the consumers by id
+      resConsumersList = resConsumersList.sort((a, b) => {
+        return a.id.localeCompare(b.id);
       });
+
+      setConsumers(resConsumersList);
+
+      let resConsumersInDb = await getConsumersInDbService();
+
+      consumersInDb.current = resConsumersInDb.consumersInDb ?? [];
+
+      // Find the consumers that are in the database but not in the list
+      let consumersDiff = consumersInDb.current.filter(
+        (consumerId) =>
+          !resConsumersList.some((consumer) => consumer.id === consumerId)
+      );
+
+      setConsumersDiff(consumersDiff);
+    } catch (err) {
+      console.log("Error while fetching consumers", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditClick = (consumer: ConsumerInterface) => {
-    setEditConsumer(consumer);
+    // setEditConsumer(consumer);
+    editConsumer.current = consumer;
     setEditDrawerVisible(true);
   };
 
@@ -166,20 +198,78 @@ const Consumers = (): React.ReactElement => {
 
   return (
     <div>
+      {/* Modals */}
+      <EditConsumer
+        fetchConsumers={fetchConsumers}
+        editConsumer={editConsumer.current}
+        editDrawerVisible={editDrawerVisible}
+        setEditDrawerVisible={setEditDrawerVisible}
+      />
+      <CreateConsumer
+        fetchConsumers={fetchConsumers}
+        createConsumer={createConsumer.current}
+        createConsumerDrawerVisible={createConsumerDrawerVisible}
+        setCreateConsumerDrawerVisible={setCreateConsumerDrawerVisible}
+      />
+
       <h2>Consumers</h2>
       <Table
         loading={loading}
         columns={consumerColumns}
         dataSource={consumers}
       />
-      <EditConsumer
-        fetchConsumers={fetchConsumers}
-        editConsumer={editConsumer}
-        editDrawerVisible={editDrawerVisible}
-        setEditDrawerVisible={setEditDrawerVisible}
-      />
 
-      <CreateConsumer fetchConsumers={fetchConsumers} />
+      {consumersDiff.length > 0 && (
+        <>
+          <h3>Consumers IDs detected in the database</h3>
+          <Row>
+            <Col span={24}>
+              <Alert
+                message={
+                  "These following consumers IDs have been found in the database records which are not yet added in the LRS system. Click on it to add it"
+                }
+                type="info"
+              />
+              <br />
+
+              <Card loading={loading}>
+                {consumersDiff.map((consumerId) => (
+                  <Button
+                    id={"id_" + consumerId}
+                    key={consumerId}
+                    type={"link"}
+                    onClick={() => {
+                      createConsumer.current = {
+                        _id: consumerId ?? "",
+                        id: consumerId ?? "",
+                        name: "Enter a friendly consumer name",
+                        picture: "",
+                      };
+                      setCreateConsumerDrawerVisible(true);
+                    }}
+                  >
+                    {consumerId}
+                  </Button>
+                ))}
+              </Card>
+            </Col>
+          </Row>
+        </>
+      )}
+
+      <p>To create a new consumer click on the following button</p>
+      <Button
+        type="primary"
+        onClick={() => {
+          createConsumer.current = null;
+          setCreateConsumerDrawerVisible(true);
+        }}
+      >
+        <Space>
+          <ApiOutlined />
+          Create a new Consumer
+        </Space>
+      </Button>
     </div>
   );
 };
