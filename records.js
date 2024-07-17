@@ -43,6 +43,12 @@ router.use("/trueFalseChart/:id/:subExerciseId", checkUserAccess);
 
 // openLRS routes
 router.get("/stats", jwtAuthz(["admin"], jwtScopeOptions), getStats);
+router.get(
+  "/getConsumersInDb",
+  jwtAuthz(["admin"], jwtScopeOptions),
+  getConsumersInDb
+);
+getConsumersInDb;
 router.get("/courses", getCourses);
 router.get("/course/:id", getCourse);
 
@@ -269,6 +275,38 @@ async function getStats(req, res, next) {
       totalConsumersList: totalConsumersArrayObject,
       totalPassingExercises: totalPassingExercises,
       totalActorsCount: totalActorsCount,
+    },
+  });
+}
+
+async function getConsumersInDb(req, res, next) {
+  // Fetch all the collections in the database with the following format
+  // process.env.MONGO_XAPI_COLLECTION_consumerId_<consumer>_courseId_*
+
+  // Get all the collections
+  let collections = await m_client.db().listCollections().toArray();
+
+  // Filter out the collections
+  let filteredCollections = collections.filter((collection) => {
+    return collection.name.includes(
+      process.env.MONGO_XAPI_COLLECTION + "_consumerId_"
+    );
+  });
+
+  // Get the total consumers
+  let totalConsumers = [];
+  for (let i = 0; i < filteredCollections.length; i++) {
+    let collection = filteredCollections[i];
+    let consumerId = collection.name.split("_consumerId_")[1].split("_")[0];
+
+    // Only push to collection if not present
+    if (!totalConsumers.includes(consumerId)) totalConsumers.push(consumerId);
+  }
+
+  // Return the result
+  res.status(200).send({
+    result: {
+      consumersInDb: totalConsumers,
     },
   });
 }
