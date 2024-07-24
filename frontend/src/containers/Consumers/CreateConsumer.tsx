@@ -3,16 +3,20 @@ import Drawer from "antd/lib/drawer";
 import Form from "antd/lib/form";
 import Input from "antd/lib/input";
 import notification from "antd/lib/notification";
-import { useRef, useState } from "react";
-import { ApiOutlined } from "@ant-design/icons";
+import { useEffect, useRef, useState } from "react";
 import { createConsumerService } from "src/services/consumers";
 import Space from "antd/lib/space";
+import { ApiOutlined } from "@ant-design/icons";
 
 export default function CreateConsumer(props) {
-  const [createConsumerDrawerVisible, setCreateConsumerDrawerVisible] =
-    useState(false);
   const [createConsumerloading, setCreateConsumerLoading] = useState(false);
   const formRef = useRef(null);
+
+  useEffect(() => {
+    if (formRef.current) {
+      formRef.current.setFieldsValue(props.createConsumer);
+    }
+  }, [props.createConsumer]);
 
   const onCreateConsumerFinish = (values: any) => {
     // Clear the form values
@@ -27,7 +31,7 @@ export default function CreateConsumer(props) {
           description: "Consumer created successfully",
         });
         setCreateConsumerLoading(false);
-        setCreateConsumerDrawerVisible(false);
+        props.setCreateConsumerDrawerVisible(false);
         props.fetchConsumers();
       })
       .catch((err) => {
@@ -38,25 +42,13 @@ export default function CreateConsumer(props) {
 
   return (
     <div>
-      <p>To create a new consumer click on the following button</p>
-      <Button
-        type="primary"
-        onClick={() => {
-          setCreateConsumerDrawerVisible(true);
-        }}
-      >
-        <Space>
-          <ApiOutlined />
-          Create a new Consumer
-        </Space>
-      </Button>
       <Drawer
         size={"large"}
         title={"Create a new consumer"}
         placement="right"
-        open={createConsumerDrawerVisible}
+        open={props.createConsumerDrawerVisible}
         onClose={() => {
-          setCreateConsumerDrawerVisible(false);
+          props.setCreateConsumerDrawerVisible(false);
         }}
       >
         <p>Create a new consumer</p>
@@ -66,11 +58,11 @@ export default function CreateConsumer(props) {
           layout="horizontal"
           labelCol={{ span: 8 }}
           wrapperCol={{ span: 16 }}
-          initialValues={props.editConsumer}
+          initialValues={props.createConsumer}
           onFinish={onCreateConsumerFinish}
           onFinishFailed={(errorInfo) => {
             notification.error({
-              message: "Error creating the consumer",
+              message: "Error creating the consumer: " + errorInfo,
             });
           }}
           autoComplete="off"
@@ -134,7 +126,7 @@ export default function CreateConsumer(props) {
           <Form.Item>
             <Button
               onClick={() => {
-                setCreateConsumerDrawerVisible(false);
+                props.setCreateConsumerDrawerVisible(false);
               }}
             >
               Cancel

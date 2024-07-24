@@ -204,7 +204,9 @@ const Exercise = (): ReactElement => {
               // @ts-ignore
               actor: location?.state?.actor ? location?.state?.actor : null,
             },
-            pathname: `../../../../../consumer/${consumerId}/course/${courseId}/exercise/${record.parentId}/sub/${record.childId}`,
+            pathname: `../../../../../consumer/${consumerId}/course/${courseId}/exercise/${encodeURIComponent(
+              record.parentId
+            )}/sub/${encodeURIComponent(record.childId)}`,
           }}
         >
           {text ?? "N/A"}
@@ -318,9 +320,9 @@ const Exercise = (): ReactElement => {
                                 location?.state?.actor
                               : null,
                           },
-                          pathname: `/consumer/${consumerId}/course/${courseId}/exercise/${
+                          pathname: `/consumer/${consumerId}/course/${courseId}/exercise/${encodeURIComponent(
                             exercise?._id.split("?subContentId=")[0]
-                          }`,
+                          )}`,
                         }}
                       >
                         {exercise?._id.split("?subContentId=")[0]}
