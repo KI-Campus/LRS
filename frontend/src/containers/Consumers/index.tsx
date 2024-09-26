@@ -162,6 +162,17 @@ const Consumers = (): React.ReactElement => {
     },
 
     {
+      title: "Data source",
+      dataIndex: "dataSource",
+      key: "dataSource",
+      // Responsive, show on bigger devices
+      responsive: ["xl", "xxl"],
+      render: (text, record: ConsumerInterface) => {
+        return record.dataSource || "Not specified";
+      },
+    },
+
+    {
       title: "Action",
       key: "action",
       render: (_, record: ConsumerInterface) => (

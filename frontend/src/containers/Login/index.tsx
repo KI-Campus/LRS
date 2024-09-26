@@ -5,7 +5,7 @@ import Button from "antd/lib/button";
 import { EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import { Link, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { login, logout } from "../../redux/auth";
+import { login, logout, setGlobalLoading } from "../../redux/auth";
 import { ReactElement } from "react";
 import { Tooltip } from "antd";
 
@@ -24,7 +24,10 @@ const Login = (): ReactElement => {
 
   useEffect(() => {
     if (token) {
+      dispatch(setGlobalLoading(true));
+      dispatch(logout());
       dispatch(login({ magicToken: token }));
+      dispatch(setGlobalLoading(false));
     }
   }, [token, dispatch]);
 

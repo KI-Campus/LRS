@@ -2,6 +2,8 @@ import Button from "antd/lib/button";
 import Drawer from "antd/lib/drawer";
 import Form from "antd/lib/form";
 import Input from "antd/lib/input";
+import Select from "antd/lib/select";
+import Option from "antd/lib/select";
 import notification from "antd/lib/notification";
 import { useRef, useState } from "react";
 import { ConsumerInterface } from "src/Interfaces/ConsumerInterface";
@@ -102,6 +104,33 @@ export default function EditConsumer(props) {
             ]}
           >
             <Input />
+          </Form.Item>
+
+          <Form.Item
+            label="Data source"
+            name="dataSource"
+            rules={[
+              {
+                required: false,
+                message: "Please provide a data source of this consumer",
+                type: "string",
+                whitespace: true,
+              },
+            ]}
+          >
+            <Select
+              placeholder="Select a data source"
+              defaultValue={undefined || null}
+            >
+              <Option value={undefined}>Not specified</Option>
+              <Option value="openHPI Platform">openHPI Platform</Option>
+              <Option value="Moodle">Moodle</Option>
+              <Option value="Open edX">Open edX</Option>
+              <Option value="Wordpress">Wordpress</Option>
+              <Option value="Drupal">Drupal</Option>
+              <Option value="Joomla">Joomla</Option>
+              <Option value="Other">Other</Option>
+            </Select>
           </Form.Item>
 
           <Form.Item>
