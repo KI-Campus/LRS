@@ -1208,6 +1208,10 @@ async function getExerciseDetails(req, res, next) {
         },
       },
     ];
+
+    // Add filter parameters to the pipeline
+    addFiltersToPipeline(verbCountPipeline, req.query.filters);
+
     let verbCount = await m_client
       .db()
       .collection(
