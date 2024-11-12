@@ -1,4 +1,14 @@
-import { Button, Card, Col, Row, Space, Spin, Table, Tooltip } from "antd";
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Row,
+  Space,
+  Spin,
+  Table,
+  Tooltip,
+} from "antd";
 import { ReactElement, useEffect, useState } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import {
@@ -237,205 +247,193 @@ const Exercise = (): ReactElement => {
 
   return (
     <>
-      <Row>
-        <Col span={18}>
-          <h2>
-            <Space>
-              <BackButton />
-              Exercise Details
-            </Space>
-          </h2>
-        </Col>
-        <Col span={6} style={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={() => setDownloadModalOpen(true)}>Download</Button>
-        </Col>
-      </Row>
-      <DownloadModal
-        consumer={consumerId}
-        course={courseId}
-        exercise={exerciseId}
-        ignoreSubExercises={0}
-        includeSimplifyRecords={0}
-        includeRAWRecords={1}
-        isConsumerSelected={false}
-        isCourseSelected={false}
-        isExerciseSelected={true}
-        selectedText={exercise?.title ?? ""}
-        isOpen={downloadModalOpen}
-        modalCloserFunction={setDownloadModalOpen}
-        // @ts-ignore
-        actor={location?.state?.actor ? location?.state?.actor : null}
-      />
+      {/* @ts-ignore */}
+      <div
+        className={location?.state?.actor ? "highlight-blue-no-top-margin" : ""}
+      >
+        <Row>
+          <Col span={18}>
+            <h2>
+              <Space>
+                <BackButton />
+                Exercise Details
+              </Space>
+            </h2>
+          </Col>
+          <Col span={6} style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button onClick={() => setDownloadModalOpen(true)}>Download</Button>
+          </Col>
+        </Row>
+        <DownloadModal
+          consumer={consumerId}
+          course={courseId}
+          exercise={exerciseId}
+          ignoreSubExercises={0}
+          includeSimplifyRecords={0}
+          includeRAWRecords={1}
+          isConsumerSelected={false}
+          isCourseSelected={false}
+          isExerciseSelected={true}
+          selectedText={exercise?.title ?? ""}
+          isOpen={downloadModalOpen}
+          modalCloserFunction={setDownloadModalOpen}
+          // @ts-ignore
+          actor={location?.state?.actor ? location?.state?.actor : null}
+        />
 
-      {exerciseLoading ? (
-        <Spin>Loading</Spin>
-      ) : (
-        <>
-          <div className="site-card-wrapper">
-            <Row gutter={[24, 24]}>
-              <Col xs={24} xl={8} span={8}>
-                <Card loading={exerciseLoading} title={"Exercise Title"}>
-                  <Tooltip
-                    title={"Complete Exercise ID in xAPI: " + exercise._id}
-                  >
-                    <Space>
-                      {exercise?.title || "N/A"}
-                      <QuestionCircleTwoTone style={{ cursor: "pointer" }} />
-                    </Space>
-                  </Tooltip>
-                </Card>
-              </Col>
-              {exercise?.type && (
-                <Col xs={24} sm={24} md={24} lg={24} xl={8} span={8}>
-                  <Card loading={exerciseLoading} title={"Type"}>
-                    <Tooltip
-                      title={
-                        "Complete Exercise Type in xAPI: " + exercise?.type
+        {exerciseLoading ? (
+          <Spin>Loading</Spin>
+        ) : (
+          <>
+            <div className="site-card-wrapper">
+              {/* @ts-ignore */}
+              {location?.state?.actor && (
+                <>
+                  {" "}
+                  <Row>
+                    <Alert
+                      message={
+                        "Showing stats for the selected student: " +
+                        location?.state?.actor
                       }
+                      type="warning"
+                      showIcon
+                    />
+                  </Row>
+                  <br />
+                </>
+              )}
+              <Row gutter={[24, 24]}>
+                <Col xs={24} xl={8} span={8}>
+                  <Card loading={exerciseLoading} title={"Exercise Title"}>
+                    <Tooltip
+                      title={"Complete Exercise ID in xAPI: " + exercise._id}
                     >
                       <Space>
-                        {String(exercise?.type)
-                          ?.split("/")
-                          ?.pop()
-                          ?.split("-")[0] || "N/A"}
+                        {exercise?.title || "N/A"}
                         <QuestionCircleTwoTone style={{ cursor: "pointer" }} />
                       </Space>
                     </Tooltip>
                   </Card>
                 </Col>
-              )}
-              <Col xs={0} xl={8} span={8}>
-                <Card
-                  loading={exerciseLoading}
-                  title={isSubExercise ? "Parent ID" : "ID"}
-                >
-                  <Space>
-                    {isSubExercise ? (
-                      <Link
-                        to={{
-                          state: {
-                            // @ts-ignore
-                            actor: location?.state?.actor
-                              ? // @ts-ignore
-                                location?.state?.actor
-                              : null,
-                          },
-                          pathname: `/consumer/${consumerId}/course/${courseId}/exercise/${encodeURIComponent(
-                            exercise?._id.split("?subContentId=")[0]
-                          )}`,
-                        }}
+                {exercise?.type && (
+                  <Col xs={24} sm={24} md={24} lg={24} xl={8} span={8}>
+                    <Card loading={exerciseLoading} title={"Type"}>
+                      <Tooltip
+                        title={
+                          "Complete Exercise Type in xAPI: " + exercise?.type
+                        }
                       >
-                        {exercise?._id.split("?subContentId=")[0]}
-                      </Link>
-                    ) : (
-                      exercise?._id
-                    )}
-                  </Space>
-                </Card>
-              </Col>
-              {isSubExercise && (
-                <Col span={6}>
-                  <Card loading={exerciseLoading} title={"Exercise ID"}>
-                    <Space>{isSubExercise ? subExerciseId : "N/A"}</Space>
+                        <Space>
+                          {String(exercise?.type)
+                            ?.split("/")
+                            ?.pop()
+                            ?.split("-")[0] || "N/A"}
+                          <QuestionCircleTwoTone
+                            style={{ cursor: "pointer" }}
+                          />
+                        </Space>
+                      </Tooltip>
+                    </Card>
+                  </Col>
+                )}
+                <Col xs={0} xl={8} span={8}>
+                  <Card
+                    loading={exerciseLoading}
+                    title={isSubExercise ? "Parent ID" : "ID"}
+                  >
+                    <Space>
+                      {isSubExercise ? (
+                        <Link
+                          to={{
+                            state: {
+                              // @ts-ignore
+                              actor: location?.state?.actor
+                                ? // @ts-ignore
+                                  location?.state?.actor
+                                : null,
+                            },
+                            pathname: `/consumer/${consumerId}/course/${courseId}/exercise/${encodeURIComponent(
+                              exercise?._id.split("?subContentId=")[0]
+                            )}`,
+                          }}
+                        >
+                          {exercise?._id.split("?subContentId=")[0]}
+                        </Link>
+                      ) : (
+                        exercise?._id
+                      )}
+                    </Space>
                   </Card>
                 </Col>
-              )}
-            </Row>
-            <br />
+                {isSubExercise && (
+                  <Col span={6}>
+                    <Card loading={exerciseLoading} title={"Exercise ID"}>
+                      <Space>{isSubExercise ? subExerciseId : "N/A"}</Space>
+                    </Card>
+                  </Col>
+                )}
+              </Row>
+              <br />
 
-            <Row gutter={[24, 24]}>
-              {/* DISABLING TOTAL RECORDS TO OPTIMIZE PERFORMANCE */}
-              {/* <Col sm={24} lg={8} span={8}>
+              <Row gutter={[24, 24]}>
+                {/* DISABLING TOTAL RECORDS TO OPTIMIZE PERFORMANCE */}
+                {/* <Col sm={24} lg={8} span={8}>
                 <Card loading={exerciseLoading} title="Total Records">
                   {exercise?.totalRecords}
                 </Card>
               </Col> */}
-              {/* DISABLING ATTEMPTED TO OPTIMIZE PERFORMANCE */}
-              {/* <Col sm={24} lg={8} span={8}>
+                {/* DISABLING ATTEMPTED TO OPTIMIZE PERFORMANCE */}
+                {/* <Col sm={24} lg={8} span={8}>
                 <Card loading={exerciseLoading} title="Attempted">
                   {exercise?.attempted ?? "0"}
                 </Card>
               </Col> */}
-              <Col sm={24} lg={8} span={8}>
-                <Card loading={exerciseLoading} title="Total Submissions">
-                  {exercise?.totalSubmissions ?? "0"}
-                </Card>
-              </Col>
-            </Row>
-            <br />
+                <Col sm={24} lg={8} span={8}>
+                  <Card loading={exerciseLoading} title="Total Submissions">
+                    {exercise?.totalSubmissions ?? "0"}
+                  </Card>
+                </Col>
+              </Row>
+              <br />
 
-            <Row gutter={[24, 24]}>
-              <Col sm={24} lg={8} span={8}>
-                <Card
-                  loading={exerciseLoading}
-                  title="Number of times Exercise Passed"
-                >
-                  {exercise?.totalPassingEvents ?? "0"}
-                </Card>
-              </Col>
-
-              {exercise?.averageScore ? (
+              <Row gutter={[24, 24]}>
                 <Col sm={24} lg={8} span={8}>
                   <Card
                     loading={exerciseLoading}
-                    title="Average Score (max 1.0)"
+                    title="Number of times Exercise Passed"
                   >
-                    {(exercise?.averageScore?.toFixed(2) ?? "N/A") +
-                      " out of " +
-                      exercise?.averageScoreOutOf}
+                    {exercise?.totalPassingEvents ?? "0"}
                   </Card>
                 </Col>
-              ) : (
-                ""
-              )}
-            </Row>
-            <br />
-            <Row gutter={[24, 24]}>
-              {
-                // @ts-ignore
-                location?.state?.actor && (
-                  <Col sm={24} lg={8} span={8}>
-                    <Card loading={exerciseLoading} title="Selected Student">
-                      {
-                        // @ts-ignore
-                        location?.state?.actor
-                      }
-                    </Card>
-                  </Col>
-                )
-              }
-              {
-                // @ts-ignore
-                exercise?.totalActorsCount && !location?.state?.actor && (
+
+                {exercise?.averageScore ? (
                   <Col sm={24} lg={8} span={8}>
                     <Card
                       loading={exerciseLoading}
-                      title="Students (Unique Users)"
+                      title="Average Score (max 1.0)"
                     >
-                      <Space>
-                        {exercise?.totalActorsCount ?? "0"}
-                        <Tooltip title={TEXT_ACTORS_COUNT_MISINFORMATION}>
-                          <QuestionCircleTwoTone
-                            style={{ cursor: "pointer" }}
-                          />
-                        </Tooltip>
-                      </Space>
+                      {(exercise?.averageScore?.toFixed(2) ?? "N/A") +
+                        " out of " +
+                        exercise?.averageScoreOutOf}
                     </Card>
                   </Col>
-                )
-              }
-              {
-                // @ts-ignore
-                exercise?.totalActorsCompletedCount &&
+                ) : (
+                  ""
+                )}
+              </Row>
+              <br />
+              <Row gutter={[24, 24]}>
+                {
                   // @ts-ignore
-                  !location?.state?.actor && (
+                  exercise?.totalActorsCount && !location?.state?.actor && (
                     <Col sm={24} lg={8} span={8}>
                       <Card
                         loading={exerciseLoading}
-                        title="Students who completed the exercise"
+                        title="Students (Unique Users)"
                       >
                         <Space>
-                          {exercise?.totalActorsCompletedCount ?? "0"}
+                          {exercise?.totalActorsCount ?? "0"}
                           <Tooltip title={TEXT_ACTORS_COUNT_MISINFORMATION}>
                             <QuestionCircleTwoTone
                               style={{ cursor: "pointer" }}
@@ -445,139 +443,168 @@ const Exercise = (): ReactElement => {
                       </Card>
                     </Col>
                   )
-              }
-            </Row>
-            <br />
-            {exercise?.question && (
-              <Row>
-                <Col span={24}>
-                  <div className="shadow-bordered">
-                    <Card loading={exerciseLoading} title={"Exercise Question"}>
-                      {exercise?.question || "N/A"}
-                    </Card>
-                  </div>
-                </Col>
+                }
+                {
+                  // @ts-ignore
+                  exercise?.totalActorsCompletedCount &&
+                    // @ts-ignore
+                    !location?.state?.actor && (
+                      <Col sm={24} lg={8} span={8}>
+                        <Card
+                          loading={exerciseLoading}
+                          title="Students who completed the exercise"
+                        >
+                          <Space>
+                            {exercise?.totalActorsCompletedCount ?? "0"}
+                            <Tooltip title={TEXT_ACTORS_COUNT_MISINFORMATION}>
+                              <QuestionCircleTwoTone
+                                style={{ cursor: "pointer" }}
+                              />
+                            </Tooltip>
+                          </Space>
+                        </Card>
+                      </Col>
+                    )
+                }
               </Row>
-            )}
-
-            <br />
-            {String(exercise?.type)?.search("H5P.TrueFalse") > 0 &&
-              trueFalseChartData?.length > 0 && (
+              <br />
+              {exercise?.question && (
                 <Row>
-                  <Col span={6}>
+                  <Col span={24}>
                     <div className="shadow-bordered">
                       <Card
                         loading={exerciseLoading}
-                        title={"True False Chart"}
+                        title={"Exercise Question"}
                       >
-                        <TrueFalseGraph
-                          data={trueFalseChartData}
-                          loading={exerciseLoading}
-                        />
+                        {exercise?.question || "N/A"}
                       </Card>
                     </div>
                   </Col>
                 </Row>
               )}
-            <br />
-            {exercise?.choices && exercise?.choices.length > 0 && (
-              <Row>
-                <Col span={24}>
-                  <div className="shadow-bordered">
-                    <Card loading={exerciseLoading} title={"Exercise Choices"}>
-                      {exercise?.choices?.map((choice, index) => (
-                        <div key={index}>
-                          {mcqChartCorrectResponse?.includes(choice.key) ? (
-                            <strong>
-                              <Space>{choice.key + ": " + choice._id}</Space>
-                            </strong>
-                          ) : (
-                            <Space>{choice.key + ": " + choice._id}</Space>
-                          )}
-                        </div>
-                      ))}
-                      <h6>
-                        {mcqChartCorrectResponse && <hr /> &&
-                          "* Correct choices are in bold font"}
-                      </h6>
-                    </Card>
-                  </div>
-                </Col>
-              </Row>
-            )}
-            <br />
-            <Row gutter={[24, 24]}>
-              {exercise?.totalSubmissions > 0 && (
-                <Col sm={24} lg={12} span={12}>
-                  <div className="shadow-bordered">
-                    <SubmissionsOverTime
-                      loading={exerciseSubmissionsOverTimeLoading}
-                      data={exerciseSubmissionsOverTime}
-                    />
-                  </div>
-                </Col>
-              )}
-              <Col sm={24} lg={12} span={12}>
-                <div className="shadow-bordered">
-                  {exerciseVerbs && (
-                    <ExerciseEventTypesGraph
-                      loading={exerciseLoading}
-                      data={exerciseVerbs}
-                      title={"Exercise Event Types"}
-                    />
-                  )}
-                  <Row>
-                    {/* List all the verbs that are used in the exercise */}
-                    {exerciseVerbs &&
-                      exerciseVerbs.map((verb, index) => (
-                        <div
-                          style={{ margin: "10px", fontSize: "9px" }}
-                          key={index}
-                        >
-                          <Space>
-                            <a href={verb.title} target="_blank">
-                              {verb.title}
-                            </a>
-                          </Space>
-                        </div>
-                      ))}
-                  </Row>
-                </div>
-              </Col>
-            </Row>
-            <br />
-            <br />
-            {exercise.childExercises.length > 0 && (
-              <Row gutter={[24, 24]}>
-                <Col span={24}>
-                  <Table
-                    rowKey={(record) => record._id}
-                    loading={exerciseLoading}
-                    dataSource={exercise.childExercises}
-                    columns={childExercisesTableColumns}
-                  />
-                </Col>
-              </Row>
-            )}
-            <br />
 
-            {mcqChartData?.choices?.length > 0 &&
-              mcqChartData?.choices?.some((choice) => choice.count > 0) && (
-                <Row gutter={[24, 24]}>
-                  <Col sm={24} span={12}>
+              <br />
+              {String(exercise?.type)?.search("H5P.TrueFalse") > 0 &&
+                trueFalseChartData?.length > 0 && (
+                  <Row>
+                    <Col span={6}>
+                      <div className="shadow-bordered">
+                        <Card
+                          loading={exerciseLoading}
+                          title={"True False Chart"}
+                        >
+                          <TrueFalseGraph
+                            data={trueFalseChartData}
+                            loading={exerciseLoading}
+                          />
+                        </Card>
+                      </div>
+                    </Col>
+                  </Row>
+                )}
+              <br />
+              {exercise?.choices && exercise?.choices.length > 0 && (
+                <Row>
+                  <Col span={24}>
                     <div className="shadow-bordered">
-                      <ExerciseMCQGraph
-                        loading={mcqChartLoading}
-                        data={mcqChartData?.choices}
-                        title={"MCQ Chart Choices Count"}
-                      />
+                      <Card
+                        loading={exerciseLoading}
+                        title={"Exercise Choices"}
+                      >
+                        {exercise?.choices?.map((choice, index) => (
+                          <div key={index}>
+                            {mcqChartCorrectResponse?.includes(choice.key) ? (
+                              <strong>
+                                <Space>{choice.key + ": " + choice._id}</Space>
+                              </strong>
+                            ) : (
+                              <Space>{choice.key + ": " + choice._id}</Space>
+                            )}
+                          </div>
+                        ))}
+                        <h6>
+                          {mcqChartCorrectResponse && <hr /> &&
+                            "* Correct choices are in bold font"}
+                        </h6>
+                      </Card>
                     </div>
                   </Col>
                 </Row>
               )}
-          </div>
-        </>
-      )}
+              <br />
+              <Row gutter={[24, 24]}>
+                {exercise?.totalSubmissions > 0 && (
+                  <Col sm={24} lg={12} span={12}>
+                    <div className="shadow-bordered">
+                      <SubmissionsOverTime
+                        loading={exerciseSubmissionsOverTimeLoading}
+                        data={exerciseSubmissionsOverTime}
+                      />
+                    </div>
+                  </Col>
+                )}
+                <Col sm={24} lg={12} span={12}>
+                  <div className="shadow-bordered">
+                    {exerciseVerbs && (
+                      <ExerciseEventTypesGraph
+                        loading={exerciseLoading}
+                        data={exerciseVerbs}
+                        title={"Exercise Event Types"}
+                      />
+                    )}
+                    <Row>
+                      {/* List all the verbs that are used in the exercise */}
+                      {exerciseVerbs &&
+                        exerciseVerbs.map((verb, index) => (
+                          <div
+                            style={{ margin: "10px", fontSize: "9px" }}
+                            key={index}
+                          >
+                            <Space>
+                              <a href={verb.title} target="_blank">
+                                {verb.title}
+                              </a>
+                            </Space>
+                          </div>
+                        ))}
+                    </Row>
+                  </div>
+                </Col>
+              </Row>
+              <br />
+              <br />
+              {exercise.childExercises.length > 0 && (
+                <Row gutter={[24, 24]}>
+                  <Col span={24}>
+                    <Table
+                      rowKey={(record) => record._id}
+                      loading={exerciseLoading}
+                      dataSource={exercise.childExercises}
+                      columns={childExercisesTableColumns}
+                    />
+                  </Col>
+                </Row>
+              )}
+              <br />
+
+              {mcqChartData?.choices?.length > 0 &&
+                mcqChartData?.choices?.some((choice) => choice.count > 0) && (
+                  <Row gutter={[24, 24]}>
+                    <Col sm={24} span={12}>
+                      <div className="shadow-bordered">
+                        <ExerciseMCQGraph
+                          loading={mcqChartLoading}
+                          data={mcqChartData?.choices}
+                          title={"MCQ Chart Choices Count"}
+                        />
+                      </div>
+                    </Col>
+                  </Row>
+                )}
+            </div>
+          </>
+        )}
+      </div>
     </>
   );
 };

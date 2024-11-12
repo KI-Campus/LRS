@@ -1,10 +1,11 @@
 import { GlobalStats } from "./GlobalStats";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
-import Select from "antd/lib/select";
-import Row from "antd/lib/row";
-import Col from "antd/lib/col";
-import { Button, Divider, Popconfirm, Space, Spin } from "antd";
+import { Row, Col, Select } from "antd";
+
+import { Alert, Divider, Space, Spin } from "antd";
+import { Popconfirm } from "antd";
+import Button from "antd/lib/button";
 
 import { ConsumerInterface } from "src/Interfaces/ConsumerInterface";
 import { CourseInterface } from "src/Interfaces/CourseInterface";
@@ -485,69 +486,93 @@ const Home = (): ReactElement => {
           <Button>Load Course Stats</Button>
         </Popconfirm>
       )}
-
-      {selectedCourse && showCourseStats && (
-        <>
-          <Row gutter={[24, 24]}>
-            <Col md={24} lg={24} xl={12} span={12}>
-              <div className="shadow-bordered">
-                {!courseSubmissionsOverTimeLoading ? (
-                  <SubmissionsOverTime
-                    loading={courseSubmissionsOverTimeLoading}
-                    data={courseSubmissionsOverTime}
-                  />
-                ) : (
-                  <Spin />
-                )}
-              </div>
-            </Col>
-            <Col md={24} lg={24} xl={12} span={12}>
-              <div className="shadow-bordered">
-                {!courseExerciseTypesCountEventsLoading ? (
-                  <ExerciseTypesGraph
-                    loading={courseExerciseTypesCountEventsLoading}
-                    data={courseExerciseTypesCountEvents}
-                    title={"Exercise types and number of events"}
-                  />
-                ) : (
-                  <Spin />
-                )}
-              </div>
+      <div className={selectedActor ? "highlight-blue" : ""}>
+        {selectedActor && (
+          <>
+            <br />
+            <Alert
+              message={
+                "Showing stats for the selected student: " + selectedActor
+              }
+              type="warning"
+              showIcon
+              action={
+                <Button
+                  onClick={() => setSelectedActor(null)}
+                  size="small"
+                  type="text"
+                >
+                  Reset
+                </Button>
+              }
+            />
+          </>
+        )}
+        {/* Course Graphs */}
+        {selectedCourse && showCourseStats && (
+          <>
+            <Row gutter={[24, 24]}>
+              <Col md={24} lg={24} xl={12} span={12}>
+                <div className="shadow-bordered">
+                  {!courseSubmissionsOverTimeLoading ? (
+                    <SubmissionsOverTime
+                      loading={courseSubmissionsOverTimeLoading}
+                      data={courseSubmissionsOverTime}
+                    />
+                  ) : (
+                    <Spin />
+                  )}
+                </div>
+              </Col>
+              <Col md={24} lg={24} xl={12} span={12}>
+                <div className="shadow-bordered">
+                  {!courseExerciseTypesCountEventsLoading ? (
+                    <ExerciseTypesGraph
+                      loading={courseExerciseTypesCountEventsLoading}
+                      data={courseExerciseTypesCountEvents}
+                      title={"Exercise types and number of events"}
+                    />
+                  ) : (
+                    <Spin />
+                  )}
+                </div>
+              </Col>
+            </Row>
+            <Divider></Divider>
+            <Row gutter={[24, 24]}>
+              <Col md={24} lg={24} xl={12} span={12}>
+                <div className="shadow-bordered">
+                  {!courseExerciseTypesCountLoading ? (
+                    <ExerciseTypesGraph
+                      loading={courseExerciseTypesCountLoading}
+                      data={courseExerciseTypesCount}
+                      title={"Exercise types and count"}
+                    />
+                  ) : (
+                    <Spin />
+                  )}
+                </div>
+              </Col>
+            </Row>
+          </>
+        )}
+        <Divider></Divider>
+        {/* Course Exercises Table Row */}
+        {selectedCourse && (
+          <Row>
+            <Col span={24}>
+              {selectedConsumer && selectedCourse && (
+                <ExercisesTable
+                  types={courseRootExerciseTypes}
+                  courseId={selectedCourse}
+                  consumerId={selectedConsumer}
+                  actor={selectedActor}
+                />
+              )}
             </Col>
           </Row>
-          <Divider></Divider>
-          <Row gutter={[24, 24]}>
-            <Col md={24} lg={24} xl={12} span={12}>
-              <div className="shadow-bordered">
-                {!courseExerciseTypesCountLoading ? (
-                  <ExerciseTypesGraph
-                    loading={courseExerciseTypesCountLoading}
-                    data={courseExerciseTypesCount}
-                    title={"Exercise types and count"}
-                  />
-                ) : (
-                  <Spin />
-                )}
-              </div>
-            </Col>
-          </Row>
-        </>
-      )}
-      <Divider></Divider>
-      {selectedCourse && (
-        <Row>
-          <Col span={24}>
-            {selectedConsumer && selectedCourse && (
-              <ExercisesTable
-                types={courseRootExerciseTypes}
-                courseId={selectedCourse}
-                consumerId={selectedConsumer}
-                actor={selectedActor}
-              />
-            )}
-          </Col>
-        </Row>
-      )}
+        )}
+      </div>
     </div>
   );
 };

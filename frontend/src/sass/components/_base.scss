@@ -160,3 +160,24 @@ body {
   color: #116af4;
   background-color: #f0f2f5;
 }
+
+.highlight-blue {
+  // background-color: #e6f7ff;
+  background-color: #eef9ff;
+  border: 1px solid #91d5ff;
+  border-radius: 8px;
+  margin-top: 10px;
+  padding : 10px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.highlight-blue-no-top-margin {
+  // background-color: #e6f7ff;
+  background-color: #eef9ff;
+  border: 1px solid #91d5ff;
+  border-radius: 8px;
+  padding : 10px;
+  padding-top: 10px;
+  padding-bottom: 0px;
+}
