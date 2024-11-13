@@ -247,8 +247,8 @@ const Exercise = (): ReactElement => {
 
   return (
     <>
-      {/* @ts-ignore */}
       <div
+        //@ts-ignore
         className={location?.state?.actor ? "highlight-blue-no-top-margin" : ""}
       >
         <Row>
@@ -294,6 +294,7 @@ const Exercise = (): ReactElement => {
                     <Alert
                       message={
                         "Showing stats for the selected student: " +
+                        // @ts-ignore
                         location?.state?.actor
                       }
                       type="warning"
