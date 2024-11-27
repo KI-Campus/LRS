@@ -2308,8 +2308,8 @@ async function helperGetTotalActorsCount(
     },
   ];
 
-  // Add filter parameters to the pipeline
-  addFiltersToPipeline(pipeline, req.query.filters);
+  // We will not be using this, because we need to get absolute count of actors
+  // addFiltersToPipeline(pipeline, req.query.filters);
 
   let totalActorsCount = await m_client
     .db()
@@ -2351,8 +2351,8 @@ async function helperGetTotalActorsCompletedCount(
     },
   ];
 
-  // Add filter parameters to the pipeline
-  addFiltersToPipeline(pipeline, req.query.filters);
+  // We will not be using this, because we need to get absolute count of actors who have completed
+  // addFiltersToPipeline(pipeline, req.query.filters);
 
   let totalActorsCompletedCount = await m_client
     .db()
