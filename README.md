@@ -8,7 +8,7 @@ For more information, please refer to [xAPI.com](https://xapi.com/learning-recor
 
 ## openLRS
 
-openLRS is an LRS built from the ground up to be used exclusively by openHPI and related platforms. Although it is designed to be used by openHPI, it can be easily adapted to be used by other platforms as well, please check LRS Endpoint section for more information.
+openLRS is an LRS built from the ground up to be used exclusively by openHPI/[KI Campus H5P Tool](https://github.com/KI-Campus/h5p-lti-1p0-provider). It can be easily adapted to be used by other platforms as well, please check LRS Endpoint section for more information. openLRS can be integrated in Moodle using the [openLRS Moodle plugin](https://github.com/KI-Campus/LRS-Moodle)
 
 This repository contains backend and frontend. The backend features an Express app, while the frontend is composed of a React app. The backend is responsible for storing and retrieving xAPI records, while the frontend is responsible for displaying the records in a user-friendly manner.
 
