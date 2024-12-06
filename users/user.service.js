@@ -33,6 +33,9 @@ async function authenticate({ email, password }) {
 }
 
 async function authenticateWithMagicToken({ magicToken }) {
+  if (!magicToken) {
+    throw "Magic token is required";
+  }
   const user = await User.findOne({ magicLoginToken: magicToken });
   // If no user is found, return token not found
   if (!user) {

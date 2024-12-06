@@ -11,7 +11,19 @@ let jwtScopeOptions = {
 // Public routes
 router.post("/authenticate", authenticate);
 router.post("/authenticateWithMagicToken", authenticateWithMagicToken);
-router.post("/register", register); // For initial deployment, make /register reachable
+
+// User registration route is public if ALLOW_PUBLIC_USER_REGISTER is set to true
+if (process.env.ALLOW_PUBLIC_USER_REGISTER === "true") {
+  console.warn(
+    "Public user registration is enabled. Please disable it in production"
+  );
+  router.post("/register", register);
+} else {
+  console.warn(
+    "Only admin can register new users. Please enable public user registration in development and/or creating a new admin user"
+  );
+  router.post("/register", jwtAuthz(["admin"], jwtScopeOptions), register);
+}
 
 // User scope private routes
 router.get("/current", getCurrent);

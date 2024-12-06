@@ -58,10 +58,12 @@ export function SubmissionsOverTime(props) {
 
   // @ts-ignore
   return (
-    <Line
-      height={props.height ?? 100}
-      options={options}
-      data={constructChartData(props.data)}
-    />
+    <div style={{ background: "white" }}>
+      <Line
+        height={props.height ?? 100}
+        options={options}
+        data={constructChartData(props.data)}
+      />
+    </div>
   );
 }

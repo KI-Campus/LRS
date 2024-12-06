@@ -523,6 +523,10 @@ async function getCourse(req, res, next) {
                 $count: "totalRecords",
               },
             ];
+
+            // Add filters to pipeline
+            addFiltersToPipeline(totalRecordsPipeline, req.query.filters);
+
             let totalRecords = await m_client
               .db()
               .collection(
@@ -559,6 +563,10 @@ async function getCourse(req, res, next) {
                 $sort: { _id: 1 },
               },
             ];
+
+            // Add filters to pipeline
+            addFiltersToPipeline(exerciseTypesPipeline, req.query.filters);
+
             let exerciseTypes = await m_client
               .db()
               .collection(
@@ -607,6 +615,10 @@ async function getCourse(req, res, next) {
                 $sort: { _id: 1 },
               },
             ];
+
+            // Add filters to pipeline
+            addFiltersToPipeline(rootExerciseTypesPipeline, req.query.filters);
+
             let rootExerciseTypes = await m_client
               .db()
               .collection(
@@ -667,6 +679,9 @@ async function getCourse(req, res, next) {
               },
             ];
 
+            // Add filters to pipeline
+            addFiltersToPipeline(totalSubmissionsPipeline, req.query.filters);
+
             let totalSubmissions = await m_client
               .db()
               .collection(
@@ -717,6 +732,9 @@ async function getCourse(req, res, next) {
               },
             ];
 
+            // Add filters to pipeline
+            addFiltersToPipeline(totalExercisesPipeline, req.query.filters);
+
             let totalExercises = await m_client
               .db()
               .collection(
@@ -763,6 +781,9 @@ async function getCourse(req, res, next) {
               },
             ];
 
+            // Add filters to pipeline
+            addFiltersToPipeline(passingExercisesPipeline, req.query.filters);
+
             let passingExercises = await m_client
               .db()
               .collection(
@@ -800,6 +821,9 @@ async function getCourse(req, res, next) {
                 $count: "totalActorsCount",
               },
             ];
+
+            // Add filters to pipeline
+            addFiltersToPipeline(totalActorsCountPipeline, req.query.filters);
 
             let totalActorsCount = await m_client
               .db()
@@ -1208,6 +1232,10 @@ async function getExerciseDetails(req, res, next) {
         },
       },
     ];
+
+    // Add filter parameters to the pipeline
+    addFiltersToPipeline(verbCountPipeline, req.query.filters);
+
     let verbCount = await m_client
       .db()
       .collection(
@@ -2304,8 +2332,8 @@ async function helperGetTotalActorsCount(
     },
   ];
 
-  // Add filter parameters to the pipeline
-  addFiltersToPipeline(pipeline, req.query.filters);
+  // We will not be using this, because we need to get absolute count of actors
+  // addFiltersToPipeline(pipeline, req.query.filters);
 
   let totalActorsCount = await m_client
     .db()
@@ -2347,8 +2375,8 @@ async function helperGetTotalActorsCompletedCount(
     },
   ];
 
-  // Add filter parameters to the pipeline
-  addFiltersToPipeline(pipeline, req.query.filters);
+  // We will not be using this, because we need to get absolute count of actors who have completed
+  // addFiltersToPipeline(pipeline, req.query.filters);
 
   let totalActorsCompletedCount = await m_client
     .db()

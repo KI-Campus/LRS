@@ -22,11 +22,13 @@ export function GenericBarGraph(props) {
   // @ts-ignore
   return (
     <>
-      <Bar
-        height={props.height ?? 100}
-        options={props.options}
-        data={props.data}
-      />
+      <div style={{ background: "white" }}>
+        <Bar
+          height={props.height ?? 100}
+          options={props.options}
+          data={props.data}
+        />
+      </div>
     </>
   );
 }

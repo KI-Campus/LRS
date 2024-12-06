@@ -1,10 +1,11 @@
 import { GlobalStats } from "./GlobalStats";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import { useParams, useHistory, useLocation } from "react-router-dom";
-import Select from "antd/lib/select";
-import Row from "antd/lib/row";
-import Col from "antd/lib/col";
-import { Button, Divider, Popconfirm, Space, Spin } from "antd";
+import { Row, Col, Select, Card, Tooltip, Skeleton } from "antd";
+
+import { Alert, Divider, Space, Spin } from "antd";
+import { Popconfirm } from "antd";
+import Button from "antd/lib/button";
 
 import { ConsumerInterface } from "src/Interfaces/ConsumerInterface";
 import { CourseInterface } from "src/Interfaces/CourseInterface";
@@ -27,6 +28,9 @@ import DownloadModal, {
 import EditUser from "../Users/EditUser";
 import { UserInterface } from "src/Interfaces/UserInterface";
 import { useAppSelector } from "src/redux/hooks";
+import { TEXT_ACTORS_COUNT_MISINFORMATION } from "src/utils/constants";
+import { QuestionCircleTwoTone } from "@ant-design/icons";
+import ActorsListModal from "src/components/ActorsListModal";
 
 const { Option } = Select;
 const Home = (): ReactElement => {
@@ -51,9 +55,16 @@ const Home = (): ReactElement => {
   const [selectedCourse, setSelectedCourse] = useState<string>(null);
   const [showCourseStats, setShowCourseStats] = useState<boolean>(false);
   const [selectedCourseDetails, setSelectedCourseDetails] = useState<any>({});
+  const [selectedCourseWithActorDetails, setSelectedCourseWithActorDetails] =
+    useState<any>({});
 
   const [selectedCourseDetailsLoading, setSelectedCourseDetailsLoading] =
     useState(true);
+
+  const [
+    selectedCourseWithActorDetailsLoading,
+    setSelectedCourseWithActorDetailsLoading,
+  ] = useState(true);
 
   const [selectedActor, setSelectedActor] = useState(null);
 
@@ -100,6 +111,8 @@ const Home = (): ReactElement => {
 
   const [editUser, setEditUser] = useState<UserInterface>();
   const [editDrawerVisible, setEditDrawerVisible] = useState(false);
+
+  const [actorsListModalVisible, setActorsListModalVisible] = useState(false);
 
   const handleConsumerSelect = (value: string) => {
     history.push("/consumer/" + value);
@@ -171,11 +184,7 @@ const Home = (): ReactElement => {
 
   const fetchCourse = () => {
     setSelectedCourseDetailsLoading(true);
-    let result = getCourseDetailsService(
-      selectedConsumer,
-      selectedCourse,
-      selectedActor
-    );
+    let result = getCourseDetailsService(selectedConsumer, selectedCourse);
     result
       .then((res) => {
         setSelectedCourseDetails(res[0]);
@@ -186,6 +195,28 @@ const Home = (): ReactElement => {
       .catch((err) => {
         console.log(err);
         setSelectedCourseDetailsLoading(false);
+        setCourseExerciseTypes([]);
+        setCourseRootExerciseTypes([]);
+      });
+  };
+
+  const fetchCourseWithActors = (selectedActor) => {
+    setSelectedCourseDetailsLoading(true);
+    let result = getCourseDetailsService(
+      selectedConsumer,
+      selectedCourse,
+      selectedActor
+    );
+    result
+      .then((res) => {
+        setSelectedCourseWithActorDetails(res[0]);
+        setSelectedCourseWithActorDetailsLoading(false);
+        setCourseExerciseTypes(res[0].exerciseTypesList);
+        setCourseRootExerciseTypes(res[0].rootExerciseTypesList);
+      })
+      .catch((err) => {
+        console.log(err);
+        setSelectedCourseWithActorDetailsLoading(false);
         setCourseExerciseTypes([]);
         setCourseRootExerciseTypes([]);
       });
@@ -286,6 +317,12 @@ const Home = (): ReactElement => {
     }
   }, [selectedCourse, selectedActor]);
 
+  useEffect(() => {
+    if (selectedActor) {
+      fetchCourseWithActors(selectedActor);
+    }
+  }, [selectedActor]);
+
   // When react router state is editCurrentUser is true
   useEffect(() => {
     // @ts-ignore
@@ -305,6 +342,13 @@ const Home = (): ReactElement => {
         editDrawerVisible={editDrawerVisible}
         setEditDrawerVisible={setEditDrawerVisible}
         isCurrentUser={true}
+      />
+      <ActorsListModal
+        consumer={selectedConsumer}
+        course={selectedCourseDetails?._id}
+        isOpen={actorsListModalVisible}
+        modalCloserFunction={setActorsListModalVisible}
+        setSelectedActor={setSelectedActor}
       />
       <h2>Welcome to openLRS Dashboard</h2>
       <div style={{ display: user.role === "admin" ? "block" : "none" }}>
@@ -457,97 +501,189 @@ const Home = (): ReactElement => {
 
       {selectedCourse && (
         <>
+          <Row gutter={[24, 24]}>
+            <Col span={24}>
+              <Card
+                size="small"
+                loading={selectedCourseDetailsLoading}
+                title={"Course Title"}
+              >
+                <Tooltip title={"Course ID: " + selectedCourseDetails?._id}>
+                  <Space>
+                    {selectedCourseDetails?.title || ""}
+                    <QuestionCircleTwoTone style={{ cursor: "pointer" }} />
+                  </Space>
+                  <Skeleton loading={selectedCourseDetailsLoading} active />
+                </Tooltip>
+              </Card>
+            </Col>
+          </Row>
           <CourseStats
             consumer={selectedConsumer}
             courseStatsLoading={selectedCourseDetailsLoading}
             courseStats={selectedCourseDetails}
-            selectedActor={selectedActor}
-            setSelectedActor={setSelectedActor}
           />
 
           <Divider></Divider>
         </>
       )}
 
-      {selectedCourse && !showCourseStats && (
-        <Popconfirm
-          title="Loading course stats will take a while. Are you sure?"
-          onConfirm={() => {
-            // fetchCourse();
-            fetchCourseSubmissionsOverTime();
-            fetchCourseExerciseTypesCountEvents();
-            fetchCourseExerciseTypesCount();
-            setShowCourseStats(true);
-          }}
-          okText="Yes"
-          cancelText="Cancel"
-        >
-          <Button>Load Course Stats</Button>
-        </Popconfirm>
-      )}
-
-      {selectedCourse && showCourseStats && (
-        <>
-          <Row gutter={[24, 24]}>
-            <Col md={24} lg={24} xl={12} span={12}>
-              <div className="shadow-bordered">
-                {!courseSubmissionsOverTimeLoading ? (
-                  <SubmissionsOverTime
-                    loading={courseSubmissionsOverTimeLoading}
-                    data={courseSubmissionsOverTime}
-                  />
-                ) : (
-                  <Spin />
-                )}
-              </div>
-            </Col>
-            <Col md={24} lg={24} xl={12} span={12}>
-              <div className="shadow-bordered">
-                {!courseExerciseTypesCountEventsLoading ? (
-                  <ExerciseTypesGraph
-                    loading={courseExerciseTypesCountEventsLoading}
-                    data={courseExerciseTypesCountEvents}
-                    title={"Exercise types and number of events"}
-                  />
-                ) : (
-                  <Spin />
-                )}
-              </div>
-            </Col>
-          </Row>
-          <Divider></Divider>
-          <Row gutter={[24, 24]}>
-            <Col md={24} lg={24} xl={12} span={12}>
-              <div className="shadow-bordered">
-                {!courseExerciseTypesCountLoading ? (
-                  <ExerciseTypesGraph
-                    loading={courseExerciseTypesCountLoading}
-                    data={courseExerciseTypesCount}
-                    title={"Exercise types and count"}
-                  />
-                ) : (
-                  <Spin />
-                )}
-              </div>
-            </Col>
-          </Row>
-        </>
-      )}
-      <Divider></Divider>
-      {selectedCourse && (
+      {!selectedActor && selectedCourse && (
         <Row>
-          <Col span={24}>
-            {selectedConsumer && selectedCourse && (
-              <ExercisesTable
-                types={courseRootExerciseTypes}
-                courseId={selectedCourse}
-                consumerId={selectedConsumer}
-                actor={selectedActor}
-              />
-            )}
+          <Col sm={24} md={24} lg={8} xl={4} span={4}>
+            <Card size="small" title="Students">
+              <Space>
+                {selectedCourseDetails?.totalActorsCount}
+                <Tooltip title={TEXT_ACTORS_COUNT_MISINFORMATION}>
+                  <QuestionCircleTwoTone style={{ cursor: "pointer" }} />
+                </Tooltip>
+                {user.role === "admin" && (
+                  <Tooltip title="Click to see the list of students">
+                    <Button
+                      type="default"
+                      onClick={() => setActorsListModalVisible(true)}
+                    >
+                      Select
+                    </Button>
+                  </Tooltip>
+                )}
+              </Space>
+            </Card>
           </Col>
         </Row>
       )}
+      {selectedActor && (
+        <Row>
+          <Col sm={24} md={24} lg={16} xl={8} span={8}>
+            <Card
+              size="small"
+              loading={coursesLoading}
+              title="Selected Student"
+            >
+              {"ID: " + selectedActor}
+              <Button type="link" onClick={() => setSelectedActor(null)}>
+                {"Reset"}
+              </Button>
+            </Card>
+          </Col>
+        </Row>
+      )}
+
+      <div className={selectedActor ? "highlight-blue" : ""}>
+        {selectedCourse && !showCourseStats && (
+          <Popconfirm
+            title="Loading course stats will take a while. Are you sure?"
+            onConfirm={() => {
+              // fetchCourse();
+              fetchCourseSubmissionsOverTime();
+              fetchCourseExerciseTypesCountEvents();
+              fetchCourseExerciseTypesCount();
+              setShowCourseStats(true);
+            }}
+            okText="Yes"
+            cancelText="Cancel"
+          >
+            <Row>
+              <Col span={24} style={{ textAlign: "center" }}>
+                <Button>Load Course Graphs</Button>
+              </Col>
+            </Row>
+          </Popconfirm>
+        )}
+        {selectedActor && (
+          <>
+            <br />
+            <Alert
+              message={
+                "Showing stats for the selected student: " + selectedActor
+              }
+              type="warning"
+              showIcon
+              action={
+                <Button
+                  onClick={() => setSelectedActor(null)}
+                  size="small"
+                  type="text"
+                >
+                  Reset
+                </Button>
+              }
+            />
+
+            <CourseStats
+              consumer={selectedConsumer}
+              courseStatsLoading={selectedCourseDetailsLoading}
+              courseStats={selectedCourseWithActorDetails}
+            />
+            <br />
+          </>
+        )}
+        {/* Course Graphs */}
+        {selectedCourse && showCourseStats && (
+          <>
+            <br />
+            <Row gutter={[24, 24]}>
+              <Col md={24} lg={24} xl={12} span={12}>
+                <div className="shadow-bordered">
+                  {!courseSubmissionsOverTimeLoading ? (
+                    <SubmissionsOverTime
+                      loading={courseSubmissionsOverTimeLoading}
+                      data={courseSubmissionsOverTime}
+                    />
+                  ) : (
+                    <Spin />
+                  )}
+                </div>
+              </Col>
+              <Col md={24} lg={24} xl={12} span={12}>
+                <div className="shadow-bordered">
+                  {!courseExerciseTypesCountEventsLoading ? (
+                    <ExerciseTypesGraph
+                      loading={courseExerciseTypesCountEventsLoading}
+                      data={courseExerciseTypesCountEvents}
+                      title={"Exercise types and number of events"}
+                    />
+                  ) : (
+                    <Spin />
+                  )}
+                </div>
+              </Col>
+            </Row>
+            <Divider></Divider>
+            <Row gutter={[24, 24]}>
+              <Col md={24} lg={24} xl={12} span={12}>
+                <div className="shadow-bordered">
+                  {!courseExerciseTypesCountLoading ? (
+                    <ExerciseTypesGraph
+                      loading={courseExerciseTypesCountLoading}
+                      data={courseExerciseTypesCount}
+                      title={"Exercise types and count"}
+                    />
+                  ) : (
+                    <Spin />
+                  )}
+                </div>
+              </Col>
+            </Row>
+          </>
+        )}
+        <Divider></Divider>
+        {/* Course Exercises Table Row */}
+        {selectedCourse && (
+          <Row>
+            <Col span={24}>
+              {selectedConsumer && selectedCourse && (
+                <ExercisesTable
+                  types={courseRootExerciseTypes}
+                  courseId={selectedCourse}
+                  consumerId={selectedConsumer}
+                  actor={selectedActor}
+                />
+              )}
+            </Col>
+          </Row>
+        )}
+      </div>
     </div>
   );
 };
